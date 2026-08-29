@@ -161,6 +161,24 @@
     font-family: 'JetBrains Mono', monospace; font-size: clamp(6px, 1vw, 7.5px);
     color: var(--steppe-gold); margin-top: 1px; opacity: 0.9;
   }
+  .buildings-row { display: flex; gap: clamp(1px, 0.3vw, 2px); justify-content: center; margin-top: 2px; }
+  .build-icon {
+    display: block;
+    transform: perspective(40px) rotateX(18deg);
+    transform-style: preserve-3d;
+  }
+  .build-icon.house {
+    width: clamp(6px, 1.3vw, 10px); height: clamp(6px, 1.3vw, 10px);
+    background: linear-gradient(145deg, #7FCB6A 0%, #3E8A34 55%, #235E1E 100%);
+    clip-path: polygon(50% 0%, 100% 38%, 100% 100%, 0% 100%, 0% 38%);
+    box-shadow: 1px 2px 2px rgba(0,0,0,0.55), inset -1px -1px 1px rgba(0,0,0,0.35), inset 1px 1px 1px rgba(255,255,255,0.35);
+  }
+  .build-icon.corp {
+    width: clamp(11px, 2.3vw, 17px); height: clamp(11px, 2.3vw, 17px);
+    background: linear-gradient(145deg, #F7E7B0 0%, #D4AF37 50%, #8a6d1f 100%);
+    clip-path: polygon(20% 0%, 80% 0%, 100% 28%, 100% 100%, 0% 100%, 0% 28%);
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.6), inset -1px -1px 1px rgba(0,0,0,0.35), inset 1px 1px 1px rgba(255,255,255,0.45);
+  }
   .cell-center {
     grid-column: 2 / 8; grid-row: 2 / 8;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(10px, 2.2vw, 22px);
@@ -523,7 +541,10 @@ function checkWinner(room) {
 function bankrupt(room, player) {
   player.bankrupt = true;
   Object.keys(room.propOwner).forEach(k => {
-    if (room.propOwner[k] === player.id) delete room.propOwner[k];
+    if (room.propOwner[k] === player.id) {
+      delete room.propOwner[k];
+      if (room.houses) delete room.houses[k];
+    }
   });
   pushLog(room, `${player.name} дампуурлаа!`);
   checkWinner(room);
@@ -570,6 +591,16 @@ function ownsFullGroup(room, ownerId, idx) {
   const group = propertiesInGroup(idx);
   return group.length > 0 && group.every(i => room.propOwner[i] === ownerId);
 }
+function houseLevel(room, idx) {
+  return (room.houses && room.houses[idx]) || 0;
+}
+function buildLevelLabel(level) {
+  if (level >= 4) return 'Корпорац';
+  return level + ' байшин';
+}
+function buildCost(sp) {
+  return Math.round(sp.price * 0.5 / 10) * 10;
+}
 
 function resolvePropertyOrTax(room, player, idx) {
   const sp = spaces[idx];
@@ -577,13 +608,27 @@ function resolvePropertyOrTax(room, player, idx) {
     const owner = room.propOwner[idx];
     if (!owner) {
       room.pendingAction = { type: 'buy', playerId: player.id, spaceIndex: idx };
-    } else if (owner !== player.id) {
+    } else if (owner === player.id) {
+      const level = houseLevel(room, idx);
+      if (level < 4) {
+        room.pendingAction = { type: 'build', playerId: player.id, spaceIndex: idx };
+      }
+    } else {
       const ownerPlayer = room.players.find(p => p.id === owner);
-      const fullGroup = ownsFullGroup(room, owner, idx);
-      const rent = fullGroup ? sp.rent * 2 : sp.rent;
+      const level = houseLevel(room, idx);
+      let rent, note;
+      if (level > 0) {
+        const mult = [1, 2, 4, 6, 10][level];
+        rent = sp.rent * mult;
+        note = ` (${buildLevelLabel(level)})`;
+      } else {
+        const fullGroup = ownsFullGroup(room, owner, idx);
+        rent = fullGroup ? sp.rent * 2 : sp.rent;
+        note = fullGroup ? ' (бүлэг бүрэн — 2x)' : '';
+      }
       player.money -= rent;
       ownerPlayer.money += rent;
-      pushLog(room, `${player.name} ${ownerPlayer.name}-д түрээс ₮${rent} төлөв${fullGroup ? ' (бүлэг бүрэн — 2x)' : ''}.`);
+      pushLog(room, `${player.name} ${ownerPlayer.name}-д түрээс ₮${rent} төлөв${note}.`);
       if (player.money < 0) bankrupt(room, player);
     }
   } else if (sp.type === 'tax') {
@@ -645,6 +690,32 @@ async function buyProperty() {
 async function skipBuy() {
   const room = await getRoom(currentRoom.roomCode);
   if (!room || !room.pendingAction || room.pendingAction.playerId !== myId) return;
+  room.pendingAction = null;
+  await saveRoom(room);
+  currentRoom = room; render();
+}
+
+async function buildProperty() {
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room || !room.pendingAction || room.pendingAction.type !== 'build' || room.pendingAction.playerId !== myId) return;
+  const idx = room.pendingAction.spaceIndex;
+  const player = room.players.find(p => p.id === myId);
+  const sp = spaces[idx];
+  const cost = buildCost(sp);
+  if (player.money < cost) { room.pendingAction = null; await saveRoom(room); currentRoom = room; render(); return; }
+  if (!room.houses) room.houses = {};
+  const level = houseLevel(room, idx) + 1;
+  room.houses[idx] = level;
+  player.money -= cost;
+  pushLog(room, `${player.name} "${sp.name}"-д ${buildLevelLabel(level)} барив (₮${cost}).`);
+  room.pendingAction = null;
+  await saveRoom(room);
+  currentRoom = room; render();
+}
+
+async function skipBuild() {
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room || !room.pendingAction || room.pendingAction.type !== 'build' || room.pendingAction.playerId !== myId) return;
   room.pendingAction = null;
   await saveRoom(room);
   currentRoom = room; render();
@@ -744,6 +815,14 @@ function showCardPopup(draw) {
   if (backdrop) backdrop.onclick = () => { root.innerHTML = ''; };
   clearTimeout(cardPopupTimer);
   cardPopupTimer = setTimeout(() => { root.innerHTML = ''; }, 4500);
+}
+
+function renderBuildings(level) {
+  if (level >= 4) return `<div class="buildings-row"><span class="build-icon corp" title="Корпорац"></span></div>`;
+  let html = '<div class="buildings-row">';
+  for (let i = 0; i < level; i++) html += `<span class="build-icon house" title="Байшин"></span>`;
+  html += '</div>';
+  return html;
 }
 
 function renderDie(value, rolling, large) {
@@ -858,10 +937,13 @@ function renderGame(rollingNow) {
     const isFullGroup = owner && sp.type === 'property' && ownsFullGroup(room, owner.id, idx);
     const tokensHere = room.players.filter(p => !p.bankrupt && displayPos(room, p) === idx);
     const tintStyle = owner ? `background-color: ${hexToRgba(owner.color, 0.14)};` : '';
+    const level = sp.type === 'property' ? houseLevel(room, idx) : 0;
+    const buildingsHtml = level > 0 ? renderBuildings(level) : '';
     cellsHtml += `
       <div class="cell ${isCorner ? 'corner' : sideOf(idx)} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color};${tintStyle}` : ''}">
         ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}" title="${owner.name} эзэмшдэг">${owner.token}</span>` : ''}
         ${isCorner ? `<div class="corner-badge">${sp.icon}</div>` : `<div class="cell-icon">${sp.icon}</div>`}
+        ${buildingsHtml}
         <div class="cell-name">${sp.name}</div>
         ${sp.price ? `<div class="cell-price">₮${sp.price}</div>` : ''}
         <div class="tokens-row">${tokensHere.map(p => `<span class="token-dot ${rollingNow && p.id === currentPlayer.id ? 'token-landed' : ''}" style="--token-ring:${p.color}">${p.token}</span>`).join('')}</div>
@@ -873,7 +955,7 @@ function renderGame(rollingNow) {
   </div>`;
 
   let actionHtml = '';
-  if (room.pendingAction && room.pendingAction.playerId === myId) {
+  if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy') {
     const sp = spaces[room.pendingAction.spaceIndex];
     actionHtml = `
       <div class="buy-prompt">
@@ -881,6 +963,18 @@ function renderGame(rollingNow) {
         "${sp.name}"-г ₮${sp.price}-р худалдаж авах уу?<br><span style="color:#9AA6BE;">Түрээс: ₮${sp.rent}/удаа</span>
         <button class="btn btn-primary" id="buyBtn" ${me.money < sp.price ? 'disabled' : ''}>Худалдаж авах</button>
         <button class="btn btn-secondary" id="skipBtn">Алгасах</button>
+      </div>`;
+  } else if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'build') {
+    const sp = spaces[room.pendingAction.spaceIndex];
+    const level = houseLevel(room, room.pendingAction.spaceIndex);
+    const cost = buildCost(sp);
+    const nextLabel = level + 1 >= 4 ? 'Корпорац' : `${level + 1}-р байшин`;
+    actionHtml = `
+      <div class="buy-prompt">
+        <div class="permit-eyebrow">🏗️ Барилгын зөвшөөрөл</div>
+        "${sp.name}" дээр ${nextLabel} барих уу?<br><span style="color:#9AA6BE;">Зардал: ₮${cost} · Одоогийн: ${level === 0 ? 'Байхгүй' : buildLevelLabel(level)}</span>
+        <button class="btn btn-primary" id="buildBtn" ${me.money < cost ? 'disabled' : ''}>Барих</button>
+        <button class="btn btn-secondary" id="skipBuildBtn">Алгасах</button>
       </div>`;
   } else if (myTurn) {
     const resultText = room.lastDice ? `Сүүлд гарсан: ${room.lastDice[0]} + ${room.lastDice[1]} = ${room.lastDice[0] + room.lastDice[1]}` : 'Тавцангийн голоос шоогоо хараарай';
@@ -923,7 +1017,10 @@ function renderGame(rollingNow) {
               return myProps.map(idx => {
                 const sp = spaces[idx];
                 const full = ownsFullGroup(room, myId, idx);
-                return `<div class="asset-row"><span class="cell-icon">${sp.icon}</span><span class="asset-name">${sp.name}${full ? ' <span class="group-badge">★ бүлэг бүрэн</span>' : ''}</span><span class="asset-rent">₮${sp.rent}${full ? '×2' : ''}/удаа</span></div>`;
+                const level = houseLevel(room, idx);
+                const levelTag = level > 0 ? ` <span class="group-badge">🏗️ ${buildLevelLabel(level)}</span>` : '';
+                const rentShown = level > 0 ? sp.rent * [1,2,4,6,10][level] : (full ? sp.rent * 2 : sp.rent);
+                return `<div class="asset-row"><span class="cell-icon">${sp.icon}</span><span class="asset-name">${sp.name}${full && level === 0 ? ' <span class="group-badge">★ бүлэг бүрэн</span>' : ''}${levelTag}</span><span class="asset-rent">₮${rentShown}/удаа</span></div>`;
               }).join('');
             })()}
           </div>
@@ -945,6 +1042,8 @@ function attachGameEvents() {
   const end = document.getElementById('endTurnBtn'); if (end) end.onclick = endTurn;
   const buy = document.getElementById('buyBtn'); if (buy) buy.onclick = buyProperty;
   const skip = document.getElementById('skipBtn'); if (skip) skip.onclick = skipBuy;
+  const build = document.getElementById('buildBtn'); if (build) build.onclick = buildProperty;
+  const skipBuild2 = document.getElementById('skipBuildBtn'); if (skipBuild2) skipBuild2.onclick = skipBuild;
 }
 
 render();
