@@ -232,9 +232,9 @@
 <script>
 /* === ЭНД ӨӨРИЙН SUPABASE ТОХИРГООГ ОРУУЛНА УУ ===
    Supabase Project → Settings → API-аас авна (Зараа-д ашигладагтай адилхан) */
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://hqfmdergdpudwebisbtf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxZm1kZXJnZHB1ZHdlYmlzYnRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTc5MzYsImV4cCI6MjEwMzU3MzkzNn0._0pspquFI8-NqtDaTlhPWCxC3GHjFo6vP7OTekQr-0k';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const TOKENS = ['🐫','🐎','🦅','🐺'];
 const TOKEN_COLORS = ['#D4A24E','#A63D2F','#7A9B63','#5A7EA6'];
@@ -323,14 +323,14 @@ let justRolled = false;
 
 async function getRoom(code) {
   try {
-    const { data, error } = await supabase.from('rooms').select('state').eq('room_code', code).single();
+    const { data, error } = await supabaseClient.from('rooms').select('state').eq('room_code', code).single();
     if (error || !data) return null;
     return data.state;
   } catch (e) { return null; }
 }
 async function saveRoom(roomState) {
   roomState.updatedAt = Date.now();
-  await supabase.from('rooms').upsert({ room_code: roomState.roomCode, state: roomState });
+  await supabaseClient.from('rooms').upsert({ room_code: roomState.roomCode, state: roomState });
 }
 
 function newPlayer(name, token, isHost) {
@@ -377,7 +377,7 @@ async function joinRoom(code, name) {
   const usedTokens = room.players.map(p => p.token);
   const freeToken = TOKENS.find(t => !usedTokens.includes(t));
   const player = newPlayer(name, freeToken, false);
-  const { data, error } = await supabase.rpc('join_room', { p_room_code: code, p_player: player });
+  const { data, error } = await supabaseClient.rpc('join_room', { p_room_code: code, p_player: player });
 
   if (error || !data) { errorMsg = 'Нэгдэхэд алдаа гарлаа, дахин оролдоно уу.'; render(); return; }
   currentRoom = data;
@@ -527,8 +527,8 @@ async function endTurn() {
 
 let roomChannel = null;
 function startPolling() {
-  if (roomChannel) supabase.removeChannel(roomChannel);
-  roomChannel = supabase
+  if (roomChannel) supabaseClient.removeChannel(roomChannel);
+  roomChannel = supabaseClient
     .channel('room-' + currentRoom.roomCode)
     .on('postgres_changes',
       { event: '*', schema: 'public', table: 'rooms', filter: `room_code=eq.${currentRoom.roomCode}` },
