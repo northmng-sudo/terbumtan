@@ -134,6 +134,7 @@
   .cell.side-right  { border-top-color: #3A6EA5; }
   .cell.corner { background: var(--night-indigo-deep); border-top-color: transparent !important; }
   .cell.owned-glow { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)); }
+  .cell.group-complete { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), 0 0 10px var(--owner-color, var(--steppe-gold)); }
   .corner-badge {
     width: clamp(20px, 4.2vw, 34px); height: clamp(20px, 4.2vw, 34px); border-radius: 50%;
     border: 2px solid var(--steppe-gold); display: flex; align-items: center; justify-content: center;
@@ -181,6 +182,16 @@
   .player-row.active-turn { color: var(--steppe-gold); font-weight: 700; }
   .player-row.active-turn .player-avatar { box-shadow: 0 0 0 3px rgba(212,162,78,0.18); }
   .player-row .p-money { margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+  .player-row .p-props { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #9AA6BE; }
+  .asset-row {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12.5px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .asset-row:last-child { border-bottom: none; }
+  .asset-name { flex: 1; }
+  .asset-rent { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--steppe-gold); }
+  .no-assets { font-size: 12.5px; color: #6b7690; padding: 4px 0; }
+  .group-badge { color: var(--steppe-gold); font-size: 10px; letter-spacing: 0.5px; }
   .p-bankrupt { text-decoration: line-through; opacity: 0.4; }
 
   .action-area { text-align: center; }
@@ -458,7 +469,16 @@ async function rollDice() {
   currentRoom = room; justRolled = true; render();
 }
 
-function resolveSpace(room, player, idx) {
+function propertiesInGroup(idx) {
+  const side = sideOf(idx);
+  return spaces.map((sp, i) => i).filter(i => spaces[i].type === 'property' && sideOf(i) === side);
+}
+function ownsFullGroup(room, ownerId, idx) {
+  const group = propertiesInGroup(idx);
+  return group.length > 0 && group.every(i => room.propOwner[i] === ownerId);
+}
+
+function resolvePropertyOrTax(room, player, idx) {
   const sp = spaces[idx];
   if (sp.type === 'property') {
     const owner = room.propOwner[idx];
@@ -466,22 +486,38 @@ function resolveSpace(room, player, idx) {
       room.pendingAction = { type: 'buy', playerId: player.id, spaceIndex: idx };
     } else if (owner !== player.id) {
       const ownerPlayer = room.players.find(p => p.id === owner);
-      player.money -= sp.rent;
-      ownerPlayer.money += sp.rent;
-      pushLog(room, `${player.name} ${ownerPlayer.name}-д түрээс ₮${sp.rent} төлөв.`);
+      const fullGroup = ownsFullGroup(room, owner, idx);
+      const rent = fullGroup ? sp.rent * 2 : sp.rent;
+      player.money -= rent;
+      ownerPlayer.money += rent;
+      pushLog(room, `${player.name} ${ownerPlayer.name}-д түрээс ₮${rent} төлөв${fullGroup ? ' (бүлэг бүрэн — 2x)' : ''}.`);
       if (player.money < 0) bankrupt(room, player);
     }
   } else if (sp.type === 'tax') {
     player.money -= sp.amount;
     pushLog(room, `${player.name} татвар ₮${sp.amount} төлөв.`);
     if (player.money < 0) bankrupt(room, player);
+  }
+}
+
+function resolveSpace(room, player, idx) {
+  const sp = spaces[idx];
+  if (sp.type === 'property' || sp.type === 'tax') {
+    resolvePropertyOrTax(room, player, idx);
   } else if (sp.type === 'chance' || sp.type === 'chest') {
     const pool = sp.type === 'chance' ? CHANCE_CARDS : CHEST_CARDS;
     const card = pool[Math.floor(Math.random() * pool.length)];
     pushLog(room, `${player.name}: "${card.text}"`);
     if (typeof card.money === 'number') player.money += card.money;
-    if (typeof card.moveTo === 'number') { player.position = card.moveTo; if (card.collect) player.money += card.collect; }
-    if (typeof card.moveRel === 'number') player.position = (player.position + card.moveRel) % spaces.length;
+    if (typeof card.moveTo === 'number') {
+      player.position = card.moveTo;
+      if (card.collect) player.money += card.collect;
+      resolvePropertyOrTax(room, player, player.position);
+    }
+    if (typeof card.moveRel === 'number') {
+      player.position = (player.position + card.moveRel) % spaces.length;
+      resolvePropertyOrTax(room, player, player.position);
+    }
     if (card.gotoJail) { player.position = 7; player.jailTurns = 2; }
     if (player.money < 0) bankrupt(room, player);
   } else if (sp.type === 'gotojail') {
@@ -651,9 +687,10 @@ function renderGame(rollingNow) {
     const pos = gridPos(idx);
     const isCorner = [0, 7, 14, 21].includes(idx);
     const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
+    const isFullGroup = owner && sp.type === 'property' && ownsFullGroup(room, owner.id, idx);
     const tokensHere = room.players.filter(p => !p.bankrupt && p.position === idx);
     cellsHtml += `
-      <div class="cell ${isCorner ? 'corner' : sideOf(idx)} ${owner ? 'owned-glow' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
+      <div class="cell ${isCorner ? 'corner' : sideOf(idx)} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
         ${isCorner ? `<div class="corner-badge">${sp.icon}</div>` : `<div class="cell-icon">${sp.icon}</div>`}
         <div class="cell-name">${sp.name}</div>
         ${sp.price ? `<div class="cell-price">₮${sp.price}</div>` : ''}
@@ -695,12 +732,28 @@ function renderGame(rollingNow) {
         <div class="side-panel">
           <div class="panel-box">
             <h3>Тоглогчид</h3>
-            ${room.players.map(p => `
+            ${room.players.map(p => {
+              const ownedCount = Object.values(room.propOwner).filter(oid => oid === p.id).length;
+              return `
               <div class="player-row ${p.id === currentPlayer.id ? 'active-turn' : ''} ${p.bankrupt ? 'p-bankrupt' : ''}">
                 <span class="player-avatar" style="--ring-color:${p.color}">${p.token}</span>
                 <span>${p.name}${p.id === myId ? ' (та)' : ''}</span>
+                <span class="p-props">🏢${ownedCount}</span>
                 <span class="p-money">₮${fmt(p.money)}</span>
-              </div>`).join('')}
+              </div>`;
+            }).join('')}
+          </div>
+          <div class="panel-box">
+            <h3>Миний компаниуд</h3>
+            ${(() => {
+              const myProps = Object.keys(room.propOwner).filter(idx => room.propOwner[idx] === myId).map(Number).sort((a,b) => a-b);
+              if (myProps.length === 0) return `<div class="no-assets">Одоогоор юу ч худалдаж аваагүй байна.</div>`;
+              return myProps.map(idx => {
+                const sp = spaces[idx];
+                const full = ownsFullGroup(room, myId, idx);
+                return `<div class="asset-row"><span class="cell-icon">${sp.icon}</span><span class="asset-name">${sp.name}${full ? ' <span class="group-badge">★ бүлэг бүрэн</span>' : ''}</span><span class="asset-rent">₮${sp.rent}${full ? '×2' : ''}/удаа</span></div>`;
+              }).join('');
+            })()}
           </div>
           <div class="panel-box action-area">
             <h3>Таны ээлж</h3>
