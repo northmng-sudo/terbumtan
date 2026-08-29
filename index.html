@@ -114,50 +114,72 @@
     height: min(98vw, 920px);
     gap: 3px;
     background: var(--slate-line);
-    border: 3px solid var(--steppe-gold);
+    border: 4px solid var(--steppe-gold);
+    outline: 1px solid rgba(212,175,55,0.35);
+    outline-offset: 3px;
     border-radius: 10px;
     padding: 3px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.45), inset 0 0 60px rgba(0,0,0,0.25);
+    box-shadow: 0 14px 50px rgba(0,0,0,0.55), inset 0 0 70px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.4);
   }
   .cell {
     position: relative;
-    background: var(--night-indigo);
-    border-radius: 4px;
+    background: linear-gradient(155deg, #1a1a1a 0%, #101010 100%);
+    border-radius: 5px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 2px;
+    padding: 3px 2px;
     overflow: hidden;
     border-top: 3px solid transparent;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 -6px 10px -8px rgba(0,0,0,0.6);
   }
   .cell.side-bottom { border-top-color: #7B4FA6; }
   .cell.side-left   { border-top-color: #C1553A; }
   .cell.side-top    { border-top-color: #2E9E6B; }
   .cell.side-right  { border-top-color: #3A6EA5; }
-  .cell.corner { background: var(--night-indigo-deep); border-top-color: transparent !important; }
-  .cell.owned-glow { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)); }
-  .cell.group-complete { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), 0 0 10px var(--owner-color, var(--steppe-gold)); }
-  .corner-badge {
-    width: clamp(20px, 4.2vw, 34px); height: clamp(20px, 4.2vw, 34px); border-radius: 50%;
-    border: 2px solid var(--steppe-gold); display: flex; align-items: center; justify-content: center;
-    font-size: clamp(10px, 2.4vw, 18px); background: rgba(212,162,78,0.08);
+  .cell.corner {
+    background: radial-gradient(circle at 50% 35%, #1c1c1c 0%, #060606 75%);
+    border-top-color: transparent !important;
   }
-  .cell-icon { font-size: clamp(10px, 2.2vw, 18px); }
-  .cell-name { font-size: clamp(5px, 1.05vw, 8px); text-align: center; line-height: 1.05; margin-top: 1px; color: #cfd7e6; font-weight: 500; }
-  .cell-price { font-family: 'JetBrains Mono', monospace; font-size: clamp(5px, 0.95vw, 7px); color: var(--steppe-gold); }
+  .cell.owned-glow { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), inset 0 0 14px -6px var(--owner-color, var(--steppe-gold)); }
+  .cell.group-complete { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), 0 0 12px var(--owner-color, var(--steppe-gold)), inset 0 0 14px -6px var(--owner-color, var(--steppe-gold)); }
+  .corner-badge {
+    width: clamp(22px, 4.6vw, 38px); height: clamp(22px, 4.6vw, 38px); border-radius: 50%;
+    border: 2px solid var(--steppe-gold); display: flex; align-items: center; justify-content: center;
+    font-size: clamp(11px, 2.6vw, 20px);
+    background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, rgba(212,175,55,0.02) 70%);
+    box-shadow: 0 0 8px rgba(212,175,55,0.15);
+  }
+  .cell-icon {
+    font-size: clamp(11px, 2.4vw, 20px);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+  }
+  .cell-name {
+    font-size: clamp(6.5px, 1.15vw, 9px); text-align: center; line-height: 1.15; margin-top: 2px;
+    color: #dbe1ee; font-weight: 600; letter-spacing: 0.1px;
+    padding: 0 1px;
+  }
+  .cell-price {
+    font-family: 'JetBrains Mono', monospace; font-size: clamp(6px, 1vw, 7.5px);
+    color: var(--steppe-gold); margin-top: 1px; opacity: 0.9;
+  }
   .cell-center {
     grid-column: 2 / 8; grid-row: 2 / 8;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(10px, 2.2vw, 22px);
+    background: radial-gradient(circle at 50% 45%, rgba(212,175,55,0.05) 0%, transparent 70%);
   }
   .center-seal {
-    width: clamp(60px, 14vw, 120px); height: clamp(60px, 14vw, 120px); border-radius: 50%;
+    width: clamp(56px, 11vw, 100px); height: clamp(56px, 11vw, 100px); border-radius: 50%;
     border: 2px solid var(--steppe-gold); display: flex; align-items: center; justify-content: center;
-    position: relative; opacity: 0.9;
+    position: relative; opacity: 0.92;
+    box-shadow: 0 0 24px rgba(212,175,55,0.12), inset 0 0 16px rgba(212,175,55,0.06);
   }
   .center-seal-text {
-    font-family: 'Cinzel', serif; font-weight: 700; font-size: clamp(9px, 2vw, 15px);
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: clamp(8px, 1.7vw, 13px);
     background: linear-gradient(180deg, #F7E7B0 0%, #D4AF37 45%, #A9822A 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
     letter-spacing: 2px; text-align: center; line-height: 1.4;
   }
+  .center-dice-row { display: flex; justify-content: center; gap: clamp(8px, 1.8vw, 18px); }
+  .dice-result-text { font-size: 12.5px; color: #9AA6BE; margin-bottom: 10px; min-height: 16px; }
   .tokens-row { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; z-index: 2; }
   .token-dot {
     font-size: clamp(9px, 2vw, 15px); width: clamp(13px, 2.8vw, 20px); height: clamp(13px, 2.8vw, 20px);
@@ -205,15 +227,19 @@
   .p-bankrupt { text-decoration: line-through; opacity: 0.4; }
 
   .action-area { text-align: center; }
-  .dice-row { display: flex; justify-content: center; gap: 10px; margin: 6px 0 14px; }
   .die {
-    width: 42px; height: 42px; background: var(--parchment); border-radius: 9px;
+    width: 42px; height: 42px; background: linear-gradient(160deg, #FBF3DC, var(--parchment)); border-radius: 9px;
     display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr);
     padding: 6px; gap: 2px; box-shadow: 0 3px 0 rgba(0,0,0,0.35), 0 6px 10px rgba(0,0,0,0.25);
   }
+  .die.die-large {
+    width: clamp(48px, 9vw, 84px); height: clamp(48px, 9vw, 84px);
+    padding: clamp(7px, 1.4vw, 12px); gap: clamp(2px, 0.5vw, 4px); border-radius: 14px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.4), 0 10px 18px rgba(0,0,0,0.35), 0 0 20px rgba(212,175,55,0.1);
+  }
   .die.rolling { animation: diceRoll 0.7s cubic-bezier(.36,.07,.19,.97); }
   .pip { border-radius: 50%; background: transparent; }
-  .pip.on { background: var(--night-indigo-deep); }
+  .pip.on { background: var(--night-indigo-deep); box-shadow: inset 0 1px 2px rgba(0,0,0,0.4); }
 
   .log-box { max-height: 170px; overflow-y: auto; font-size: 12px; color: #b8c2d9; display: flex; flex-direction: column-reverse; gap: 5px; }
   .log-box::-webkit-scrollbar { width: 5px; }
@@ -617,11 +643,11 @@ function startPolling() {
 
 /* ---------- RENDER ---------- */
 
-function renderDie(value, rolling) {
+function renderDie(value, rolling, large) {
   const on = value ? (DIE_PIPS[value] || []) : [];
   let pipsHtml = '';
   for (let i = 1; i <= 9; i++) pipsHtml += `<div class="pip ${on.includes(i) ? 'on' : ''}"></div>`;
-  return `<div class="die ${rolling ? 'rolling' : ''}">${pipsHtml}</div>`;
+  return `<div class="die ${large ? 'die-large' : ''} ${rolling ? 'rolling' : ''}">${pipsHtml}</div>`;
 }
 
 function render() {
@@ -714,6 +740,8 @@ function renderGame(rollingNow) {
   const me = room.players.find(p => p.id === myId);
   const myTurn = isMyTurn(room);
   const currentPlayer = room.players[room.currentPlayerIndex];
+  const centerD1 = room.lastDice ? room.lastDice[0] : null;
+  const centerD2 = room.lastDice ? room.lastDice[1] : null;
 
   let cellsHtml = '';
   spaces.forEach((sp, idx) => {
@@ -732,7 +760,10 @@ function renderGame(rollingNow) {
         <div class="tokens-row">${tokensHere.map(p => `<span class="token-dot ${rollingNow && p.id === currentPlayer.id ? 'token-landed' : ''}" style="--token-ring:${p.color}">${p.token}</span>`).join('')}</div>
       </div>`;
   });
-  cellsHtml += `<div class="cell-center"><div class="center-seal"><div class="center-seal-text">ТАЛЫН<br>ЭЗЭНТ<br>УЛС</div></div></div>`;
+  cellsHtml += `<div class="cell-center">
+    <div class="center-seal"><div class="center-seal-text">ТАЛЫН<br>ЭЗЭНТ<br>УЛС</div></div>
+    <div class="center-dice-row">${renderDie(centerD1, rollingNow, true)}${renderDie(centerD2, rollingNow, true)}</div>
+  </div>`;
 
   let actionHtml = '';
   if (room.pendingAction && room.pendingAction.playerId === myId) {
@@ -745,10 +776,9 @@ function renderGame(rollingNow) {
         <button class="btn btn-secondary" id="skipBtn">Алгасах</button>
       </div>`;
   } else if (myTurn) {
-    const d1 = room.lastDice ? room.lastDice[0] : null;
-    const d2 = room.lastDice ? room.lastDice[1] : null;
+    const resultText = room.lastDice ? `Сүүлд гарсан: ${room.lastDice[0]} + ${room.lastDice[1]} = ${room.lastDice[0] + room.lastDice[1]}` : 'Тавцангийн голоос шоогоо хараарай';
     actionHtml = `
-      <div class="dice-row">${renderDie(d1, rollingNow)}${renderDie(d2, rollingNow)}</div>
+      <div class="dice-result-text">${resultText}</div>
       <button class="btn btn-primary" id="rollBtn" ${room.hasRolled ? 'disabled' : ''}>Шоо шидэх</button>
       <button class="btn btn-secondary" id="endTurnBtn" ${!room.hasRolled ? 'disabled' : ''}>Ээлжийг дуусгах</button>
     `;
