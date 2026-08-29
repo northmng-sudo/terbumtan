@@ -158,12 +158,22 @@
     -webkit-background-clip: text; background-clip: text; color: transparent;
     letter-spacing: 2px; text-align: center; line-height: 1.4;
   }
-  .tokens-row { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 1px; flex-wrap: wrap; }
+  .tokens-row { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; z-index: 2; }
   .token-dot {
-    font-size: clamp(8px, 1.7vw, 12px); width: clamp(11px, 2.3vw, 16px); height: clamp(11px, 2.3vw, 16px);
+    font-size: clamp(9px, 2vw, 15px); width: clamp(13px, 2.8vw, 20px); height: clamp(13px, 2.8vw, 20px);
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    background: var(--night-indigo-deep); border: 1.5px solid var(--token-ring, var(--steppe-gold));
+    background: var(--night-indigo-deep); border: 2px solid var(--token-ring, var(--steppe-gold));
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     animation: popIn 0.35s ease;
+  }
+  .token-dot.token-landed { animation: tokenLand 0.55s cubic-bezier(.34,1.56,.64,1); }
+  .owner-badge {
+    position: absolute; top: 1px; right: 1px; z-index: 1;
+    width: clamp(9px, 1.8vw, 13px); height: clamp(9px, 1.8vw, 13px);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(6px, 1.3vw, 9px); line-height: 1;
+    background: var(--night-indigo-deep); border: 1.5px solid var(--owner-color, var(--steppe-gold));
+    opacity: 0.95;
   }
 
   .side-panel { display: flex; flex-direction: column; gap: 12px; }
@@ -201,7 +211,7 @@
     display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr);
     padding: 6px; gap: 2px; box-shadow: 0 3px 0 rgba(0,0,0,0.35), 0 6px 10px rgba(0,0,0,0.25);
   }
-  .die.rolling { animation: diceRoll 0.45s ease; }
+  .die.rolling { animation: diceRoll 0.7s cubic-bezier(.36,.07,.19,.97); }
   .pip { border-radius: 50%; background: transparent; }
   .pip.on { background: var(--night-indigo-deep); }
 
@@ -232,7 +242,23 @@
 
   @keyframes popIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-  @keyframes diceRoll { 0% { transform: rotate(0deg) scale(1); } 40% { transform: rotate(-14deg) scale(1.08); } 70% { transform: rotate(10deg) scale(1.05); } 100% { transform: rotate(0deg) scale(1); } }
+  @keyframes diceRoll {
+    0%   { transform: rotate(0deg) scale(1) translateY(0); }
+    12%  { transform: rotate(-45deg) scale(1.1) translateY(-10px); }
+    24%  { transform: rotate(110deg) scale(0.95) translateY(2px); }
+    36%  { transform: rotate(-160deg) scale(1.08) translateY(-8px); }
+    48%  { transform: rotate(250deg) scale(0.97) translateY(2px); }
+    60%  { transform: rotate(-320deg) scale(1.05) translateY(-6px); }
+    72%  { transform: rotate(380deg) scale(0.98) translateY(1px); }
+    84%  { transform: rotate(-410deg) scale(1.03) translateY(-2px); }
+    100% { transform: rotate(-360deg) scale(1) translateY(0); }
+  }
+  @keyframes tokenLand {
+    0%   { transform: scale(0.3) translateY(-18px); opacity: 0.4; }
+    55%  { transform: scale(1.3) translateY(0); opacity: 1; }
+    75%  { transform: scale(0.9) translateY(-3px); }
+    100% { transform: scale(1) translateY(0); }
+  }
   @keyframes sealSpin { from { transform: rotate(-180deg) scale(0.3); opacity: 0; } to { transform: rotate(0deg) scale(1); opacity: 1; } }
 </style>
 </head>
@@ -328,6 +354,13 @@ function randCode() {
 }
 function uid() { return Math.random().toString(36).slice(2, 10); }
 function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+function hexToRgba(hex, alpha) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 let myId = uid();
 let myName = '';
@@ -689,12 +722,14 @@ function renderGame(rollingNow) {
     const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
     const isFullGroup = owner && sp.type === 'property' && ownsFullGroup(room, owner.id, idx);
     const tokensHere = room.players.filter(p => !p.bankrupt && p.position === idx);
+    const tintStyle = owner ? `background-color: ${hexToRgba(owner.color, 0.14)};` : '';
     cellsHtml += `
-      <div class="cell ${isCorner ? 'corner' : sideOf(idx)} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
+      <div class="cell ${isCorner ? 'corner' : sideOf(idx)} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color};${tintStyle}` : ''}">
+        ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}" title="${owner.name} эзэмшдэг">${owner.token}</span>` : ''}
         ${isCorner ? `<div class="corner-badge">${sp.icon}</div>` : `<div class="cell-icon">${sp.icon}</div>`}
         <div class="cell-name">${sp.name}</div>
         ${sp.price ? `<div class="cell-price">₮${sp.price}</div>` : ''}
-        <div class="tokens-row">${tokensHere.map(p => `<span class="token-dot" style="--token-ring:${p.color}">${p.token}</span>`).join('')}</div>
+        <div class="tokens-row">${tokensHere.map(p => `<span class="token-dot ${rollingNow && p.id === currentPlayer.id ? 'token-landed' : ''}" style="--token-ring:${p.color}">${p.token}</span>`).join('')}</div>
       </div>`;
   });
   cellsHtml += `<div class="cell-center"><div class="center-seal"><div class="center-seal-text">ТАЛЫН<br>ЭЗЭНТ<br>УЛС</div></div></div>`;
