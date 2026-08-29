@@ -83,7 +83,9 @@
   }
   .wait-token {
     font-size: 26px; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    background: rgba(212,162,78,0.1); border: 2px solid var(--token-color, var(--steppe-gold));
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--token-color, var(--steppe-gold)) 55%, white 45%) 0%, var(--night-indigo-deep) 78%);
+    border: 2.5px solid var(--token-color, var(--steppe-gold));
+    box-shadow: inset -2px -2px 3px rgba(0,0,0,0.55), inset 2px 2px 3px rgba(255,255,255,0.3), 0 3px 5px rgba(0,0,0,0.5);
   }
   .room-code-box {
     text-align: center; margin: 20px 0; padding: 18px 10px; border: 1.5px dashed var(--steppe-gold);
@@ -161,23 +163,21 @@
     font-family: 'JetBrains Mono', monospace; font-size: clamp(6px, 1vw, 7.5px);
     color: var(--steppe-gold); margin-top: 1px; opacity: 0.9;
   }
-  .buildings-row { display: flex; gap: clamp(1px, 0.3vw, 2px); justify-content: center; margin-top: 2px; }
+  .buildings-row { display: flex; gap: clamp(1.5px, 0.4vw, 3px); justify-content: center; margin-top: 2px; z-index: 3; position: relative; }
   .build-icon {
     display: block;
-    transform: perspective(40px) rotateX(18deg);
-    transform-style: preserve-3d;
   }
   .build-icon.house {
-    width: clamp(6px, 1.3vw, 10px); height: clamp(6px, 1.3vw, 10px);
-    background: linear-gradient(145deg, #7FCB6A 0%, #3E8A34 55%, #235E1E 100%);
-    clip-path: polygon(50% 0%, 100% 38%, 100% 100%, 0% 100%, 0% 38%);
-    box-shadow: 1px 2px 2px rgba(0,0,0,0.55), inset -1px -1px 1px rgba(0,0,0,0.35), inset 1px 1px 1px rgba(255,255,255,0.35);
+    width: clamp(11px, 2.6vw, 18px); height: clamp(11px, 2.6vw, 18px);
+    background: linear-gradient(155deg, #9AE87E 0%, #3E8A34 55%, #1c4d18 100%);
+    clip-path: polygon(50% 0%, 100% 40%, 100% 100%, 0% 100%, 0% 40%);
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.75));
   }
   .build-icon.corp {
-    width: clamp(11px, 2.3vw, 17px); height: clamp(11px, 2.3vw, 17px);
-    background: linear-gradient(145deg, #F7E7B0 0%, #D4AF37 50%, #8a6d1f 100%);
-    clip-path: polygon(20% 0%, 80% 0%, 100% 28%, 100% 100%, 0% 100%, 0% 28%);
-    box-shadow: 1px 2px 3px rgba(0,0,0,0.6), inset -1px -1px 1px rgba(0,0,0,0.35), inset 1px 1px 1px rgba(255,255,255,0.45);
+    width: clamp(15px, 3.4vw, 24px); height: clamp(15px, 3.4vw, 24px);
+    background: linear-gradient(155deg, #FBEDC0 0%, #D4AF37 50%, #7a5f1c 100%);
+    clip-path: polygon(20% 0%, 80% 0%, 100% 30%, 100% 100%, 0% 100%, 0% 30%);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.8));
   }
   .cell-center {
     grid-column: 2 / 8; grid-row: 2 / 8;
@@ -200,20 +200,22 @@
   .dice-result-text { font-size: 12.5px; color: #9AA6BE; margin-bottom: 10px; min-height: 16px; }
   .tokens-row { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; z-index: 2; }
   .token-dot {
-    font-size: clamp(13px, 2.9vw, 21px); width: clamp(19px, 4vw, 29px); height: clamp(19px, 4vw, 29px);
+    font-size: clamp(14px, 3.1vw, 23px); width: clamp(21px, 4.4vw, 32px); height: clamp(21px, 4.4vw, 32px);
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    background: var(--night-indigo-deep); border: 2.5px solid var(--token-ring, var(--steppe-gold));
-    box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--token-ring, var(--steppe-gold)) 55%, white 45%) 0%, var(--night-indigo-deep) 78%);
+    border: 2.5px solid var(--token-ring, var(--steppe-gold));
+    box-shadow: inset -2px -2px 3px rgba(0,0,0,0.55), inset 2px 2px 3px rgba(255,255,255,0.3), 0 3px 5px rgba(0,0,0,0.65);
     animation: popIn 0.35s ease;
   }
   .token-dot.token-landed { animation: tokenLand 0.55s cubic-bezier(.34,1.56,.64,1); }
   .owner-badge {
-    position: absolute; top: 1px; right: 1px; z-index: 1;
-    width: clamp(9px, 1.8vw, 13px); height: clamp(9px, 1.8vw, 13px);
+    position: absolute; top: 1px; right: 1px; z-index: 3;
+    width: clamp(11px, 2.2vw, 16px); height: clamp(11px, 2.2vw, 16px);
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: clamp(6px, 1.3vw, 9px); line-height: 1;
-    background: var(--night-indigo-deep); border: 1.5px solid var(--owner-color, var(--steppe-gold));
-    opacity: 0.95;
+    font-size: clamp(7px, 1.5vw, 10px); line-height: 1;
+    background: var(--owner-color, var(--steppe-gold));
+    border: 1.5px solid rgba(0,0,0,0.5);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.7);
   }
 
   .card-popup-backdrop {
@@ -936,7 +938,7 @@ function renderGame(rollingNow) {
     const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
     const isFullGroup = owner && sp.type === 'property' && ownsFullGroup(room, owner.id, idx);
     const tokensHere = room.players.filter(p => !p.bankrupt && displayPos(room, p) === idx);
-    const tintStyle = owner ? `background-color: ${hexToRgba(owner.color, 0.14)};` : '';
+    const tintStyle = owner ? `background-color: ${hexToRgba(owner.color, 0.22)};` : '';
     const level = sp.type === 'property' ? houseLevel(room, idx) : 0;
     const buildingsHtml = level > 0 ? renderBuildings(level) : '';
     cellsHtml += `
