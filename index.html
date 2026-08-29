@@ -323,7 +323,7 @@ const spaces = [
   { type:'property',  name:'Саусгоби Сэндс',          icon:'⛏️', price:200, rent:24 },
   { type:'property',  name:'Говь ХК',                 icon:'🧣', price:200, rent:24 },
   { type:'property',  name:'Энержи Ресурс',           icon:'⚡', price:220, rent:26 },
-  { type:'chest',      name:'Нийтийн сан',             icon:'📦' },
+  { type:'chest',      name:'Шүүхийн тогтоол',        icon:'⚖️' },
   { type:'gotojail',   name:'Шоронд ор',               icon:'🚔' },
   { type:'property',  name:'Худалдаа Хөгжлийн Банк',  icon:'🏦', price:240, rent:28 },
   { type:'property',  name:'Голомт Банк',             icon:'🏦', price:260, rent:30 },
@@ -340,14 +340,20 @@ const CHANCE_CARDS = [
   { text: '3 нүд урагшилав', moveRel: 3 },
   { text: 'Шоронд орлоо', gotoJail: true },
   { text: 'Тэмцээнд түрүүлж шагнал авав', money: 30 },
+  { text: 'Хөрөнгө оруулагч татан оролцов', money: 80 },
+  { text: 'Гэнэтийн зардал гарав', money: -60 },
+  { text: 'Ногдол ашиг хүлээн авав', money: 100 },
+  { text: '2 нүд хойшоо шилжив', moveRel: -2 },
 ];
 const CHEST_CARDS = [
-  { text: 'Төрөөс татаас хүлээн авав', money: 100 },
-  { text: 'Эмнэлгийн зардал төлөв', money: -50 },
-  { text: 'Хос тэвэг олов', money: 20 },
-  { text: 'Татвар төлөв', money: -30 },
-  { text: 'Найзаас бэлэг хүлээн авав', money: 40 },
-  { text: 'Торгууль төлөв', money: -25 },
+  { text: 'Шүүх танд төлбөр ногдууллаа', money: -100 },
+  { text: 'Гэрээ зөрчсөний торгууль төлөв', money: -75 },
+  { text: 'Шүүхийн маргаанд ялж нөхөн төлбөр авав', money: 150 },
+  { text: 'Татварын шалгалтын нэмэгдэл төлөв', money: -50 },
+  { text: 'Өв залгамжлалын шийдвэрээр хөрөнгө хүлээн авав', money: 120 },
+  { text: 'Хэрэг хянан шийдвэрлэх зардал төлөв', money: -40 },
+  { text: 'Барааны тэмдгийн маргаанд ялав', money: 90 },
+  { text: 'Захиргааны торгууль төлөв', money: -30 },
 ];
 
 const DIE_PIPS = {
@@ -574,7 +580,7 @@ function resolveSpace(room, player, idx) {
       resolvePropertyOrTax(room, player, player.position);
     }
     if (typeof card.moveRel === 'number') {
-      player.position = (player.position + card.moveRel) % spaces.length;
+      player.position = ((player.position + card.moveRel) % spaces.length + spaces.length) % spaces.length;
       resolvePropertyOrTax(room, player, player.position);
     }
     if (card.gotoJail) { player.position = 7; player.jailTurns = 2; }
