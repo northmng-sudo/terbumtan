@@ -124,6 +124,24 @@
   .tile .tile-price { font-size: 0.8em; fill: #6b4f1a; }
   .tile .tile-icon { font-size: 15px; pointer-events: none; }
   .owner-dot { pointer-events: none; }
+
+  .tile-building {
+    cursor: pointer;
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    filter: drop-shadow(0 8px 5px rgba(0,0,0,0.35));
+    transition: transform 0.25s ease, filter 0.25s ease;
+  }
+  .tile-building:hover {
+    transform: translateY(-6px) scale(1.08);
+    filter: drop-shadow(0 10px 7px rgba(0,0,0,0.4)) drop-shadow(0 0 8px #ffd64d);
+  }
+  .tile-building.level-1 { scale: 0.75; }
+  .tile-building.level-2 { scale: 0.88; }
+  .tile-building.level-3 { scale: 1; }
+  .tile-building.level-4 { scale: 1.12; }
+  .building-flag { animation: flagWave 1.6s ease-in-out infinite; transform-origin: left center; }
+  .building-light { animation: lightBlink 1.2s ease-in-out infinite; }
   .debug-poly { display: none; }
   .board.debug .tile polygon { fill: rgba(255,0,0,0.28) !important; stroke: #ff2b2b !important; }
   .board.debug .debug-poly { display: block; }
@@ -231,6 +249,8 @@
   @keyframes popIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
   @keyframes activePulseSvg { 0%,100% { stroke: #D4AF37; stroke-width: 3px; filter: none; } 50% { stroke: #FFE58A; stroke-width: 5px; filter: drop-shadow(0 0 6px #D4AF37); } }
+  @keyframes flagWave { 0%,100% { transform: skewY(0deg); } 50% { transform: skewY(-8deg); } }
+  @keyframes lightBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
   @keyframes diceRoll {
     0% { transform: rotate(0deg) scale(1); } 12% { transform: rotate(-45deg) scale(1.1); }
     24% { transform: rotate(110deg) scale(0.95); } 36% { transform: rotate(-160deg) scale(1.08); }
@@ -318,7 +338,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 712.8,
     "labelY": 766.2,
-    "labelRotation": -33.4
+    "labelRotation": -33.4,
+    "buildingType": "factory",
+    "buildingX": 773.1,
+    "buildingY": 715.3,
+    "buildingWidth": 59.9,
+    "buildingRotation": 0,
+    "depth": 715
   },
   {
     "id": 2,
@@ -347,7 +373,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 631.7,
     "labelY": 710.5,
-    "labelRotation": -32.3
+    "labelRotation": -32.3,
+    "buildingType": "telecom",
+    "buildingX": 696.6,
+    "buildingY": 663.4,
+    "buildingWidth": 58.8,
+    "buildingRotation": 0,
+    "depth": 663
   },
   {
     "id": 3,
@@ -376,7 +408,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 550.9,
     "labelY": 655.3,
-    "labelRotation": -31.3
+    "labelRotation": -31.3,
+    "buildingType": "technology",
+    "buildingX": 619.4,
+    "buildingY": 613.1,
+    "buildingWidth": 58.1,
+    "buildingRotation": 0,
+    "depth": 613
   },
   {
     "id": 4,
@@ -405,7 +443,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 472.4,
     "labelY": 602.1,
-    "labelRotation": -30.1
+    "labelRotation": -30.1,
+    "buildingType": "telecom",
+    "buildingX": 542.3,
+    "buildingY": 565.0,
+    "buildingWidth": 56.6,
+    "buildingRotation": 0,
+    "depth": 565
   },
   {
     "id": 5,
@@ -434,7 +478,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 397.3,
     "labelY": 551.0,
-    "labelRotation": -28.9
+    "labelRotation": -28.9,
+    "buildingType": "bank",
+    "buildingX": 467.1,
+    "buildingY": 518.3,
+    "buildingWidth": 54.3,
+    "buildingRotation": 0,
+    "depth": 518
   },
   {
     "id": 6,
@@ -492,7 +542,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 256.5,
     "labelY": 454.5,
-    "labelRotation": -27.0
+    "labelRotation": -27.0,
+    "buildingType": "retail",
+    "buildingX": 326.1,
+    "buildingY": 427.3,
+    "buildingWidth": 52.2,
+    "buildingRotation": 0,
+    "depth": 427
   },
   {
     "id": 8,
@@ -550,7 +606,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 296.4,
     "labelY": 312.8,
-    "labelRotation": 34.6
+    "labelRotation": 34.6,
+    "buildingType": "mining",
+    "buildingX": 362.1,
+    "buildingY": 293.2,
+    "buildingWidth": 51.0,
+    "buildingRotation": 0,
+    "depth": 293
   },
   {
     "id": 10,
@@ -579,7 +641,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 378.9,
     "labelY": 275.3,
-    "labelRotation": 33.3
+    "labelRotation": 33.3,
+    "buildingType": "construction",
+    "buildingX": 442.3,
+    "buildingY": 258.0,
+    "buildingWidth": 49.9,
+    "buildingRotation": 0,
+    "depth": 258
   },
   {
     "id": 11,
@@ -608,7 +676,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 458.5,
     "labelY": 239.6,
-    "labelRotation": 32.0
+    "labelRotation": 32.0,
+    "buildingType": "technology",
+    "buildingX": 517.9,
+    "buildingY": 276.5,
+    "buildingWidth": 48.5,
+    "buildingRotation": 0,
+    "depth": 276
   },
   {
     "id": 12,
@@ -637,7 +711,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 534.2,
     "labelY": 205.0,
-    "labelRotation": 30.3
+    "labelRotation": 30.3,
+    "buildingType": "factory",
+    "buildingX": 593.4,
+    "buildingY": 243.3,
+    "buildingWidth": 48.0,
+    "buildingRotation": 0,
+    "depth": 243
   },
   {
     "id": 13,
@@ -666,7 +746,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 607.4,
     "labelY": 171.6,
-    "labelRotation": 29.5
+    "labelRotation": 29.5,
+    "buildingType": "fuel",
+    "buildingX": 663.0,
+    "buildingY": 210.4,
+    "buildingWidth": 46.1,
+    "buildingRotation": 0,
+    "depth": 210
   },
   {
     "id": 14,
@@ -725,7 +811,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 742.8,
     "labelY": 109.9,
-    "labelRotation": 28.3
+    "labelRotation": 28.3,
+    "buildingType": "mining",
+    "buildingX": 790.5,
+    "buildingY": 148.4,
+    "buildingWidth": 42.6,
+    "buildingRotation": 0,
+    "depth": 148
   },
   {
     "id": 16,
@@ -783,7 +875,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 930.9,
     "labelY": 109.7,
-    "labelRotation": -28.5
+    "labelRotation": -28.5,
+    "buildingType": "mining",
+    "buildingX": 883.0,
+    "buildingY": 148.5,
+    "buildingWidth": 42.6,
+    "buildingRotation": 0,
+    "depth": 148
   },
   {
     "id": 18,
@@ -812,7 +910,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 995.8,
     "labelY": 139.6,
-    "labelRotation": -29.5
+    "labelRotation": -29.5,
+    "buildingType": "fashion",
+    "buildingX": 945.1,
+    "buildingY": 178.6,
+    "buildingWidth": 43.5,
+    "buildingRotation": 0,
+    "depth": 179
   },
   {
     "id": 19,
@@ -841,7 +945,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1064.4,
     "labelY": 170.8,
-    "labelRotation": -29.7
+    "labelRotation": -29.7,
+    "buildingType": "mining",
+    "buildingX": 1009.2,
+    "buildingY": 209.6,
+    "buildingWidth": 45.8,
+    "buildingRotation": 0,
+    "depth": 210
   },
   {
     "id": 20,
@@ -870,7 +980,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1136.7,
     "labelY": 204.3,
-    "labelRotation": -31.0
+    "labelRotation": -31.0,
+    "buildingType": "bank",
+    "buildingX": 1078.6,
+    "buildingY": 242.6,
+    "buildingWidth": 47.3,
+    "buildingRotation": 0,
+    "depth": 243
   },
   {
     "id": 21,
@@ -899,7 +1015,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1212.1,
     "labelY": 238.2,
-    "labelRotation": -31.8
+    "labelRotation": -31.8,
+    "buildingType": "bank",
+    "buildingX": 1152.6,
+    "buildingY": 275.0,
+    "buildingWidth": 48.1,
+    "buildingRotation": 0,
+    "depth": 275
   },
   {
     "id": 22,
@@ -957,7 +1079,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1372.2,
     "labelY": 312.1,
-    "labelRotation": -34.4
+    "labelRotation": -34.4,
+    "buildingType": "bank",
+    "buildingX": 1306.2,
+    "buildingY": 293.0,
+    "buildingWidth": 51.1,
+    "buildingRotation": 0,
+    "depth": 293
   },
   {
     "id": 24,
@@ -1015,7 +1143,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1413.9,
     "labelY": 453.7,
-    "labelRotation": 26.6
+    "labelRotation": 26.6,
+    "buildingType": "mining",
+    "buildingX": 1343.0,
+    "buildingY": 426.4,
+    "buildingWidth": 53.1,
+    "buildingRotation": 0,
+    "depth": 426
   },
   {
     "id": 26,
@@ -1044,7 +1178,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1346.1,
     "labelY": 501.8,
-    "labelRotation": 27.5
+    "labelRotation": 27.5,
+    "buildingType": "mining",
+    "buildingX": 1274.5,
+    "buildingY": 471.9,
+    "buildingWidth": 54.2,
+    "buildingRotation": 0,
+    "depth": 472
   },
   {
     "id": 27,
@@ -1073,7 +1213,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1274.4,
     "labelY": 550.8,
-    "labelRotation": 29.2
+    "labelRotation": 29.2,
+    "buildingType": "retail",
+    "buildingX": 1203.6,
+    "buildingY": 517.3,
+    "buildingWidth": 55.5,
+    "buildingRotation": 0,
+    "depth": 517
   },
   {
     "id": 28,
@@ -1102,7 +1248,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1199.7,
     "labelY": 602.6,
-    "labelRotation": 30.3
+    "labelRotation": 30.3,
+    "buildingType": "mining",
+    "buildingX": 1129.0,
+    "buildingY": 564.8,
+    "buildingWidth": 58.0,
+    "buildingRotation": 0,
+    "depth": 565
   },
   {
     "id": 29,
@@ -1131,7 +1283,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1120.6,
     "labelY": 656.6,
-    "labelRotation": 31.4
+    "labelRotation": 31.4,
+    "buildingType": "mining",
+    "buildingX": 1051.3,
+    "buildingY": 613.6,
+    "buildingWidth": 59.2,
+    "buildingRotation": 0,
+    "depth": 614
   },
   {
     "id": 30,
@@ -1190,7 +1348,13 @@ const BOARD_CONFIG = [
     ],
     "labelX": 958.3,
     "labelY": 767.8,
-    "labelRotation": 33.4
+    "labelRotation": 33.4,
+    "buildingType": "construction",
+    "buildingX": 898.1,
+    "buildingY": 716.7,
+    "buildingWidth": 59.5,
+    "buildingRotation": 0,
+    "depth": 717
   }
 ];
 
@@ -1578,6 +1742,56 @@ function wrapLabel(text, maxCharsPerLine) {
   return line2 ? [line1, line2] : [line1];
 }
 
+const BUILDING_ICON_SHAPES = {
+  bank: `<polygon points="4,20 40,20 22,7" fill="#E8D9A8"/><rect x="9" y="20" width="26" height="27" fill="#F2E7C6"/>
+    <rect x="12" y="24" width="4" height="20" fill="#B8912A"/><rect x="20" y="24" width="4" height="20" fill="#B8912A"/><rect x="28" y="24" width="4" height="20" fill="#B8912A"/>
+    <rect x="6" y="47" width="32" height="4" fill="#8a6d1f"/>`,
+  mining: `<polygon points="14,7 30,7 22,0" fill="#7a5240"/><rect x="19" y="7" width="6" height="42" fill="#6b4a38"/>
+    <line x1="14" y1="16" x2="30" y2="16" stroke="#5a3d2e" stroke-width="2"/>
+    <circle cx="12" cy="45" r="9" fill="#9c6f4a"/><circle cx="32" cy="47" r="7" fill="#8a5f3c"/>`,
+  telecom: `<rect x="20" y="4" width="4" height="46" fill="#8a97a8"/>
+    <line x1="10" y1="16" x2="34" y2="16" stroke="#6b7688" stroke-width="2"/>
+    <line x1="13" y1="26" x2="31" y2="26" stroke="#6b7688" stroke-width="2"/>
+    <ellipse cx="32" cy="14" rx="6" ry="3" fill="#B8C4D6" transform="rotate(-20 32 14)"/>
+    <circle cx="22" cy="4" r="2.4" fill="#E8317A" class="building-light"/>`,
+  construction: `<rect x="19" y="2" width="4" height="48" fill="#C97B2E"/><rect x="2" y="9" width="38" height="3" fill="#C97B2E"/>
+    <line x1="6" y1="12" x2="6" y2="24" stroke="#8a5a1f" stroke-width="1.5"/>
+    <rect x="8" y="30" width="18" height="22" fill="#D8C89A"/>
+    <line x1="11" y1="34" x2="11" y2="48" stroke="#8a7550" stroke-width="1"/><line x1="16" y1="34" x2="16" y2="48" stroke="#8a7550" stroke-width="1"/><line x1="21" y1="34" x2="21" y2="48" stroke="#8a7550" stroke-width="1"/>`,
+  retail: `<rect x="4" y="26" width="36" height="24" fill="#F2E7C6"/>
+    <rect x="4" y="22" width="36" height="6" fill="#E8317A"/><rect x="4" y="22" width="9" height="6" fill="#fff" opacity="0.5"/><rect x="22" y="22" width="9" height="6" fill="#fff" opacity="0.5"/>
+    <rect x="16" y="36" width="10" height="14" fill="#8a6d1f"/>`,
+  fuel: `<rect x="3" y="12" width="36" height="4" fill="#C1553A"/><rect x="6" y="16" width="3" height="18" fill="#8a5240"/><rect x="33" y="16" width="3" height="18" fill="#8a5240"/>
+    <rect x="15" y="28" width="12" height="20" fill="#D8C89A"/><circle cx="21" cy="24" r="2.6" fill="#C1553A"/>`,
+  factory: `<rect x="5" y="26" width="34" height="24" fill="#C9A98A"/>
+    <rect x="11" y="6" width="5" height="22" fill="#8a7550"/><ellipse cx="13.5" cy="4" rx="4" ry="2.4" fill="#cfcfcf" opacity="0.6"/>
+    <rect x="25" y="12" width="5" height="16" fill="#8a7550"/><ellipse cx="27.5" cy="10" rx="4" ry="2.4" fill="#cfcfcf" opacity="0.6"/>`,
+  agriculture: `<rect x="13" y="12" width="16" height="36" rx="6" fill="#D8C89A"/><ellipse cx="21" cy="12" rx="8" ry="3" fill="#E8D9A8"/>
+    <polygon points="28,32 40,32 34,20" fill="#7A2E3A"/><rect x="28" y="32" width="12" height="18" fill="#8a3a48"/>`,
+  fashion: `<rect x="8" y="22" width="28" height="28" fill="#F2E7C6"/>
+    <polygon points="17,10 21,16 17,18" fill="#C1553A"/><polygon points="27,10 23,16 27,18" fill="#C1553A"/><rect x="20" y="14" width="4" height="4" fill="#8a2530"/>
+    <rect x="8" y="20" width="28" height="3" fill="#C1553A"/>`,
+  technology: `<rect x="10" y="4" width="24" height="46" fill="#DCEFEA"/>
+    <line x1="10" y1="12" x2="34" y2="12" stroke="#5C3A8E" stroke-width="1.2"/><line x1="10" y1="20" x2="34" y2="20" stroke="#5C3A8E" stroke-width="1.2"/>
+    <line x1="10" y1="28" x2="34" y2="28" stroke="#5C3A8E" stroke-width="1.2"/><line x1="10" y1="36" x2="34" y2="36" stroke="#5C3A8E" stroke-width="1.2"/>
+    <line x1="22" y1="0" x2="22" y2="4" stroke="#5C3A8E" stroke-width="1.5"/><circle cx="22" cy="0" r="1.8" fill="#8A4FE8" class="building-light"/>`,
+};
+
+function renderBuildingIcon(tile, level, idx) {
+  if (!level || level < 1) return '';
+  const shapes = BUILDING_ICON_SHAPES[tile.buildingType] || BUILDING_ICON_SHAPES.factory;
+  const boxW = 44, boxH = 56;
+  const scale = tile.buildingWidth / boxW;
+  const tx = tile.buildingX - boxW * scale / 2;
+  const ty = tile.buildingY - boxH * scale;
+  let extra = '';
+  if (level >= 4) {
+    extra = `<g class="building-flag"><line x1="34" y1="2" x2="34" y2="14" stroke="#8a6d1f" stroke-width="1.5"/><polygon points="34,2 44,5 34,8" fill="#D4AF37"/></g>
+      <circle cx="6" cy="50" r="2" fill="#FFE58A" class="building-light"/><circle cx="38" cy="50" r="2" fill="#FFE58A" class="building-light"/>`;
+  }
+  return `<g class="tile-building level-${Math.min(level,4)}" data-idx="${idx}" transform="translate(${tx},${ty}) scale(${scale})" style="--depth:${tile.depth}">${shapes}${extra}</g>`;
+}
+
 function renderBuildings(level) {
   if (level >= 4) return `<div class="buildings-row"><span class="build-icon corp" title="\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446"></span></div>`;
   let html = '<div class="buildings-row">';
@@ -1675,6 +1889,7 @@ function renderGame() {
 
   const CORNER_IDS = [0,8,16,24];
   let tilesHtml = '';
+  const buildingsToRender = [];
   BOARD_CONFIG.forEach(tile => {
     const idx = tile.id;
     const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
@@ -1688,7 +1903,6 @@ function renderGame() {
     let tspans = `<tspan x="${tile.labelX}" dy="${lines.length > 1 ? '-0.55em' : '0.3em'}">${lines[0]}</tspan>`;
     if (lines[1]) tspans += `<tspan x="${tile.labelX}" dy="1.05em">${lines[1]}</tspan>`;
     if (tile.price) tspans += `<tspan class="tile-price" x="${tile.labelX}" dy="1.15em" font-size="${fontSize*0.78}">\u20ae${fmt(tile.price)}</tspan>`;
-    if (level > 0) tspans += `<tspan x="${tile.labelX}" dy="1.15em" font-size="${fontSize*0.9}">${level >= 4 ? '\ud83c\udfe6' : '\ud83c\udfe0'.repeat(level)}</tspan>`;
     const ownerStyle = owner ? `--owner-color:${owner.color}; --owner-fill:${hexToRgba(owner.color,0.28)};` : '';
     tilesHtml += `<g class="tile ${owner?'owned':''} ${isFullGroup?'group-complete':''} ${isActivePos?'active-position':''}"
       data-idx="${idx}" style="${ownerStyle}">
@@ -1696,7 +1910,12 @@ function renderGame() {
       <text x="${tile.labelX}" y="${tile.labelY}" text-anchor="middle" font-size="${fontSize}" transform="rotate(${tile.labelRotation} ${tile.labelX} ${tile.labelY})">${tspans}</text>
       ${owner ? `<circle class="owner-dot" cx="${tile.labelX + 22}" cy="${tile.labelY - 22}" r="9" fill="${owner.color}" stroke="#18382d" stroke-width="1.5"></circle>` : ''}
     </g>`;
+    if (owner && level > 0 && tile.buildingType) {
+      buildingsToRender.push({ tile, level, idx, depth: tile.depth });
+    }
   });
+  buildingsToRender.sort((a, b) => a.depth - b.depth);
+  const buildingsHtml = buildingsToRender.map(b => renderBuildingIcon(b.tile, b.level, b.idx)).join('');
 
   const tokensHtml = room.players.filter(p => !p.bankrupt).map((p, i) => {
     const pos = displayPos(room, p);
@@ -1767,6 +1986,7 @@ function renderGame() {
           <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
           <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
             ${tilesHtml}
+            ${buildingsHtml}
           </svg>
           <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
           ${tokensHtml}
@@ -1851,6 +2071,10 @@ function attachGameEvents() {
       tooltip.style.top = (e.clientY + 14) + 'px';
     };
     el.onmouseleave = () => { if (tooltip) tooltip.style.display = 'none'; };
+  });
+  document.querySelectorAll('.tile-building[data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    el.onclick = (e) => { e.stopPropagation(); showCellDetail(idx); };
   });
 }
 
