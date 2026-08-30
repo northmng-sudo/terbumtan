@@ -112,19 +112,29 @@
 
   .tile {
     position: absolute; z-index: 2;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: #18382d; font-size: clamp(6.5px, 0.72vw, 12px); font-weight: 800; text-align: center;
     cursor: pointer; border: 2px solid transparent; border-radius: 10px;
-    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-    padding: 2px;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    padding: 0;
+    overflow: visible;
   }
-  .tile small { margin-top: 2px; font-size: 0.82em; font-family: 'JetBrains Mono', monospace; opacity: 0.85; }
-  .tile:hover { z-index: 6; transform: translateY(-4px) scale(1.08); background: rgba(255,255,255,0.5); border-color: #ffd95a; box-shadow: 0 10px 22px rgba(0,0,0,0.35); }
-  .tile:active { transform: translateY(-1px) scale(0.97); }
+  .tile-inner {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #18382d; font-size: clamp(6px, 0.62vw, 10.5px); font-weight: 800; text-align: center;
+    line-height: 1.1; padding: 3px 2px;
+    transition: transform 0.15s ease;
+    overflow: hidden;
+  }
+  .tile-inner span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .tile small { margin-top: 2px; font-size: 0.8em; font-family: 'JetBrains Mono', monospace; opacity: 0.85; white-space: nowrap; }
+  .tile:hover { z-index: 6; background: rgba(255,255,255,0.5); border-color: #ffd95a; box-shadow: 0 10px 22px rgba(0,0,0,0.35); }
+  .tile:hover .tile-inner { transform: rotate(var(--r, 0deg)) scale(1.1) translateY(-3px); }
+  .tile:active .tile-inner { transform: rotate(var(--r, 0deg)) scale(0.95); }
   .tile.owned { box-shadow: inset 0 0 0 3px var(--owner-color, var(--steppe-gold)); background: rgba(255,255,255,0.28); }
   .tile.group-complete { box-shadow: inset 0 0 0 3px var(--owner-color, var(--steppe-gold)), 0 0 14px var(--owner-color, var(--steppe-gold)); }
   .tile.active-position { animation: activePulse 1.3s infinite; }
-  .tile.corner-tile { font-size: clamp(6px, 0.6vw, 10px); background: rgba(255,255,255,0.12); }
+  .tile.corner-tile .tile-inner { font-size: clamp(6.5px, 0.68vw, 11px); }
+  .tile.corner-tile { background: rgba(255,255,255,0.12); }
   .tile-group-tab {
     position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
     width: 60%; height: 5px; border-radius: 3px;
@@ -1240,10 +1250,12 @@ function renderGame() {
     tilesHtml += `<div class="tile ${[0,8,16,24].includes(idx)?'corner-tile':''} ${owner?'owned':''} ${isFullGroup?'group-complete':''} ${isActivePos?'active-position':''}"
       data-idx="${idx}"
       style="left:${tile.left}%; top:${tile.top}%; width:${tile.width}%; height:${tile.height}%; transform:rotate(${tile.rotation}deg); ${owner?`--owner-color:${owner.color}; background:${hexToRgba(owner.color,0.18)};`:''}">
-      ${groupTab}
-      <span>${tile.name}</span>
-      ${tile.price ? `<small>\u20ae${fmt(tile.price)}</small>` : ''}
-      ${level > 0 ? renderBuildings(level) : ''}
+      <div class="tile-inner" style="--r:${-tile.rotation}deg; transform:rotate(${-tile.rotation}deg);">
+        ${groupTab}
+        <span>${tile.name}</span>
+        ${tile.price ? `<small>\u20ae${fmt(tile.price)}</small>` : ''}
+        ${level > 0 ? renderBuildings(level) : ''}
+      </div>
       ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}">${owner.token}</span>` : ''}
       <span class="debug-idx">${idx}</span>
     </div>`;
