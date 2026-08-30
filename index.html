@@ -20,9 +20,30 @@
     --grp-B: #14C088;
     --grp-C: #8A4FE8;
     --grp-D: #FF6B1F;
+
+    --sidebar-bg: #041a16;
+    --sidebar-bg-2: #092b24;
+    --card-bg: rgba(8, 38, 31, 0.96);
+    --card-light: rgba(18, 65, 52, 0.94);
+    --gold: #f5ca55;
+    --gold-light: #ffe69a;
+    --gold-dark: #8e5c0a;
+    --emerald: #087557;
+    --emerald-light: #22c58b;
+    --emerald-dark: #043c30;
+    --cream: #fff2cf;
+    --sb-text: #fff7df;
+    --sb-muted: #a9c2b9;
+    --sb-danger: #e85d5d;
+    --sb-blue: #4599ff;
+    --radius-large: 22px;
+    --radius-medium: 16px;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
   body {
     margin: 0;
     background: radial-gradient(ellipse at 50% -10%, #1c1710 0%, var(--night-indigo-deep) 60%), var(--night-indigo-deep);
@@ -97,8 +118,204 @@
   }
   .debug-toggle.on { border-color: #FF5252; color: #FF5252; }
 
-  .game-layout { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; }
-  @media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } }
+  .game-layout { display: grid; grid-template-columns: minmax(0,1fr) clamp(340px, 24vw, 410px); gap: 20px; align-items: start; }
+  @media (max-width: 1000px) { .game-layout { grid-template-columns: minmax(0,1fr) 310px; } }
+  @media (max-width: 780px) { .game-layout { grid-template-columns: 1fr; } }
+
+  /* ===== GAME SIDEBAR ===== */
+  .game-sidebar {
+    display: flex; flex-direction: column; gap: 14px;
+    background: linear-gradient(160deg, var(--sidebar-bg-2) 0%, var(--sidebar-bg) 100%);
+    border: 1.5px solid rgba(245,202,85,0.5);
+    border-radius: var(--radius-large);
+    padding: 14px;
+    max-height: 100vh; overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .game-sidebar::before {
+    content: ''; position: absolute; inset: 0; border-radius: var(--radius-large); pointer-events: none; z-index: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(245,202,85,0.035) 0 2px, transparent 2px 22px),
+      repeating-linear-gradient(-45deg, rgba(245,202,85,0.035) 0 2px, transparent 2px 22px);
+    opacity: 0.5;
+  }
+  .game-sidebar::after {
+    content: ''; position: absolute; inset: 0; border-radius: var(--radius-large); pointer-events: none; z-index: 0;
+    box-shadow: inset 0 0 90px rgba(0,0,0,0.55);
+  }
+  .game-sidebar > * { position: relative; z-index: 1; }
+  .game-sidebar::-webkit-scrollbar { width: 6px; }
+  .game-sidebar::-webkit-scrollbar-track { background: var(--emerald-dark); border-radius: 6px; }
+  .game-sidebar::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 6px; }
+
+  .sb-panel {
+    background: linear-gradient(145deg, rgba(20,75,60,0.96), rgba(4,27,23,0.98));
+    border: 1px solid rgba(245,202,85,0.55);
+    border-radius: var(--radius-medium);
+    padding: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -3px 8px rgba(0,0,0,0.25), 0 10px 24px rgba(0,0,0,0.32);
+    animation: sbCardEnter 0.35s ease;
+  }
+  .sb-panel-title {
+    font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 11.5px; letter-spacing: 1.5px;
+    color: var(--gold-light); text-align: center; margin-bottom: 10px; text-transform: uppercase;
+  }
+  .sb-empty-state { text-align: center; font-size: 12.5px; color: var(--sb-muted); padding: 10px 0; }
+
+  /* Header */
+  .sb-header {
+    display: flex; align-items: center; gap: 10px;
+    background: linear-gradient(145deg, rgba(20,75,60,0.96), rgba(4,27,23,0.98));
+    border: 1px solid rgba(245,202,85,0.55); border-radius: var(--radius-medium);
+    padding: 10px 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 10px 24px rgba(0,0,0,0.32);
+  }
+  .sb-round-badge {
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 13px; color: var(--emerald-light);
+    background: rgba(34,197,139,0.12); border: 1.5px solid var(--emerald-light); border-radius: 10px;
+    padding: 6px 10px; flex-shrink: 0;
+  }
+  .sb-header-mid { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+  .sb-header-avatar {
+    position: relative; width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--ring-color, var(--gold)) 55%, white 45%) 0%, var(--sidebar-bg) 78%);
+    border: 2.5px solid var(--gold);
+  }
+  .sb-live-dot { position: absolute; bottom: -1px; right: -1px; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; border: 1.5px solid var(--sidebar-bg); animation: pulse 1.4s infinite; }
+  .sb-header-name { font-weight: 800; font-size: 13px; color: var(--sb-text); letter-spacing: 0.3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sb-header-icons { display: flex; gap: 6px; flex-shrink: 0; }
+  .sb-icon-btn {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(245,202,85,0.4);
+    background: rgba(0,0,0,0.25); color: var(--gold-light); font-size: 13px; cursor: pointer;
+  }
+
+  /* Players panel */
+  .sb-player-card {
+    position: relative; background: rgba(0,0,0,0.18); border: 1px solid rgba(245,202,85,0.18);
+    border-radius: 12px; padding: 8px 10px; margin-bottom: 8px;
+    animation: sbCardEnter 0.35s ease;
+  }
+  .sb-player-card:last-child { margin-bottom: 0; }
+  .sb-player-card.sb-player-current {
+    border-color: var(--gold); background: rgba(245,202,85,0.08);
+    box-shadow: 0 0 0 1px rgba(245,202,85,0.3), 0 0 14px rgba(245,202,85,0.2);
+    animation: sbCardEnter 0.35s ease, sbPulseGlow 2.2s ease-in-out infinite;
+  }
+  .sb-player-card.sb-player-bankrupt { opacity: 0.4; }
+  .sb-crown { position: absolute; top: -9px; left: 8px; font-size: 13px; }
+  .sb-player-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .sb-player-avatar {
+    width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;
+    background: rgba(255,255,255,0.05); border: 2px solid var(--ring-color, var(--gold)); flex-shrink: 0;
+  }
+  .sb-player-name { font-weight: 700; font-size: 12.5px; color: var(--sb-text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sb-player-name em { color: var(--sb-muted); font-style: normal; font-size: 10.5px; }
+  .sb-player-props { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--sb-muted); flex-shrink: 0; }
+  .sb-player-money { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12.5px; color: var(--gold-light); flex-shrink: 0; }
+  .sb-progress-track { width: 100%; height: 6px; border-radius: 4px; background: rgba(0,0,0,0.35); overflow: hidden; }
+  .sb-progress-track-sm { height: 4px; flex: 1; }
+  .sb-progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+  /* Dice panel */
+  .sb-dice-panel { text-align: center; padding: 16px 12px; }
+  .sb-dice-row { display: flex; justify-content: center; gap: 10px; margin: 4px 0 10px; }
+  .sb-dice-sum-label { font-size: 11px; color: var(--sb-muted); margin-bottom: 4px; }
+  .sb-dice-sum-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 20px; color: var(--gold-light);
+    background: rgba(0,0,0,0.3); border: 2px solid var(--gold); border-radius: 50%;
+    width: 52px; height: 52px; justify-content: center; margin: 0 auto 12px;
+  }
+  .sb-dice-sum-badge span { color: var(--gold-light); }
+  .sb-dice-sum-spacer { height: 12px; }
+  .sb-dice-btn {
+    display: block; width: 100%; padding: 14px; border: none; border-radius: 14px;
+    font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;
+    color: var(--cream); cursor: pointer; position: relative; overflow: hidden;
+    background: linear-gradient(180deg, #ffcf6e 0%, #f39c1f 55%, #d9840d 100%);
+    border: 2px solid var(--gold-light);
+    box-shadow: 0 5px 0 var(--gold-dark), 0 8px 16px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    transition: transform 0.08s ease;
+  }
+  .sb-dice-btn:not(:disabled):hover::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+    animation: sbShine 0.9s ease;
+  }
+  .sb-dice-btn:not(:disabled):active { transform: translateY(4px); box-shadow: 0 1px 0 var(--gold-dark); }
+  .sb-dice-btn:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: 0 3px 0 rgba(0,0,0,0.3); }
+  .sb-endturn-btn {
+    display: block; width: 100%; margin-top: 8px; padding: 10px; border-radius: 12px;
+    background: transparent; border: 1.5px solid var(--emerald-light); color: var(--emerald-light);
+    font-weight: 700; font-size: 12.5px; letter-spacing: 0.5px; cursor: pointer;
+  }
+  .sb-endturn-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .sb-waiting { text-align: center; color: var(--sb-muted); font-size: 12.5px; padding: 14px 0; }
+
+  /* Owned companies */
+  .sb-company-scroll { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; }
+  .sb-company-card {
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--grp-color) 22%, transparent) 0%, rgba(0,0,0,0.2) 100%);
+    border: 1px solid color-mix(in srgb, var(--grp-color) 55%, transparent);
+    border-radius: 12px; padding: 7px 9px;
+    animation: sbCardEnter 0.3s ease;
+  }
+  .sb-company-icon {
+    width: 34px; height: 34px; border-radius: 9px; overflow: hidden; flex-shrink: 0;
+    background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.5);
+  }
+  .sb-company-icon img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+  .sb-company-info { flex: 1; min-width: 0; }
+  .sb-company-name { font-weight: 700; font-size: 12px; color: var(--sb-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-company-level-row { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+  .sb-level-badge { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 800; color: var(--gold-light); background: rgba(0,0,0,0.3); border-radius: 5px; padding: 1px 5px; flex-shrink: 0; }
+  .sb-company-rent { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px; color: var(--gold-light); flex-shrink: 0; }
+
+  /* Ranking */
+  .sb-rank-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sb-rank-card {
+    flex: 1; min-width: 128px; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: rgba(0,0,0,0.2); border: 1px solid rgba(245,202,85,0.25); border-radius: 12px; padding: 10px 6px;
+  }
+  .sb-rank-card.sb-rank-gold { border-color: var(--gold); background: rgba(245,202,85,0.1); }
+  .sb-rank-card.sb-rank-silver { border-color: #c8ccd6; background: rgba(200,204,214,0.08); }
+  .sb-rank-card.sb-player-bankrupt { opacity: 0.4; }
+  .sb-rank-medal { font-size: 18px; }
+  .sb-rank-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 2px solid var(--ring-color, var(--gold)); background: rgba(255,255,255,0.05); }
+  .sb-rank-name { font-weight: 700; font-size: 11.5px; color: var(--sb-text); }
+  .sb-rank-worth { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 13px; color: var(--gold-light); }
+
+  /* Activity timeline */
+  .sb-timeline { display: flex; flex-direction: column; gap: 10px; }
+  .sb-timeline-item {
+    display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 8px;
+    animation: sbSlideIn 0.3s ease;
+  }
+  .sb-timeline-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .sb-timeline-avatar { font-size: 15px; }
+  .sb-timeline-body { font-size: 11.5px; color: var(--sb-text); line-height: 1.4; }
+  .sb-timeline-player { font-weight: 700; }
+  .sb-timeline-text { color: var(--sb-muted); }
+  .sb-timeline-time { font-size: 10px; color: var(--sb-muted); white-space: nowrap; }
+  .sb-viewall-btn {
+    display: block; width: 100%; margin-top: 10px; padding: 8px; border-radius: 10px;
+    background: transparent; border: none; color: var(--gold-light); font-weight: 700; font-size: 12px; cursor: pointer;
+  }
+
+  @keyframes sbCardEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes sbSlideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes sbPulseGlow { 0%,100% { box-shadow: 0 0 0 1px rgba(245,202,85,0.3), 0 0 14px rgba(245,202,85,0.2); } 50% { box-shadow: 0 0 0 1px rgba(245,202,85,0.5), 0 0 22px rgba(245,202,85,0.4); } }
+  @keyframes sbShine { from { left: -60%; } to { left: 120%; } }
+
+  @media (max-width: 780px) {
+    .game-sidebar { max-height: none; }
+  }
+
 
   .board-outer { display: flex; justify-content: center; min-width: 0; overflow: hidden; }
   .board {
@@ -228,8 +445,8 @@
   .ptoken {
     position: absolute; z-index: 10;
     display: grid; place-items: center;
-    width: clamp(34px, 5.2vw, 62px); height: clamp(34px, 5.2vw, 62px);
-    font-size: clamp(22px, 3.4vw, 40px);
+    width: clamp(18px, 2.6vw, 32px); height: clamp(18px, 2.6vw, 32px);
+    font-size: clamp(12px, 1.8vw, 20px);
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--token-ring, var(--steppe-gold)) 55%, white 45%) 0%, var(--night-indigo-deep) 78%);
     border: 4px solid #241a0d;
@@ -2356,7 +2573,7 @@ async function createRoom(name) {
     players: [newPlayer(name, TOKENS[0], true)],
     propOwner: {}, houses: {},
     currentPlayerIndex: 0, hasRolled: false, pendingAction: null,
-    lastDice: null, diceRollId: null, animPath: null, cardDraw: null, winnerId: null,
+    lastDice: null, diceRollId: null, animPath: null, cardDraw: null, winnerId: null, turnCount: 0,
     log: ['\u04e8\u0440\u04e9\u04e9 \u04af\u04af\u0441\u0433\u044d\u043b\u044d\u044d. \u0422\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0434 \u043d\u044d\u0433\u0434\u044d\u0445\u0438\u0439\u0433 \u0445\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430...'],
   };
   await saveRoom(room);
@@ -2535,6 +2752,7 @@ async function endTurn() {
   let next = room.currentPlayerIndex;
   do { next = (next + 1) % room.players.length; } while (room.players[next].bankrupt);
   room.currentPlayerIndex = next; room.hasRolled = false; room.lastDice = null;
+  room.turnCount = (room.turnCount || 0) + 1;
   pushLog(room, `\u2014 ${room.players[next].name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u2014`);
   await saveRoom(room); currentRoom = room; render();
 }
@@ -2714,9 +2932,7 @@ function renderUpgradeIcons(tile, level, idx, ownerIdx) {
   if (!level || level < 1) return '';
   const glow = PLAYER_GLOW_COLORS[((ownerIdx % 4) + 4) % 4];
   const scale = tile.buildingScale || 1;
-  const zoneClip = (bx, by, bw, bh) => tile.buildingZone
-    ? `clip-path: polygon(${computeClipPathPct(tile.buildingZone, bx, by, bw, bh)});`
-    : '';
+  const zoneClip = () => '';
 
   if (level >= 4) {
     const key = 'corp-' + idx;
@@ -2781,7 +2997,7 @@ function renderBuildingIcon(tile, level, idx) {
   const isNew = !seenBuildings.has(idx);
   seenBuildings.add(idx);
   const flagHtml = level >= 4 ? `<span class="building-flag-icon">\ud83c\udfc1</span>` : '';
-  const clipPath = tile.buildingZone ? `clip-path: polygon(${computeClipPathPct(tile.buildingZone, x, y, w, w)});` : '';
+  const clipPath = '';
   const debugHtml = debugMode ? `<span class="badge-debug-id">${idx}</span>` : '';
   return `<div data-idx="${idx}" data-tile-id="${idx}"
     class="tile-building-badge level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}"
@@ -2870,6 +3086,161 @@ function renderWaiting() {
 }
 function attachWaitingEvents() { const btn = document.getElementById('startBtn'); if (btn) btn.onclick = startGame; }
 
+function timeAgoLabel(logIndexFromEnd) {
+  if (logIndexFromEnd === 0) return '\u041e\u0434\u043e\u043e';
+  return '\u04e8\u043c\u043d\u04e9';
+}
+
+function renderTurnStatusHeader(room, currentPlayer) {
+  const roundN = Math.floor((room.turnCount || 0) / room.players.length) + 1;
+  return `<div class="sb-header">
+    <div class="sb-round-badge">\u04ae\u0415 ${roundN}</div>
+    <div class="sb-header-mid">
+      <span class="sb-header-avatar" style="--ring-color:${currentPlayer.color}">${currentPlayer.token}<span class="sb-live-dot"></span></span>
+      <span class="sb-header-name">${currentPlayer.name}-\u0418\u0419\u041d \u042d\u042d\u041b\u0416</span>
+    </div>
+    <div class="sb-header-icons">
+      <button class="sb-icon-btn" title="\u0414\u0443\u0443">\ud83d\udd0a</button>
+      <button class="sb-icon-btn" id="debugToggle" title="Debug">\u2699\ufe0f</button>
+    </div>
+  </div>`;
+}
+
+function renderPlayersPanel(room, currentPlayer) {
+  const maxWorth = Math.max(1, ...room.players.map(p => netWorth(room, p)));
+  const rows = room.players.map(p => {
+    const worth = netWorth(room, p);
+    const ownedCount = Object.values(room.propOwner).filter(oid => oid === p.id).length;
+    const pct = Math.max(4, Math.round(worth / maxWorth * 100));
+    const isCurrent = p.id === currentPlayer.id;
+    return `<div class="sb-player-card ${isCurrent ? 'sb-player-current' : ''} ${p.bankrupt ? 'sb-player-bankrupt' : ''}" style="--pcolor:${p.color}">
+      ${isCurrent ? '<span class="sb-crown">\ud83d\udc51</span>' : ''}
+      <div class="sb-player-top">
+        <span class="sb-player-avatar" style="--ring-color:${p.color}">${p.token}</span>
+        <span class="sb-player-name">${p.name}${p.id === myId ? ' <em>(\u0442\u0430)</em>' : ''}</span>
+        <span class="sb-player-props">\ud83c\udfe2${ownedCount}</span>
+        <span class="sb-player-money">\u20ae${fmt(p.money)}</span>
+      </div>
+      <div class="sb-progress-track"><div class="sb-progress-fill" style="width:${pct}%; background:${p.color};"></div></div>
+    </div>`;
+  }).join('');
+  return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u0422\u041e\u0413\u041b\u041e\u0413\u0427\u0418\u0414 \u25c8</div>${rows}</div>`;
+}
+
+function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling) {
+  if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy') {
+    const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
+    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0410\u041d\u042b \u0417\u04e9\u0412\u0428\u04e8\u04e8\u0420\u0415\u041b \u25c8</div>
+      <div class="buy-prompt">
+        "${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0445 \u0443\u0443?<br><span style="color:var(--sb-muted);">\u0422\u04af\u0440\u044d\u044d\u0441: \u20ae${sp.rent}/\u0443\u0434\u0430\u0430</span>
+        <button class="sb-dice-btn" id="buyBtn" ${me.money < sp.price ? 'disabled' : ''}>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0445</button>
+        <button class="sb-endturn-btn" id="skipBtn">\u0410\u043b\u0433\u0430\u0441\u0430\u0445</button>
+      </div></div>`;
+  }
+  if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'build') {
+    const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
+    const level = houseLevel(room, room.pendingAction.spaceIndex);
+    const cost = buildCost(sp);
+    const nextLabel = level + 1 >= 4 ? '\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : `${level + 1}-\u0440 \u0431\u0430\u0439\u0448\u0438\u043d`;
+    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0411\u0410\u0420\u0418\u041b\u0413\u042b\u041d \u0417\u04e9\u0412\u0428\u04e8\u04e8\u0420\u0415\u041b \u25c8</div>
+      <div class="buy-prompt">
+        "${sp.name}" \u0434\u044d\u044d\u0440 ${nextLabel} \u0431\u0430\u0440\u0438\u0445 \u0443\u0443?<br><span style="color:var(--sb-muted);">\u0417\u0430\u0440\u0434\u0430\u043b: \u20ae${cost}</span>
+        <button class="sb-dice-btn" id="buildBtn" ${me.money < cost ? 'disabled' : ''}>\u0411\u0430\u0440\u0438\u0445</button>
+        <button class="sb-endturn-btn" id="skipBuildBtn">\u0410\u043b\u0433\u0430\u0441\u0430\u0445</button>
+      </div></div>`;
+  }
+  if (!myTurn) {
+    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
+      <div class="sb-waiting"><span class="pulse-dot"></span>${currentPlayer.name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u0431\u0430\u0439\u043d\u0430...</div></div>`;
+  }
+  const sum = room.lastDice ? room.lastDice[0] + room.lastDice[1] : null;
+  return `<div class="sb-panel sb-dice-panel">
+    <div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
+    <div class="sb-dice-row">${renderDie(d1, rolling)}${renderDie(d2, rolling)}</div>
+    ${sum !== null ? `<div class="sb-dice-sum-label">\u0421\u04af\u04af\u0434 \u0433\u0430\u0440\u0441\u0430\u043d:</div><div class="sb-dice-sum-badge">\u2756 <span>${sum}</span> \u2756</div>` : '<div class="sb-dice-sum-spacer"></div>'}
+    <button class="sb-dice-btn" id="rollBtn" ${room.hasRolled ? 'disabled' : ''}>${room.hasRolled ? '\ud83d\udd12' : '\ud83c\udfb2'} \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
+    <button class="sb-endturn-btn" id="endTurnBtn" ${!room.hasRolled ? 'disabled' : ''}>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
+  </div>`;
+}
+
+function renderOwnedCompaniesPanel(room) {
+  const myProps = Object.keys(room.propOwner).filter(idx => room.propOwner[idx] === myId).map(Number).sort((a,b)=>a-b);
+  if (myProps.length === 0) {
+    return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u041c\u0418\u041d\u0418\u0419 \u041a\u041e\u041c\u041f\u0410\u041d\u0418\u0423\u0414 \u25c8</div>
+      <div class="sb-empty-state">\u041e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u044d\u0437\u044d\u043c\u0448\u044d\u044d\u0433\u04af\u0439 \u0431\u0430\u0439\u043d\u0430.</div></div>`;
+  }
+  const cards = myProps.map(idx => {
+    const sp = BOARD_CONFIG[idx];
+    const level = houseLevel(room, idx);
+    const full = ownsFullGroup(room, myId, idx);
+    const rentShown = level > 0 ? sp.rent * [1,2,4,6,10][level] : (full ? sp.rent * 2 : sp.rent);
+    const pct = Math.round((level / 4) * 100);
+    const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
+    return `<div class="sb-company-card" data-idx="${idx}" style="--grp-color:${GROUP_COLORS[sp.colorGroup] || 'var(--emerald)'};">
+      <div class="sb-company-icon"><img src="${fileName}.png" alt="" onerror="this.style.display='none'"></div>
+      <div class="sb-company-info">
+        <div class="sb-company-name">${sp.name}</div>
+        <div class="sb-company-level-row"><span class="sb-level-badge">LV.${level}</span><div class="sb-progress-track sb-progress-track-sm"><div class="sb-progress-fill" style="width:${Math.max(pct,6)}%; background:var(--gold);"></div></div></div>
+      </div>
+      <div class="sb-company-rent">\u20ae${fmt(rentShown)}</div>
+    </div>`;
+  }).join('');
+  return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u041c\u0418\u041d\u0418\u0419 \u041a\u041e\u041c\u041f\u0410\u041d\u0418\u0423\u0414 \u25c8</div><div class="sb-company-scroll">${cards}</div></div>`;
+}
+
+function renderWealthRankingPanel(room) {
+  const ranked = room.players.slice().sort((a, b) => netWorth(room, b) - netWorth(room, a));
+  const medalIcons = ['\ud83e\udd47', '\ud83e\udd48', '\ud83e\udd49', '4\ufe0f\u20e3'];
+  const medalClass = ['sb-rank-gold', 'sb-rank-silver', 'sb-rank-bronze', ''];
+  const cards = ranked.map((p, i) => `<div class="sb-rank-card ${medalClass[i] || ''} ${p.bankrupt ? 'sb-player-bankrupt' : ''}">
+    <span class="sb-rank-medal">${medalIcons[i] || (i+1)}</span>
+    <span class="sb-rank-avatar" style="--ring-color:${p.color}">${p.token}</span>
+    <span class="sb-rank-name">${p.name}</span>
+    <span class="sb-rank-worth">\u20ae${fmt(netWorth(room, p))}</span>
+  </div>`).join('');
+  return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u0425\u04e8\u0420\u04e8\u041d\u0413\u0418\u0419\u041d \u0428\u0410\u0422\u041b\u0410\u041b \u25c8</div><div class="sb-rank-grid">${cards}</div></div>`;
+}
+
+function renderActivityTimeline(room) {
+  const recent = room.log.slice(-3).reverse();
+  const items = recent.map((line, i) => {
+    const playerMatch = room.players.find(p => line.startsWith(p.name));
+    const avatar = playerMatch ? playerMatch.token : '\ud83d\udcdc';
+    const color = playerMatch ? playerMatch.color : 'var(--gold)';
+    const text = playerMatch ? line.slice(playerMatch.name.length).replace(/^[:\s]+/, '') : line;
+    return `<div class="sb-timeline-item">
+      <span class="sb-timeline-dot" style="background:${color};"></span>
+      <span class="sb-timeline-avatar">${avatar}</span>
+      <div class="sb-timeline-body"><span class="sb-timeline-player" style="color:${color};">${playerMatch ? playerMatch.name : ''}</span> <span class="sb-timeline-text">${text}</span></div>
+      <span class="sb-timeline-time">${timeAgoLabel(i)}</span>
+    </div>`;
+  }).join('');
+  return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u0421\u04af\u04af\u041b\u0418\u0419\u041d \u04ae\u0419\u041b \u042f\u0412\u0414\u0410\u041b \u25c8</div>
+    <div class="sb-timeline">${items || `<div class="sb-empty-state">\u0410\u043b\u0438 \u04af\u0439\u043b \u044f\u0432\u0434\u0430\u043b \u0431\u0430\u0439\u0445\u0433\u04af\u0439.</div>`}</div>
+    <button class="sb-viewall-btn" id="viewAllLogBtn">\u0411\u04af\u0433\u0434\u0438\u0439\u0433 \u0445\u0430\u0440\u0430\u0445 \u203a</button>
+  </div>`;
+}
+
+function showFullLogModal(room) {
+  const root = document.getElementById('card-popup-root');
+  if (!root) return;
+  const items = room.log.slice().reverse().map(line => {
+    const playerMatch = room.players.find(p => line.startsWith(p.name));
+    const avatar = playerMatch ? playerMatch.token : '\ud83d\udcdc';
+    const color = playerMatch ? playerMatch.color : 'var(--gold)';
+    return `<div class="sb-timeline-item"><span class="sb-timeline-dot" style="background:${color};"></span><span class="sb-timeline-avatar">${avatar}</span><div class="sb-timeline-body">${line}</div></div>`;
+  }).join('');
+  root.innerHTML = `<div class="card-popup-backdrop" id="fullLogBackdrop"><div class="card-popup detail-popup" style="max-height:70vh; overflow-y:auto;">
+    <div class="card-popup-eyebrow">\u0411\u04af\u0445 \u04af\u0439\u043b \u044f\u0432\u0434\u0430\u043b</div>
+    <div class="sb-timeline">${items}</div>
+    <button class="btn btn-secondary" id="closeFullLogBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
+  </div></div>`;
+  const backdrop = document.getElementById('fullLogBackdrop');
+  if (backdrop) backdrop.onclick = () => { root.innerHTML = ''; };
+  const closeBtn = document.getElementById('closeFullLogBtn');
+  if (closeBtn) closeBtn.onclick = () => { root.innerHTML = ''; };
+}
+
 function renderGame() {
   const room = currentRoom;
   if (room.winnerId) {
@@ -2944,59 +3315,7 @@ function renderGame() {
     return `<div class="ptoken ${justRolled && p.id === currentPlayer.id ? 'moving' : ''}" style="left:${left}%; top:${top}%; --token-ring:${p.color}">${p.token}</div>`;
   }).join('');
 
-  let actionHtml = '';
-  if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy') {
-    const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
-    actionHtml = `<div class="buy-prompt">
-      <div class="permit-eyebrow">\ud83c\udfee \u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0430\u043d\u044b \u0437\u04e9\u0432\u0448\u04e9\u04e9\u0440\u04e9\u043b</div>
-      "${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0445 \u0443\u0443?<br><span style="color:#9AA6BE;">\u0422\u04af\u0440\u044d\u044d\u0441: \u20ae${sp.rent}/\u0443\u0434\u0430\u0430</span>
-      <button class="btn btn-primary" id="buyBtn" ${me.money<sp.price?'disabled':''}>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0445</button>
-      <button class="btn btn-secondary" id="skipBtn">\u0410\u043b\u0433\u0430\u0441\u0430\u0445</button>
-    </div>`;
-  } else if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'build') {
-    const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
-    const level = houseLevel(room, room.pendingAction.spaceIndex);
-    const cost = buildCost(sp);
-    const nextLabel = level+1>=4 ? '\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : `${level+1}-\u0440 \u0431\u0430\u0439\u0448\u0438\u043d`;
-    actionHtml = `<div class="buy-prompt">
-      <div class="permit-eyebrow">\ud83c\udfd7\ufe0f \u0411\u0430\u0440\u0438\u043b\u0433\u044b\u043d \u0437\u04e9\u0432\u0448\u04e9\u04e9\u0440\u04e9\u043b</div>
-      "${sp.name}" \u0434\u044d\u044d\u0440 ${nextLabel} \u0431\u0430\u0440\u0438\u0445 \u0443\u0443?<br><span style="color:#9AA6BE;">\u0417\u0430\u0440\u0434\u0430\u043b: \u20ae${cost}</span>
-      <button class="btn btn-primary" id="buildBtn" ${me.money<cost?'disabled':''}>\u0411\u0430\u0440\u0438\u0445</button>
-      <button class="btn btn-secondary" id="skipBuildBtn">\u0410\u043b\u0433\u0430\u0441\u0430\u0445</button>
-    </div>`;
-  } else if (myTurn) {
-    actionHtml = `<div class="dice-fab-wrap">
-      <div class="dice-fab-row">${renderDie(d1, diceRollingNow)}${renderDie(d2, diceRollingNow)}</div>
-      <div class="dice-result-text">${room.lastDice ? `\u0421\u04af\u04af\u043b\u0434 \u0433\u0430\u0440\u0441\u0430\u043d: ${room.lastDice[0]} + ${room.lastDice[1]} = ${room.lastDice[0]+room.lastDice[1]}` : ''}</div>
-      <button class="dice-fab" id="rollBtn" ${room.hasRolled?'disabled':''}>\ud83c\udfb2 \u0428\u043e\u043e \u0445\u0430\u044f\u0445</button>
-      <button class="btn btn-secondary" id="endTurnBtn" ${!room.hasRolled?'disabled':''} style="width:auto;padding:8px 20px;">\u0415\u044d\u043b\u0436\u0438\u0439\u0433 \u0434\u0443\u0443\u0441\u0433\u0430\u0445</button>
-    </div>`;
-  } else {
-    actionHtml = `<div class="waiting-note"><span class="pulse-dot"></span>${currentPlayer.name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u0431\u0430\u0439\u043d\u0430...</div>`;
-  }
-
-  const ranked = room.players.slice().sort((a,b) => netWorth(room,b) - netWorth(room,a));
-  const medals = ['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49','4\ufe0f\u20e3'];
-  const leaderboardHtml = ranked.map((p,i) => `<div class="lb-row ${p.bankrupt?'lb-bankrupt':''}"><span class="lb-medal">${medals[i]||(i+1)}</span><span>${p.token}</span><span class="lb-name">${p.name}</span><span class="lb-worth">\u20ae${fmt(netWorth(room,p))}</span></div>`).join('');
-  const latestLog = room.log.length ? room.log[room.log.length-1] : '';
-  const myProps = Object.keys(room.propOwner).filter(idx => room.propOwner[idx] === myId).map(Number).sort((a,b)=>a-b);
-  const myAssetsHtml = myProps.length === 0
-    ? `<div class="no-assets">\u041e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u044e\u0443 \u0447 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0430\u0433\u04af\u0439 \u0431\u0430\u0439\u043d\u0430.</div>`
-    : myProps.map(idx => {
-        const sp = BOARD_CONFIG[idx]; const full = ownsFullGroup(room, myId, idx); const level = houseLevel(room, idx);
-        const levelTag = level > 0 ? ` <span class="group-badge">\ud83c\udfd7\ufe0f ${buildLevelLabel(level)}</span>` : '';
-        const rentShown = level > 0 ? sp.rent*[1,2,4,6,10][level] : (full ? sp.rent*2 : sp.rent);
-        return `<div class="asset-row"><span class="asset-name">${sp.name}${full && level===0 ? ' <span class="group-badge">\u2605</span>' : ''}${levelTag}</span><span class="asset-rent">\u20ae${rentShown}</span></div>`;
-      }).join('');
-
   return `<div class="game-wrap">
-    <div class="top-bar">
-      <div class="seal-title">\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9</div>
-      <div class="top-bar-right">
-        <button class="debug-toggle ${debugMode?'on':''}" id="debugToggle">${debugMode?'\ud83d\udd34 Debug ON':'Debug OFF'}</button>
-        <div class="turn-indicator"><span class="pulse-dot"></span>${room.roomCode} \u00b7 ${currentPlayer.token} ${currentPlayer.name}</div>
-      </div>
-    </div>
     <div class="game-layout">
       <div class="board-outer">
         <div class="board ${debugMode?'debug':''}" id="boardEl">
@@ -3011,23 +3330,13 @@ function renderGame() {
           ${tokensHtml}
         </div>
       </div>
-      <div class="side-panel">
-        <div class="panel-box">
-          <h3>\u0422\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0434</h3>
-          ${room.players.map(p => {
-            const ownedCount = Object.values(room.propOwner).filter(oid => oid === p.id).length;
-            return `<div class="player-row ${p.id===currentPlayer.id?'active-turn':''} ${p.bankrupt?'p-bankrupt':''}">
-              <span class="player-avatar" style="--ring-color:${p.color}">${p.token}</span>
-              <span>${p.name}${p.id===myId?' (\u0442\u0430)':''}</span>
-              <span class="p-props">\ud83c\udfe2${ownedCount}</span>
-              <span class="p-money">\u20ae${fmt(p.money)}</span>
-            </div>`;
-          }).join('')}
-        </div>
-        <div class="panel-box"><h3>\u0425\u04e9\u0440\u04e9\u043d\u0433\u0438\u0439\u043d \u0448\u0430\u0442\u043b\u0430\u0433\u0430</h3>${leaderboardHtml}</div>
-        <div class="panel-box"><h3>\u041c\u0438\u043d\u0438\u0439 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0443\u0434</h3>${myAssetsHtml}</div>
-        <div class="panel-box action-area"><h3>\u0422\u0430\u043d\u044b \u044d\u044d\u043b\u0436</h3>${actionHtml}</div>
-        <div class="panel-box"><h3>\u0422\u044d\u043c\u0434\u044d\u0433\u043b\u044d\u043b</h3><div class="log-box">${room.log.slice().reverse().map(l=>`<div>${l}</div>`).join('')}</div></div>
+      <div class="game-sidebar">
+        ${renderTurnStatusHeader(room, currentPlayer)}
+        ${renderPlayersPanel(room, currentPlayer)}
+        ${renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow)}
+        ${renderOwnedCompaniesPanel(room)}
+        ${renderWealthRankingPanel(room)}
+        ${renderActivityTimeline(room)}
       </div>
     </div>
   </div>`;
@@ -3073,6 +3382,11 @@ function attachGameEvents() {
   const build = document.getElementById('buildBtn'); if (build) build.onclick = buildProperty;
   const skipBuild2 = document.getElementById('skipBuildBtn'); if (skipBuild2) skipBuild2.onclick = skipBuild;
   const dbg = document.getElementById('debugToggle'); if (dbg) dbg.onclick = () => { debugMode = !debugMode; render(); };
+  const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
+  document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    el.onclick = () => showCellDetail(idx);
+  });
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
