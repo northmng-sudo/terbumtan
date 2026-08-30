@@ -155,7 +155,8 @@
     box-sizing: border-box;
     pointer-events: none;
   }
-  .tile-building-badge:hover { transform: scale(1.25); z-index: 7; }
+  .tile-building-badge:hover { transform: scale(2.1); z-index: 8; }
+  .tile-building-badge:active { transform: scale(2.3); z-index: 8; }
   .tile-building-badge:hover .badge-ring { border-color: #ffd64d; box-shadow: 0 0 8px #ffd64d; }
   .building-flag-icon { position: absolute; top: -6px; right: -4px; font-size: clamp(7px, 1.2vw, 10px); z-index: 2; }
 
@@ -2319,7 +2320,7 @@ function renderUpgradeIcons(tile, level, idx, ownerIdx) {
 
 function renderBuildingIcon(tile, level, idx) {
   const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-  const w = tile.buildingWidth * 1.1;
+  const w = tile.buildingWidth * 0.7;
   const x = tile.buildingX - w / 2;
   const y = tile.buildingY - w / 2;
   const leftPct = (x / 1672 * 100).toFixed(2);
