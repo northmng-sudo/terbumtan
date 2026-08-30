@@ -125,78 +125,131 @@
   }
   .cell {
     position: relative;
-    background: linear-gradient(155deg, #1a1a1a 0%, #101010 100%);
+    background: linear-gradient(160deg, #F5ECD6 0%, #E8D8AF 100%);
     border-radius: 5px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 3px 2px;
+    display: flex; flex-direction: column;
     overflow: hidden;
-    border-top: 3px solid transparent;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), inset 0 -6px 10px -8px rgba(0,0,0,0.6);
+    box-shadow: inset 0 0 0 1px rgba(90,70,30,0.35), inset 0 -3px 6px -4px rgba(0,0,0,0.25);
   }
-  .cell.side-bottom { border-top-color: #7B4FA6; }
-  .cell.side-left   { border-top-color: #C1553A; }
-  .cell.side-top    { border-top-color: #2E9E6B; }
-  .cell.side-right  { border-top-color: #3A6EA5; }
   .cell.corner {
-    background: radial-gradient(circle at 50% 35%, #1c1c1c 0%, #060606 75%);
-    border-top-color: transparent !important;
+    background: linear-gradient(160deg, #F5ECD6 0%, #E4D2A6 100%);
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 2px;
+    padding: 3px;
   }
-  .cell.owned-glow { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), inset 0 0 14px -6px var(--owner-color, var(--steppe-gold)); }
-  .cell.group-complete { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), 0 0 12px var(--owner-color, var(--steppe-gold)), inset 0 0 14px -6px var(--owner-color, var(--steppe-gold)); }
+  .cell.owned-glow { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), 0 0 8px -2px var(--owner-color, var(--steppe-gold)); }
+  .cell.group-complete { box-shadow: inset 0 0 0 2px var(--owner-color, var(--steppe-gold)), 0 0 12px var(--owner-color, var(--steppe-gold)); }
+  .cell-tint { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .cell-header {
+    flex: 0 0 38%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.25);
+  }
+  .cell-header.side-bottom { background: linear-gradient(160deg, #D9B347 0%, #B8912A 100%); }
+  .cell-header.side-left   { background: linear-gradient(160deg, #9C4657 0%, #7A2E3A 100%); }
+  .cell-header.side-top    { background: linear-gradient(160deg, #2F9E77 0%, #1E7A5C 100%); }
+  .cell-header.side-right  { background: linear-gradient(160deg, #7059AC 0%, #5C3A8E 100%); }
+  .cell-header-icon {
+    font-size: clamp(11px, 2.4vw, 20px);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)) brightness(0) invert(1);
+  }
+  .cell-body {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; z-index: 1; padding: 1px 2px;
+  }
   .corner-badge {
     width: clamp(22px, 4.6vw, 38px); height: clamp(22px, 4.6vw, 38px); border-radius: 50%;
     border: 2px solid var(--steppe-gold); display: flex; align-items: center; justify-content: center;
     font-size: clamp(11px, 2.6vw, 20px);
-    background: radial-gradient(circle, rgba(212,175,55,0.16) 0%, rgba(212,175,55,0.02) 70%);
-    box-shadow: 0 0 8px rgba(212,175,55,0.15);
-  }
-  .cell-icon {
-    font-size: clamp(11px, 2.4vw, 20px);
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));
+    background: radial-gradient(circle, rgba(212,175,55,0.22) 0%, rgba(212,175,55,0.04) 70%);
+    box-shadow: 0 1px 3px rgba(90,70,30,0.4);
+    position: relative; z-index: 1;
   }
   .cell-name {
-    font-size: clamp(6.5px, 1.15vw, 9px); text-align: center; line-height: 1.15; margin-top: 2px;
-    color: #dbe1ee; font-weight: 600; letter-spacing: 0.1px;
+    font-size: clamp(6.5px, 1.15vw, 9px); text-align: center; line-height: 1.15; margin-top: 1px;
+    color: #2b2013; font-weight: 700; letter-spacing: 0.1px;
     padding: 0 1px;
   }
+  .cell-name.corner-name { font-size: clamp(6px, 1.15vw, 8.5px); margin-top: 0; }
   .cell-price {
     font-family: 'JetBrains Mono', monospace; font-size: clamp(6px, 1vw, 7.5px);
-    color: var(--steppe-gold); margin-top: 1px; opacity: 0.9;
+    color: #6b4f1a; margin-top: 1px; font-weight: 600;
   }
-  .buildings-row { display: flex; gap: clamp(1.5px, 0.4vw, 3px); justify-content: center; margin-top: 2px; z-index: 3; position: relative; }
+  .buildings-row { display: flex; gap: clamp(1.5px, 0.4vw, 3px); justify-content: center; margin-top: 1px; z-index: 3; position: relative; }
   .build-icon {
     display: block;
   }
   .build-icon.house {
-    width: clamp(11px, 2.6vw, 18px); height: clamp(11px, 2.6vw, 18px);
+    width: clamp(10px, 2.3vw, 16px); height: clamp(10px, 2.3vw, 16px);
     background: linear-gradient(155deg, #9AE87E 0%, #3E8A34 55%, #1c4d18 100%);
     clip-path: polygon(50% 0%, 100% 40%, 100% 100%, 0% 100%, 0% 40%);
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.75));
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
   }
   .build-icon.corp {
-    width: clamp(15px, 3.4vw, 24px); height: clamp(15px, 3.4vw, 24px);
+    width: clamp(13px, 3vw, 21px); height: clamp(13px, 3vw, 21px);
     background: linear-gradient(155deg, #FBEDC0 0%, #D4AF37 50%, #7a5f1c 100%);
     clip-path: polygon(20% 0%, 80% 0%, 100% 30%, 100% 100%, 0% 100%, 0% 30%);
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.8));
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.55));
   }
   .cell-center {
     grid-column: 2 / 8; grid-row: 2 / 8;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(10px, 2.2vw, 22px);
-    background: radial-gradient(circle at 50% 45%, rgba(212,175,55,0.05) 0%, transparent 70%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.3vw, 12px);
+    background:
+      radial-gradient(circle at 50% 40%, #1e4634 0%, #0f2a1f 75%);
+    padding: clamp(10px, 2vw, 20px);
+    overflow: hidden;
+    position: relative;
+    border-radius: 6px;
+    box-shadow:
+      inset 0 0 0 3px var(--steppe-gold),
+      inset 0 0 0 6px #0f2a1f,
+      inset 0 0 0 7px rgba(212,175,55,0.55),
+      0 0 30px rgba(0,0,0,0.5);
+  }
+  .cell-center::before {
+    content: '◆'; position: absolute; top: 6px; left: 8px; color: var(--steppe-gold);
+    font-size: clamp(8px, 1.4vw, 12px); opacity: 0.85;
+  }
+  .cell-center::after {
+    content: '◆'; position: absolute; bottom: 6px; right: 8px; color: var(--steppe-gold);
+    font-size: clamp(8px, 1.4vw, 12px); opacity: 0.85;
   }
   .center-seal {
-    width: clamp(56px, 11vw, 100px); height: clamp(56px, 11vw, 100px); border-radius: 50%;
+    width: clamp(42px, 8vw, 72px); height: clamp(42px, 8vw, 72px); border-radius: 50%;
     border: 2px solid var(--steppe-gold); display: flex; align-items: center; justify-content: center;
-    position: relative; opacity: 0.92;
-    box-shadow: 0 0 24px rgba(212,175,55,0.12), inset 0 0 16px rgba(212,175,55,0.06);
+    position: relative; opacity: 0.95;
+    box-shadow: 0 0 24px rgba(212,175,55,0.2), inset 0 0 16px rgba(212,175,55,0.1);
   }
   .center-seal-text {
-    font-family: 'Cinzel', serif; font-weight: 700; font-size: clamp(8px, 1.7vw, 13px);
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: clamp(6.5px, 1.3vw, 10px);
     background: linear-gradient(180deg, #F7E7B0 0%, #D4AF37 45%, #A9822A 100%);
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    letter-spacing: 2px; text-align: center; line-height: 1.4;
+    letter-spacing: 1.5px; text-align: center; line-height: 1.35;
+  }
+  .center-subtitle {
+    font-size: clamp(6px, 1.1vw, 8.5px); letter-spacing: 1.5px; color: var(--steppe-gold);
+    opacity: 0.85; text-transform: uppercase; text-align: center;
   }
   .center-dice-row { display: flex; justify-content: center; gap: clamp(8px, 1.8vw, 18px); }
+  .center-leaderboard {
+    width: min(90%, 280px); background: rgba(0,0,0,0.35); border: 1px solid rgba(212,175,55,0.35);
+    border-radius: 10px; padding: clamp(6px, 1.2vw, 10px) clamp(8px, 1.6vw, 14px);
+  }
+  .lb-title {
+    font-family: 'Cinzel', serif; font-size: clamp(8px, 1.4vw, 10.5px); letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--steppe-gold); text-align: center; margin-bottom: 4px; opacity: 0.9;
+  }
+  .lb-row { display: flex; align-items: center; gap: clamp(5px, 1vw, 8px); padding: clamp(2px, 0.6vw, 4px) 0; }
+  .lb-row.lb-bankrupt { opacity: 0.4; text-decoration: line-through; }
+  .lb-medal { font-size: clamp(9px, 1.6vw, 12px); width: 16px; text-align: center; }
+  .lb-token { font-size: clamp(9px, 1.7vw, 13px); }
+  .lb-name { flex: 1; font-size: clamp(8px, 1.5vw, 11px); color: var(--parchment); }
+  .lb-worth { font-family: 'JetBrains Mono', monospace; font-size: clamp(8px, 1.5vw, 11px); color: var(--steppe-gold); }
+  .center-ticker {
+    width: min(90%, 300px); font-size: clamp(8px, 1.4vw, 11px); color: #cfd7e6; text-align: center;
+    padding: clamp(4px, 1vw, 7px) clamp(8px, 1.6vw, 12px); border-top: 1px dashed rgba(212,175,55,0.3);
+    animation: tickerFade 0.4s ease;
+  }
   .dice-result-text { font-size: 12.5px; color: #9AA6BE; margin-bottom: 10px; min-height: 16px; }
   .tokens-row { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; z-index: 2; }
   .token-dot {
@@ -331,6 +384,10 @@
     0%   { transform: rotateY(90deg) scale(0.8); opacity: 0; }
     60%  { transform: rotateY(-8deg) scale(1.03); opacity: 1; }
     100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+  }
+  @keyframes tickerFade {
+    0% { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
@@ -819,6 +876,37 @@ function showCardPopup(draw) {
   cardPopupTimer = setTimeout(() => { root.innerHTML = ''; }, 4500);
 }
 
+function netWorth(room, player) {
+  let worth = player.money;
+  Object.keys(room.propOwner).forEach(idx => {
+    if (room.propOwner[idx] === player.id) {
+      const sp = spaces[idx];
+      worth += sp.price;
+      const level = houseLevel(room, idx);
+      if (level > 0) worth += buildCost(sp) * level;
+    }
+  });
+  return worth;
+}
+
+function renderCenterLeaderboard(room) {
+  const ranked = room.players.slice().sort((a, b) => netWorth(room, b) - netWorth(room, a));
+  const medals = ['🥇', '🥈', '🥉', '4️⃣'];
+  const rows = ranked.map((p, i) => `
+    <div class="lb-row ${p.bankrupt ? 'lb-bankrupt' : ''}">
+      <span class="lb-medal">${medals[i] || (i + 1)}</span>
+      <span class="lb-token" style="--token-ring:${p.color}">${p.token}</span>
+      <span class="lb-name">${p.name}</span>
+      <span class="lb-worth">₮${fmt(netWorth(room, p))}</span>
+    </div>`).join('');
+  return `<div class="center-leaderboard"><div class="lb-title">Хөрөнгийн шатлага</div>${rows}</div>`;
+}
+
+function renderCenterTicker(room) {
+  const latest = room.log.length ? room.log[room.log.length - 1] : 'Тоглоом эхэллээ';
+  return `<div class="center-ticker">${latest}</div>`;
+}
+
 function renderBuildings(level) {
   if (level >= 4) return `<div class="buildings-row"><span class="build-icon corp" title="Корпорац"></span></div>`;
   let html = '<div class="buildings-row">';
@@ -938,22 +1026,30 @@ function renderGame(rollingNow) {
     const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
     const isFullGroup = owner && sp.type === 'property' && ownsFullGroup(room, owner.id, idx);
     const tokensHere = room.players.filter(p => !p.bankrupt && displayPos(room, p) === idx);
-    const tintStyle = owner ? `background-color: ${hexToRgba(owner.color, 0.22)};` : '';
+    const tintStyle = owner ? `background-color: ${hexToRgba(owner.color, 0.16)};` : '';
     const level = sp.type === 'property' ? houseLevel(room, idx) : 0;
     const buildingsHtml = level > 0 ? renderBuildings(level) : '';
-    cellsHtml += `
-      <div class="cell ${isCorner ? 'corner' : sideOf(idx)} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color};${tintStyle}` : ''}">
-        ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}" title="${owner.name} эзэмшдэг">${owner.token}</span>` : ''}
-        ${isCorner ? `<div class="corner-badge">${sp.icon}</div>` : `<div class="cell-icon">${sp.icon}</div>`}
+    const bodyInner = `
         ${buildingsHtml}
         <div class="cell-name">${sp.name}</div>
-        ${sp.price ? `<div class="cell-price">₮${sp.price}</div>` : ''}
+        ${sp.price ? `<div class="cell-price">₮${sp.price}</div>` : ''}`;
+    const cellInner = isCorner
+      ? `<div class="corner-badge">${sp.icon}</div><div class="cell-name corner-name">${sp.name}</div>`
+      : `<div class="cell-header ${sideOf(idx)}"><span class="cell-header-icon">${sp.icon}</span></div><div class="cell-body">${bodyInner}</div>`;
+    cellsHtml += `
+      <div class="cell ${isCorner ? 'corner' : ''} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
+        ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}" title="${owner.name} эзэмшдэг">${owner.token}</span>` : ''}
+        ${cellInner}
+        <div class="cell-tint" style="${tintStyle}"></div>
         <div class="tokens-row">${tokensHere.map(p => `<span class="token-dot ${rollingNow && p.id === currentPlayer.id ? 'token-landed' : ''}" style="--token-ring:${p.color}">${p.token}</span>`).join('')}</div>
       </div>`;
   });
   cellsHtml += `<div class="cell-center">
     <div class="center-seal"><div class="center-seal-text">ТАЛЫН<br>ЭЗЭНТ<br>УЛС</div></div>
+    <div class="center-subtitle">БИЗНЕС · ХӨРӨНГӨ · СТРАТЕГИ</div>
     <div class="center-dice-row">${renderDie(centerD1, rollingNow, true)}${renderDie(centerD2, rollingNow, true)}</div>
+    ${renderCenterLeaderboard(room)}
+    ${renderCenterTicker(room)}
   </div>`;
 
   let actionHtml = '';
