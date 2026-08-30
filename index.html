@@ -1804,7 +1804,7 @@ function renderBuildingIcon(tile, level, idx) {
   const isNew = !seenBuildings.has(idx);
   seenBuildings.add(idx);
   return `<g class="tile-building level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}" data-idx="${idx}" style="--depth:${tile.depth}">
-    <image href="public/assets/buildings/${fileName}.png" x="${x}" y="${y}" width="${w}" height="${w}" preserveAspectRatio="xMidYMax meet"></image>
+    <image href="${fileName}.png" x="${x}" y="${y}" width="${w}" height="${w}" preserveAspectRatio="xMidYMax meet"></image>
     ${extra}
   </g>`;
 }
