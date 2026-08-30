@@ -136,10 +136,16 @@
     transform: translateY(-6px) scale(1.08);
     filter: drop-shadow(0 10px 7px rgba(0,0,0,0.4)) drop-shadow(0 0 8px #ffd64d);
   }
+  .tile-building.level-0 { scale: 0.62; }
   .tile-building.level-1 { scale: 0.75; }
   .tile-building.level-2 { scale: 0.88; }
   .tile-building.level-3 { scale: 1; }
   .tile-building.level-4 { scale: 1.12; }
+  .tile-building.level-0.building-appear { animation: buildingAppear0 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building.level-1.building-appear { animation: buildingAppear1 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building.level-2.building-appear { animation: buildingAppear2 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building.level-3.building-appear { animation: buildingAppear3 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building.level-4.building-appear { animation: buildingAppear4 0.5s cubic-bezier(.2,1.4,.4,1); }
   .building-flag { animation: flagWave 1.6s ease-in-out infinite; transform-origin: left center; }
   .building-light { animation: lightBlink 1.2s ease-in-out infinite; }
   .debug-poly { display: none; }
@@ -251,6 +257,11 @@
   @keyframes activePulseSvg { 0%,100% { stroke: #D4AF37; stroke-width: 3px; filter: none; } 50% { stroke: #FFE58A; stroke-width: 5px; filter: drop-shadow(0 0 6px #D4AF37); } }
   @keyframes flagWave { 0%,100% { transform: skewY(0deg); } 50% { transform: skewY(-8deg); } }
   @keyframes lightBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  @keyframes buildingAppear0 { 0% { opacity: 0; scale: 0.15; } 60% { opacity: 1; scale: 0.75; } 100% { opacity: 1; scale: 0.62; } }
+  @keyframes buildingAppear1 { 0% { opacity: 0; scale: 0.2; } 60% { opacity: 1; scale: 0.9; } 100% { opacity: 1; scale: 0.75; } }
+  @keyframes buildingAppear2 { 0% { opacity: 0; scale: 0.25; } 60% { opacity: 1; scale: 1.02; } 100% { opacity: 1; scale: 0.88; } }
+  @keyframes buildingAppear3 { 0% { opacity: 0; scale: 0.3; } 60% { opacity: 1; scale: 1.15; } 100% { opacity: 1; scale: 1; } }
+  @keyframes buildingAppear4 { 0% { opacity: 0; scale: 0.35; } 60% { opacity: 1; scale: 1.28; } 100% { opacity: 1; scale: 1.12; } }
   @keyframes diceRoll {
     0% { transform: rotate(0deg) scale(1); } 12% { transform: rotate(-45deg) scale(1.1); }
     24% { transform: rotate(110deg) scale(0.95); } 36% { transform: rotate(-160deg) scale(1.08); }
@@ -1777,19 +1788,25 @@ const BUILDING_ICON_SHAPES = {
     <line x1="22" y1="0" x2="22" y2="4" stroke="#5C3A8E" stroke-width="1.5"/><circle cx="22" cy="0" r="1.8" fill="#8A4FE8" class="building-light"/>`,
 };
 
+const BUILDING_FILE_MAP = { mining: 'mine' };
+let seenBuildings = new Set();
+
 function renderBuildingIcon(tile, level, idx) {
-  if (!level || level < 1) return '';
-  const shapes = BUILDING_ICON_SHAPES[tile.buildingType] || BUILDING_ICON_SHAPES.factory;
-  const boxW = 44, boxH = 56;
-  const scale = tile.buildingWidth / boxW;
-  const tx = tile.buildingX - boxW * scale / 2;
-  const ty = tile.buildingY - boxH * scale;
+  const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
+  const w = tile.buildingWidth * 2.1;
+  const x = tile.buildingX - w / 2;
+  const y = tile.buildingY - w;
   let extra = '';
   if (level >= 4) {
-    extra = `<g class="building-flag"><line x1="34" y1="2" x2="34" y2="14" stroke="#8a6d1f" stroke-width="1.5"/><polygon points="34,2 44,5 34,8" fill="#D4AF37"/></g>
-      <circle cx="6" cy="50" r="2" fill="#FFE58A" class="building-light"/><circle cx="38" cy="50" r="2" fill="#FFE58A" class="building-light"/>`;
+    extra = `<g class="building-flag"><line x1="${x+w-6}" y1="${y-2}" x2="${x+w-6}" y2="${y+10}" stroke="#8a6d1f" stroke-width="1.5"/><polygon points="${x+w-6},${y-2} ${x+w+4},${y+1} ${x+w-6},${y+4}" fill="#D4AF37"/></g>
+      <circle cx="${x+6}" cy="${y+w-4}" r="2" fill="#FFE58A" class="building-light"/><circle cx="${x+w-6}" cy="${y+w-4}" r="2" fill="#FFE58A" class="building-light"/>`;
   }
-  return `<g class="tile-building level-${Math.min(level,4)}" data-idx="${idx}" transform="translate(${tx},${ty}) scale(${scale})" style="--depth:${tile.depth}">${shapes}${extra}</g>`;
+  const isNew = !seenBuildings.has(idx);
+  seenBuildings.add(idx);
+  return `<g class="tile-building level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}" data-idx="${idx}" style="--depth:${tile.depth}">
+    <image href="public/assets/buildings/${fileName}.png" x="${x}" y="${y}" width="${w}" height="${w}" preserveAspectRatio="xMidYMax meet"></image>
+    ${extra}
+  </g>`;
 }
 
 function renderBuildings(level) {
@@ -1910,7 +1927,7 @@ function renderGame() {
       <text x="${tile.labelX}" y="${tile.labelY}" text-anchor="middle" font-size="${fontSize}" transform="rotate(${tile.labelRotation} ${tile.labelX} ${tile.labelY})">${tspans}</text>
       ${owner ? `<circle class="owner-dot" cx="${tile.labelX + 22}" cy="${tile.labelY - 22}" r="9" fill="${owner.color}" stroke="#18382d" stroke-width="1.5"></circle>` : ''}
     </g>`;
-    if (owner && level > 0 && tile.buildingType) {
+    if (owner && tile.buildingType) {
       buildingsToRender.push({ tile, level, idx, depth: tile.depth });
     }
   });
