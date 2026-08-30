@@ -101,72 +101,32 @@
   @media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } }
 
   .board-outer { display: flex; justify-content: center; }
-  .board-wrap {
+  .board {
     position: relative;
     width: min(96vw, 1400px);
     aspect-ratio: 1672 / 941;
     user-select: none;
     margin: 0 auto;
   }
-  .board-image { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; border-radius: 14px; }
-
-  .tile {
-    position: absolute; z-index: 2;
-    cursor: pointer; border: 2px solid transparent; border-radius: 10px;
-    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-    padding: 0;
-    overflow: visible;
-  }
-  .tile-inner {
+  .board-image, .board-overlay {
+    position: absolute; inset: 0;
     width: 100%; height: 100%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: #18382d; font-size: clamp(6px, 0.62vw, 10.5px); font-weight: 800; text-align: center;
-    line-height: 1.1; padding: 3px 2px;
-    transition: transform 0.15s ease;
-    overflow: hidden;
   }
-  .tile-inner span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
-  .tile small { margin-top: 2px; font-size: 0.8em; font-family: 'JetBrains Mono', monospace; opacity: 0.85; white-space: nowrap; }
-  .tile:hover { z-index: 6; background: rgba(255,255,255,0.5); border-color: #ffd95a; box-shadow: 0 10px 22px rgba(0,0,0,0.35); }
-  .tile:hover .tile-inner { transform: rotate(var(--r, 0deg)) scale(1.1) translateY(-3px); }
-  .tile:active .tile-inner { transform: rotate(var(--r, 0deg)) scale(0.95); }
-  .tile.owned { box-shadow: inset 0 0 0 3px var(--owner-color, var(--steppe-gold)); background: rgba(255,255,255,0.28); }
-  .tile.group-complete { box-shadow: inset 0 0 0 3px var(--owner-color, var(--steppe-gold)), 0 0 14px var(--owner-color, var(--steppe-gold)); }
-  .tile.active-position { animation: activePulse 1.3s infinite; }
-  .tile.corner-tile .tile-inner { font-size: clamp(6.5px, 0.68vw, 11px); }
-  .tile.corner-tile { background: rgba(255,255,255,0.12); }
-  .tile-group-tab {
-    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
-    width: 60%; height: 5px; border-radius: 3px;
-  }
-  .owner-badge {
-    position: absolute; top: 1px; right: 1px; z-index: 4;
-    width: clamp(10px, 1.6vw, 15px); height: clamp(10px, 1.6vw, 15px);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: clamp(6px, 1.1vw, 9px); background: var(--owner-color, var(--steppe-gold));
-    border: 1.5px solid #18382d; box-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  }
-  .buildings-row { display: flex; gap: 1px; margin-top: 1px; }
-  .build-icon { display: block; }
-  .build-icon.house {
-    width: clamp(7px, 1.4vw, 11px); height: clamp(7px, 1.4vw, 11px);
-    background: linear-gradient(155deg, #E8FFD8 0%, #9AE87E 22%, #3E8A34 62%, #1c4d18 100%);
-    clip-path: polygon(50% 0%, 100% 40%, 100% 100%, 0% 100%, 0% 40%);
-    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));
-  }
-  .build-icon.corp {
-    width: clamp(9px, 1.8vw, 14px); height: clamp(9px, 1.8vw, 14px);
-    background: linear-gradient(155deg, #FFFCEE 0%, #FBEDC0 20%, #D4AF37 55%, #7a5f1c 100%);
-    clip-path: polygon(20% 0%, 80% 0%, 100% 30%, 100% 100%, 0% 100%, 0% 30%);
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.55));
-  }
-  .debug-idx {
-    display: none; position: absolute; bottom: 1px; left: 1px;
-    font-family: 'JetBrains Mono', monospace; font-size: 8px; color: #fff; background: rgba(255,0,0,0.7);
-    border-radius: 3px; padding: 0 3px; z-index: 5;
-  }
-  .board-wrap.debug .tile { outline: 2px dashed #FF3B3B; }
-  .board-wrap.debug .debug-idx { display: block; }
+  .board-image { object-fit: contain; pointer-events: none; border-radius: 14px; }
+  .board-overlay { overflow: visible; }
+
+  .tile polygon { fill: transparent; stroke: transparent; stroke-width: 3px; cursor: pointer; transition: fill 0.15s ease, stroke 0.15s ease; }
+  .tile:hover polygon { fill: rgba(255,215,70,0.35); stroke: #ffd84d; }
+  .tile.owned polygon { fill: var(--owner-fill, rgba(212,175,55,0.22)); stroke: var(--owner-color, var(--steppe-gold)); stroke-width: 3px; }
+  .tile.group-complete polygon { stroke-width: 4px; filter: drop-shadow(0 0 4px var(--owner-color, var(--steppe-gold))); }
+  .tile.active-position polygon { animation: activePulseSvg 1.3s infinite; }
+  .tile text { fill: #172a22; font-weight: 800; pointer-events: none; paint-order: stroke; stroke: rgba(255,255,255,0.85); stroke-width: 3px; stroke-linejoin: round; font-family: 'Work Sans', sans-serif; }
+  .tile .tile-price { font-size: 0.8em; fill: #6b4f1a; }
+  .tile .tile-icon { font-size: 15px; pointer-events: none; }
+  .owner-dot { pointer-events: none; }
+  .debug-poly { display: none; }
+  .board.debug .tile polygon { fill: rgba(255,0,0,0.28) !important; stroke: #ff2b2b !important; }
+  .board.debug .debug-poly { display: block; }
 
   .ptoken {
     position: absolute; z-index: 10;
@@ -182,6 +142,16 @@
     transform: translate(-50%, -50%);
   }
   .ptoken.moving { transform: translate(-50%, -50%) translateY(-14px) scale(1.18); }
+
+  .tile-tooltip {
+    position: fixed; z-index: 500; pointer-events: none;
+    background: linear-gradient(155deg, #1c1c1c 0%, #0c0c0c 100%);
+    border: 1.5px solid var(--steppe-gold); border-radius: 8px; padding: 8px 12px;
+    font-size: 12.5px; color: var(--parchment); box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    white-space: nowrap; display: none;
+  }
+  .tile-tooltip .tt-name { font-weight: 700; color: var(--steppe-gold); }
+  .tile-tooltip .tt-price { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #9AA6BE; margin-top: 2px; }
 
   .dice-fab-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 14px; }
   .dice-fab {
@@ -201,8 +171,6 @@
   .pip { border-radius: 50%; background: transparent; }
   .pip.on { background: var(--night-indigo-deep); box-shadow: inset 0 1px 2px rgba(0,0,0,0.4); }
   .dice-result-text { font-size: 12.5px; color: #9AA6BE; text-align: center; min-height: 16px; }
-
-  .owner-badge, .buildings-row { pointer-events: none; }
 
   .card-popup-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: popIn 0.2s ease; }
   .card-popup { width: min(90vw, 380px); background: linear-gradient(155deg, #1c1c1c 0%, #0c0c0c 100%); border: 2px solid var(--steppe-gold); border-radius: 16px; padding: 28px 22px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.15); animation: cardFlip 0.4s cubic-bezier(.2,1.4,.4,1); }
@@ -262,7 +230,7 @@
 
   @keyframes popIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-  @keyframes activePulse { 0%,100% { box-shadow: inset 0 0 0 3px var(--steppe-gold); } 50% { box-shadow: inset 0 0 0 3px var(--steppe-gold), 0 0 14px var(--steppe-gold); } }
+  @keyframes activePulseSvg { 0%,100% { stroke: #D4AF37; stroke-width: 3px; filter: none; } 50% { stroke: #FFE58A; stroke-width: 5px; filter: drop-shadow(0 0 6px #D4AF37); } }
   @keyframes diceRoll {
     0% { transform: rotate(0deg) scale(1); } 12% { transform: rotate(-45deg) scale(1.1); }
     24% { transform: rotate(110deg) scale(0.95); } 36% { transform: rotate(-160deg) scale(1.08); }
@@ -280,6 +248,7 @@
 
 <div id="app"></div>
 <div id="card-popup-root"></div>
+<div id="tile-tooltip" class="tile-tooltip"></div>
 
 <script>
 
@@ -297,483 +266,931 @@ const BOARD_CONFIG = [
     "id": 0,
     "type": "go",
     "name": "ЭХЛЭЛ",
-    "left": 42.8,
-    "top": 75.6,
-    "width": 12,
-    "height": 13,
-    "rotation": 0,
+    "polygon": [
+      [
+        739.2,
+        827.9
+      ],
+      [
+        864.4,
+        740.3
+      ],
+      [
+        933.1,
+        838.5
+      ],
+      [
+        807.9,
+        926.1
+      ]
+    ],
+    "labelX": 836.1,
+    "labelY": 833.2,
+    "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null,
-    "tokenLeft": 48.8,
-    "tokenTop": 82.1
+    "rent": null
   },
   {
     "id": 1,
-    "left": 38.37,
-    "top": 69.52,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "АПУ",
     "price": 60,
     "rent": 8,
     "colorGroup": "A",
-    "tokenLeft": 42.12,
-    "tokenTop": 74.52
+    "polygon": [
+      [
+        747.1,
+        694.7
+      ],
+      [
+        792.1,
+        763.0
+      ],
+      [
+        678.5,
+        837.8
+      ],
+      [
+        633.6,
+        769.5
+      ]
+    ],
+    "labelX": 712.8,
+    "labelY": 766.2,
+    "labelRotation": -33.4
   },
   {
     "id": 2,
-    "left": 34.05,
-    "top": 64.61,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
-    "name": "Мобиком Корпораци",
+    "name": "Мобиком",
     "price": 70,
     "rent": 9,
     "colorGroup": "A",
-    "tokenLeft": 37.8,
-    "tokenTop": 69.61
+    "polygon": [
+      [
+        667.0,
+        640.9
+      ],
+      [
+        709.7,
+        708.5
+      ],
+      [
+        596.4,
+        780.1
+      ],
+      [
+        553.7,
+        712.5
+      ]
+    ],
+    "labelX": 631.7,
+    "labelY": 710.5,
+    "labelRotation": -32.3
   },
   {
     "id": 3,
-    "left": 29.72,
-    "top": 59.71,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "Дижитал Концепт",
     "price": 80,
     "rent": 10,
     "colorGroup": "A",
-    "tokenLeft": 33.47,
-    "tokenTop": 64.71
+    "polygon": [
+      [
+        587.4,
+        587.4
+      ],
+      [
+        628.0,
+        654.2
+      ],
+      [
+        514.4,
+        723.3
+      ],
+      [
+        473.8,
+        656.5
+      ]
+    ],
+    "labelX": 550.9,
+    "labelY": 655.3,
+    "labelRotation": -31.3
   },
   {
     "id": 4,
-    "left": 25.4,
-    "top": 54.8,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "Юнител",
     "price": 90,
     "rent": 11,
     "colorGroup": "A",
-    "tokenLeft": 29.15,
-    "tokenTop": 59.8
+    "polygon": [
+      [
+        510.1,
+        536.9
+      ],
+      [
+        547.8,
+        601.7
+      ],
+      [
+        434.6,
+        667.4
+      ],
+      [
+        397.0,
+        602.6
+      ]
+    ],
+    "labelX": 472.4,
+    "labelY": 602.1,
+    "labelRotation": -30.1
   },
   {
     "id": 5,
-    "left": 21.08,
-    "top": 49.89,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "ХасБанк",
     "price": 100,
     "rent": 12,
     "colorGroup": "A",
-    "tokenLeft": 24.83,
-    "tokenTop": 54.89
+    "polygon": [
+      [
+        436.4,
+        489.6
+      ],
+      [
+        470.1,
+        550.6
+      ],
+      [
+        358.3,
+        612.4
+      ],
+      [
+        324.6,
+        551.4
+      ]
+    ],
+    "labelX": 397.3,
+    "labelY": 551.0,
+    "labelRotation": -28.9
   },
   {
     "id": 6,
-    "left": 16.75,
-    "top": 44.99,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "chance",
     "name": "Азын карт",
     "colorGroup": null,
     "price": null,
     "rent": null,
-    "tokenLeft": 20.5,
-    "tokenTop": 49.99
+    "polygon": [
+      [
+        366.2,
+        442.7
+      ],
+      [
+        397.5,
+        501.6
+      ],
+      [
+        284.4,
+        561.5
+      ],
+      [
+        253.2,
+        502.6
+      ]
+    ],
+    "labelX": 325.3,
+    "labelY": 502.1,
+    "labelRotation": -27.9
   },
   {
     "id": 7,
-    "left": 12.43,
-    "top": 40.08,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "Шунхлай",
     "price": 110,
     "rent": 14,
     "colorGroup": "A",
-    "tokenLeft": 16.18,
-    "tokenTop": 45.08
+    "polygon": [
+      [
+        186.1,
+        454.2
+      ],
+      [
+        297.6,
+        397.3
+      ],
+      [
+        326.9,
+        454.8
+      ],
+      [
+        215.4,
+        511.6
+      ]
+    ],
+    "labelX": 256.5,
+    "labelY": 454.5,
+    "labelRotation": -27.0
   },
   {
     "id": 8,
     "type": "corner",
     "name": "АМРАЛТ",
-    "left": 3.5,
-    "top": 31.0,
-    "width": 12,
-    "height": 13,
-    "rotation": 0,
+    "polygon": [
+      [
+        94.7,
+        372.9
+      ],
+      [
+        238.9,
+        305.7
+      ],
+      [
+        276.2,
+        385.7
+      ],
+      [
+        132.0,
+        452.9
+      ]
+    ],
+    "labelX": 185.4,
+    "labelY": 379.3,
+    "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null,
-    "tokenLeft": 9.5,
-    "tokenTop": 37.5
+    "rent": null
   },
   {
     "id": 9,
-    "left": 12.8,
-    "top": 29.87,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
     "name": "Хан Алтай Ресурс",
     "price": 130,
     "rent": 16,
     "colorGroup": "B",
-    "tokenLeft": 16.55,
-    "tokenTop": 34.87
+    "polygon": [
+      [
+        229.1,
+        305.9
+      ],
+      [
+        334.3,
+        256.8
+      ],
+      [
+        363.7,
+        319.8
+      ],
+      [
+        258.5,
+        368.9
+      ]
+    ],
+    "labelX": 296.4,
+    "labelY": 312.8,
+    "labelRotation": 34.6
   },
   {
     "id": 10,
-    "left": 17.37,
-    "top": 28.16,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
     "name": "Макс Групп",
     "price": 140,
     "rent": 17,
     "colorGroup": "B",
-    "tokenLeft": 21.12,
-    "tokenTop": 33.16
+    "polygon": [
+      [
+        313.3,
+        268.2
+      ],
+      [
+        415.4,
+        220.3
+      ],
+      [
+        444.6,
+        282.5
+      ],
+      [
+        342.5,
+        330.4
+      ]
+    ],
+    "labelX": 378.9,
+    "labelY": 275.3,
+    "labelRotation": 33.3
   },
   {
     "id": 11,
-    "left": 21.94,
-    "top": 26.45,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
     "name": "Премиум Нэксус",
     "price": 150,
     "rent": 18,
     "colorGroup": "B",
-    "tokenLeft": 25.69,
-    "tokenTop": 31.45
+    "polygon": [
+      [
+        394.0,
+        237.3
+      ],
+      [
+        428.1,
+        182.6
+      ],
+      [
+        523.0,
+        241.9
+      ],
+      [
+        488.8,
+        296.6
+      ]
+    ],
+    "labelX": 458.5,
+    "labelY": 239.6,
+    "labelRotation": 32.0
   },
   {
     "id": 12,
-    "left": 26.5,
-    "top": 24.75,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
     "name": "НИК",
     "price": 160,
     "rent": 20,
     "colorGroup": "B",
-    "tokenLeft": 30.25,
-    "tokenTop": 29.75
+    "polygon": [
+      [
+        469.8,
+        202.7
+      ],
+      [
+        500.5,
+        150.1
+      ],
+      [
+        598.6,
+        207.3
+      ],
+      [
+        567.9,
+        260.0
+      ]
+    ],
+    "labelX": 534.2,
+    "labelY": 205.0,
+    "labelRotation": 30.3
   },
   {
     "id": 13,
-    "left": 31.07,
-    "top": 23.04,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
-    "name": "Алтан Жолоо Групп",
+    "name": "Алтан Жолоо",
     "price": 170,
     "rent": 21,
     "colorGroup": "B",
-    "tokenLeft": 34.82,
-    "tokenTop": 28.04
+    "polygon": [
+      [
+        545.3,
+        169.7
+      ],
+      [
+        573.7,
+        119.4
+      ],
+      [
+        669.5,
+        173.5
+      ],
+      [
+        641.0,
+        223.8
+      ]
+    ],
+    "labelX": 607.4,
+    "labelY": 171.6,
+    "labelRotation": 29.5
   },
   {
     "id": 14,
-    "left": 35.63,
-    "top": 21.34,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "tax",
     "name": "Гаалийн татвар",
-    "amount": 100,
     "colorGroup": null,
     "price": null,
     "rent": null,
-    "tokenLeft": 39.38,
-    "tokenTop": 26.34
+    "amount": 100,
+    "polygon": [
+      [
+        616.0,
+        137.6
+      ],
+      [
+        641.8,
+        90.3
+      ],
+      [
+        737.4,
+        142.4
+      ],
+      [
+        711.6,
+        189.8
+      ]
+    ],
+    "labelX": 676.7,
+    "labelY": 140.0,
+    "labelRotation": 28.6
   },
   {
     "id": 15,
-    "left": 40.2,
-    "top": 19.63,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
-    "name": "Болдтөмөр Ерөө Гол",
+    "name": "Болдтөмөр",
     "price": 180,
     "rent": 22,
     "colorGroup": "B",
-    "tokenLeft": 43.95,
-    "tokenTop": 24.63
+    "polygon": [
+      [
+        684.9,
+        107.8
+      ],
+      [
+        709.2,
+        62.8
+      ],
+      [
+        800.6,
+        112.0
+      ],
+      [
+        776.4,
+        157.0
+      ]
+    ],
+    "labelX": 742.8,
+    "labelY": 109.9,
+    "labelRotation": 28.3
   },
   {
     "id": 16,
     "type": "corner",
     "name": "ЗАХ ЗЭЭЛ",
-    "left": 45.0,
-    "top": 15.5,
-    "width": 12,
-    "height": 13,
-    "rotation": 0,
+    "polygon": [
+      [
+        769.4,
+        66.7
+      ],
+      [
+        876.8,
+        17.1
+      ],
+      [
+        905.7,
+        79.7
+      ],
+      [
+        798.3,
+        129.3
+      ]
+    ],
+    "labelX": 837.5,
+    "labelY": 73.2,
+    "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null,
-    "tokenLeft": 51.0,
-    "tokenTop": 22.0
+    "rent": null
   },
   {
     "id": 17,
-    "left": 53.45,
-    "top": 19.63,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "Саусгоби Сэндс",
     "price": 200,
     "rent": 24,
     "colorGroup": "C",
-    "tokenLeft": 57.2,
-    "tokenTop": 24.63
+    "polygon": [
+      [
+        964.6,
+        62.7
+      ],
+      [
+        988.7,
+        107.1
+      ],
+      [
+        897.1,
+        156.8
+      ],
+      [
+        873.0,
+        112.4
+      ]
+    ],
+    "labelX": 930.9,
+    "labelY": 109.7,
+    "labelRotation": -28.5
   },
   {
     "id": 18,
-    "left": 57.47,
-    "top": 21.34,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "Говь ХК",
     "price": 210,
     "rent": 25,
     "colorGroup": "C",
-    "tokenLeft": 61.22,
-    "tokenTop": 26.34
+    "polygon": [
+      [
+        1028.5,
+        90.6
+      ],
+      [
+        1054.6,
+        136.8
+      ],
+      [
+        963.1,
+        188.6
+      ],
+      [
+        936.9,
+        142.4
+      ]
+    ],
+    "labelX": 995.8,
+    "labelY": 139.6,
+    "labelRotation": -29.5
   },
   {
     "id": 19,
-    "left": 61.48,
-    "top": 23.05,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "Энержи Ресурс",
     "price": 220,
     "rent": 26,
     "colorGroup": "C",
-    "tokenLeft": 65.23,
-    "tokenTop": 28.05
+    "polygon": [
+      [
+        1097.7,
+        118.9
+      ],
+      [
+        1126.0,
+        168.5
+      ],
+      [
+        1031.1,
+        222.7
+      ],
+      [
+        1002.7,
+        173.1
+      ]
+    ],
+    "labelX": 1064.4,
+    "labelY": 170.8,
+    "labelRotation": -29.7
   },
   {
     "id": 20,
-    "left": 65.5,
-    "top": 24.75,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
-    "name": "Худалдаа Хөгжлийн Банк",
+    "name": "ХХБанк",
     "price": 230,
     "rent": 28,
     "colorGroup": "C",
-    "tokenLeft": 69.25,
-    "tokenTop": 29.75
+    "polygon": [
+      [
+        1169.1,
+        149.7
+      ],
+      [
+        1200.1,
+        201.4
+      ],
+      [
+        1104.3,
+        258.9
+      ],
+      [
+        1073.2,
+        207.2
+      ]
+    ],
+    "labelX": 1136.7,
+    "labelY": 204.3,
+    "labelRotation": -31.0
   },
   {
     "id": 21,
-    "left": 69.52,
-    "top": 26.46,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "Голомт Банк",
     "price": 240,
     "rent": 29,
     "colorGroup": "C",
-    "tokenLeft": 73.27,
-    "tokenTop": 31.46
+    "polygon": [
+      [
+        1243.1,
+        181.9
+      ],
+      [
+        1276.3,
+        235.5
+      ],
+      [
+        1181.1,
+        294.4
+      ],
+      [
+        1148.0,
+        240.8
+      ]
+    ],
+    "labelX": 1212.1,
+    "labelY": 238.2,
+    "labelRotation": -31.8
   },
   {
     "id": 22,
-    "left": 73.53,
-    "top": 28.16,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "chest",
     "name": "Шүүхийн тогтоол",
     "colorGroup": null,
     "price": null,
     "rent": null,
-    "tokenLeft": 77.28,
-    "tokenTop": 33.16
+    "polygon": [
+      [
+        1319.6,
+        215.7
+      ],
+      [
+        1355.9,
+        271.8
+      ],
+      [
+        1261.2,
+        333.1
+      ],
+      [
+        1224.9,
+        276.9
+      ]
+    ],
+    "labelX": 1290.4,
+    "labelY": 274.4,
+    "labelRotation": -32.9
   },
   {
     "id": 23,
-    "left": 77.55,
-    "top": 29.87,
-    "width": 7.5,
-    "height": 10,
-    "rotation": -12,
     "type": "property",
     "name": "ХААН Банк",
     "price": 250,
     "rent": 30,
     "colorGroup": "C",
-    "tokenLeft": 81.3,
-    "tokenTop": 34.87
+    "polygon": [
+      [
+        1333.7,
+        256.4
+      ],
+      [
+        1439.5,
+        304.5
+      ],
+      [
+        1410.7,
+        367.9
+      ],
+      [
+        1304.9,
+        319.8
+      ]
+    ],
+    "labelX": 1372.2,
+    "labelY": 312.1,
+    "labelRotation": -34.4
   },
   {
     "id": 24,
     "type": "corner",
     "name": "ДУУДЛАГА ХУДАЛДАА",
-    "left": 81.5,
-    "top": 31.0,
-    "width": 12,
-    "height": 13,
-    "rotation": 0,
+    "polygon": [
+      [
+        1430.5,
+        303.7
+      ],
+      [
+        1576.6,
+        372.7
+      ],
+      [
+        1538.6,
+        453.1
+      ],
+      [
+        1392.5,
+        384.1
+      ]
+    ],
+    "labelX": 1484.6,
+    "labelY": 378.4,
+    "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null,
-    "tokenLeft": 87.5,
-    "tokenTop": 37.5
+    "rent": null
   },
   {
     "id": 25,
-    "left": 77.17,
-    "top": 40.08,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
     "name": "МАК",
     "price": 270,
     "rent": 32,
     "colorGroup": "D",
-    "tokenLeft": 80.92,
-    "tokenTop": 45.08
+    "polygon": [
+      [
+        1371.6,
+        395.8
+      ],
+      [
+        1485.6,
+        452.8
+      ],
+      [
+        1456.2,
+        511.6
+      ],
+      [
+        1342.2,
+        454.6
+      ]
+    ],
+    "labelX": 1413.9,
+    "labelY": 453.7,
+    "labelRotation": 26.6
   },
   {
     "id": 26,
-    "left": 72.91,
-    "top": 44.99,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
     "name": "Оюутолгой",
     "price": 290,
     "rent": 35,
     "colorGroup": "D",
-    "tokenLeft": 76.66,
-    "tokenTop": 49.99
+    "polygon": [
+      [
+        1304.1,
+        442.0
+      ],
+      [
+        1419.2,
+        501.8
+      ],
+      [
+        1388.0,
+        561.7
+      ],
+      [
+        1273.0,
+        501.9
+      ]
+    ],
+    "labelX": 1346.1,
+    "labelY": 501.8,
+    "labelRotation": 27.5
   },
   {
     "id": 27,
-    "left": 68.66,
-    "top": 49.89,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
-    "name": "Скай Хайпермаркет",
+    "name": "Скай Март",
     "price": 300,
     "rent": 36,
     "colorGroup": "D",
-    "tokenLeft": 72.41,
-    "tokenTop": 54.89
+    "polygon": [
+      [
+        1200.1,
+        550.3
+      ],
+      [
+        1235.0,
+        487.9
+      ],
+      [
+        1348.6,
+        551.3
+      ],
+      [
+        1313.8,
+        613.8
+      ]
+    ],
+    "labelX": 1274.4,
+    "labelY": 550.8,
+    "labelRotation": 29.2
   },
   {
     "id": 28,
-    "left": 64.4,
-    "top": 54.8,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
     "name": "Бороо Гоулд",
     "price": 310,
     "rent": 37,
     "colorGroup": "D",
-    "tokenLeft": 68.15,
-    "tokenTop": 59.8
+    "polygon": [
+      [
+        1162.0,
+        535.5
+      ],
+      [
+        1276.7,
+        602.4
+      ],
+      [
+        1237.5,
+        669.7
+      ],
+      [
+        1122.7,
+        602.8
+      ]
+    ],
+    "labelX": 1199.7,
+    "labelY": 602.6,
+    "labelRotation": 30.3
   },
   {
     "id": 29,
-    "left": 60.14,
-    "top": 59.71,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
-    "name": "Хүрэн Толгой Коал Майнинг",
+    "name": "Хүрэн Толгой",
     "price": 320,
     "rent": 38,
     "colorGroup": "D",
-    "tokenLeft": 63.89,
-    "tokenTop": 64.71
+    "polygon": [
+      [
+        1042.1,
+        655.6
+      ],
+      [
+        1084.0,
+        587.1
+      ],
+      [
+        1199.2,
+        657.5
+      ],
+      [
+        1157.3,
+        726.1
+      ]
+    ],
+    "labelX": 1120.6,
+    "labelY": 656.6,
+    "labelRotation": 31.4
   },
   {
     "id": 30,
-    "left": 55.89,
-    "top": 64.61,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "tax",
     "name": "Улсын татвар",
-    "amount": 150,
     "colorGroup": null,
     "price": null,
     "rent": null,
-    "tokenLeft": 59.64,
-    "tokenTop": 69.61
+    "amount": 150,
+    "polygon": [
+      [
+        959.4,
+        709.8
+      ],
+      [
+        1005.2,
+        639.2
+      ],
+      [
+        1119.5,
+        713.4
+      ],
+      [
+        1073.6,
+        784.0
+      ]
+    ],
+    "labelX": 1039.4,
+    "labelY": 711.6,
+    "labelRotation": 33.0
   },
   {
     "id": 31,
-    "left": 51.63,
-    "top": 69.52,
-    "width": 7.5,
-    "height": 10,
-    "rotation": 12,
     "type": "property",
-    "name": "СОД Монгол Групп",
+    "name": "СОД Монгол",
     "price": 340,
     "rent": 41,
     "colorGroup": "D",
-    "tokenLeft": 55.38,
-    "tokenTop": 74.52
+    "polygon": [
+      [
+        879.4,
+        763.8
+      ],
+      [
+        923.5,
+        696.8
+      ],
+      [
+        1037.3,
+        771.8
+      ],
+      [
+        993.2,
+        838.7
+      ]
+    ],
+    "labelX": 958.3,
+    "labelY": 767.8,
+    "labelRotation": 33.4
   }
 ];
 
@@ -1144,6 +1561,23 @@ function renderDie(value, rolling) {
   for (let i = 1; i <= 9; i++) pipsHtml += `<div class="pip ${on.includes(i)?'on':''}"></div>`;
   return `<div class="die ${rolling?'rolling':''}">${pipsHtml}</div>`;
 }
+function shortLabel(name) {
+  if (name.length <= 9) return name;
+  const parts = name.split(' ');
+  return parts[0];
+}
+function wrapLabel(text, maxCharsPerLine) {
+  if (text.length <= maxCharsPerLine) return [text];
+  const words = text.split(' ');
+  if (words.length === 1) return [text];
+  let line1 = '', line2 = '';
+  for (const w of words) {
+    if ((line1 + ' ' + w).trim().length <= maxCharsPerLine && !line2) line1 = (line1 + ' ' + w).trim();
+    else line2 = (line2 + ' ' + w).trim();
+  }
+  return line2 ? [line1, line2] : [line1];
+}
+
 function renderBuildings(level) {
   if (level >= 4) return `<div class="buildings-row"><span class="build-icon corp" title="\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446"></span></div>`;
   let html = '<div class="buildings-row">';
@@ -1239,6 +1673,7 @@ function renderGame() {
   const d1 = diceRollingNow && diceTempFaces ? diceTempFaces[0] : (room.lastDice ? room.lastDice[0] : null);
   const d2 = diceRollingNow && diceTempFaces ? diceTempFaces[1] : (room.lastDice ? room.lastDice[1] : null);
 
+  const CORNER_IDS = [0,8,16,24];
   let tilesHtml = '';
   BOARD_CONFIG.forEach(tile => {
     const idx = tile.id;
@@ -1246,28 +1681,30 @@ function renderGame() {
     const isFullGroup = owner && tile.type === 'property' && ownsFullGroup(room, owner.id, idx);
     const isActivePos = displayPos(room, currentPlayer) === idx;
     const level = tile.type === 'property' ? houseLevel(room, idx) : 0;
-    const groupTab = tile.colorGroup ? `<span class="tile-group-tab" style="background:${GROUP_COLORS[tile.colorGroup]}"></span>` : '';
-    tilesHtml += `<div class="tile ${[0,8,16,24].includes(idx)?'corner-tile':''} ${owner?'owned':''} ${isFullGroup?'group-complete':''} ${isActivePos?'active-position':''}"
-      data-idx="${idx}"
-      style="left:${tile.left}%; top:${tile.top}%; width:${tile.width}%; height:${tile.height}%; transform:rotate(${tile.rotation}deg); ${owner?`--owner-color:${owner.color}; background:${hexToRgba(owner.color,0.18)};`:''}">
-      <div class="tile-inner" style="--r:${-tile.rotation}deg; transform:rotate(${-tile.rotation}deg);">
-        ${groupTab}
-        <span>${tile.name}</span>
-        ${tile.price ? `<small>\u20ae${fmt(tile.price)}</small>` : ''}
-        ${level > 0 ? renderBuildings(level) : ''}
-      </div>
-      ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}">${owner.token}</span>` : ''}
-      <span class="debug-idx">${idx}</span>
-    </div>`;
+    const isCorner = CORNER_IDS.includes(idx);
+    const pts = tile.polygon.map(p => p.join(',')).join(' ');
+    const lines = wrapLabel(shortLabel(tile.name), isCorner ? 10 : 8);
+    const fontSize = isCorner ? 15 : 12.5;
+    let tspans = `<tspan x="${tile.labelX}" dy="${lines.length > 1 ? '-0.55em' : '0.3em'}">${lines[0]}</tspan>`;
+    if (lines[1]) tspans += `<tspan x="${tile.labelX}" dy="1.05em">${lines[1]}</tspan>`;
+    if (tile.price) tspans += `<tspan class="tile-price" x="${tile.labelX}" dy="1.15em" font-size="${fontSize*0.78}">\u20ae${fmt(tile.price)}</tspan>`;
+    if (level > 0) tspans += `<tspan x="${tile.labelX}" dy="1.15em" font-size="${fontSize*0.9}">${level >= 4 ? '\ud83c\udfe6' : '\ud83c\udfe0'.repeat(level)}</tspan>`;
+    const ownerStyle = owner ? `--owner-color:${owner.color}; --owner-fill:${hexToRgba(owner.color,0.28)};` : '';
+    tilesHtml += `<g class="tile ${owner?'owned':''} ${isFullGroup?'group-complete':''} ${isActivePos?'active-position':''}"
+      data-idx="${idx}" style="${ownerStyle}">
+      <polygon points="${pts}"></polygon>
+      <text x="${tile.labelX}" y="${tile.labelY}" text-anchor="middle" font-size="${fontSize}" transform="rotate(${tile.labelRotation} ${tile.labelX} ${tile.labelY})">${tspans}</text>
+      ${owner ? `<circle class="owner-dot" cx="${tile.labelX + 22}" cy="${tile.labelY - 22}" r="9" fill="${owner.color}" stroke="#18382d" stroke-width="1.5"></circle>` : ''}
+    </g>`;
   });
 
   const tokensHtml = room.players.filter(p => !p.bankrupt).map((p, i) => {
     const pos = displayPos(room, p);
     const tile = BOARD_CONFIG[pos];
-    const offsets = [[-3,-3],[3,-3],[-3,3],[3,3]];
+    const offsets = [[-14,-14],[14,-14],[-14,14],[14,14]];
     const off = offsets[i % 4];
-    const left = tile.tokenLeft + off[0]*0.35;
-    const top = tile.tokenTop + off[1]*0.35;
+    const left = (tile.labelX + off[0]) / 1672 * 100;
+    const top = (tile.labelY + off[1]) / 941 * 100;
     return `<div class="ptoken ${justRolled && p.id === currentPlayer.id ? 'moving' : ''}" style="left:${left}%; top:${top}%; --token-ring:${p.color}">${p.token}</div>`;
   }).join('');
 
@@ -1326,9 +1763,11 @@ function renderGame() {
     </div>
     <div class="game-layout">
       <div class="board-outer">
-        <div class="board-wrap ${debugMode?'debug':''}" id="boardWrap">
+        <div class="board ${debugMode?'debug':''}" id="boardEl">
           <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
-          ${tilesHtml}
+          <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            ${tilesHtml}
+          </svg>
           <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
           ${tokensHtml}
         </div>
@@ -1395,7 +1834,24 @@ function attachGameEvents() {
   const build = document.getElementById('buildBtn'); if (build) build.onclick = buildProperty;
   const skipBuild2 = document.getElementById('skipBuildBtn'); if (skipBuild2) skipBuild2.onclick = skipBuild;
   const dbg = document.getElementById('debugToggle'); if (dbg) dbg.onclick = () => { debugMode = !debugMode; render(); };
-  document.querySelectorAll('.tile[data-idx]').forEach(el => { el.onclick = () => showCellDetail(parseInt(el.dataset.idx, 10)); });
+  const tooltip = document.getElementById('tile-tooltip');
+  document.querySelectorAll('.tile[data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    el.onclick = () => showCellDetail(idx);
+    el.onmouseenter = (e) => {
+      if (!tooltip || !currentRoom) return;
+      const sp = BOARD_CONFIG[idx];
+      const priceLine = sp.price ? `\u20ae${fmt(sp.price)}` : (sp.amount ? `\u20ae${fmt(sp.amount)}` : '');
+      tooltip.innerHTML = `<div class="tt-name">${sp.name}</div>${priceLine ? `<div class="tt-price">${priceLine}</div>` : ''}`;
+      tooltip.style.display = 'block';
+    };
+    el.onmousemove = (e) => {
+      if (!tooltip) return;
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top = (e.clientY + 14) + 'px';
+    };
+    el.onmouseleave = () => { if (tooltip) tooltip.style.display = 'none'; };
+  });
 }
 
 render();
