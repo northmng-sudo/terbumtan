@@ -49,6 +49,12 @@
   }
   .subtitle { text-align: center; color: #9AA6BE; font-size: 13px; margin-bottom: 8px; }
   .motif-strip { text-align: center; font-size: 15px; letter-spacing: 6px; opacity: 0.55; margin: 14px 0 28px; }
+  .landing-card {
+    background: linear-gradient(160deg, #1c1c1c 0%, #131313 100%);
+    border: 1px solid var(--slate-line); border-radius: 16px;
+    padding: 22px 20px 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
 
   label { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #8b96b0; margin: 18px 0 7px; }
   input[type=text] {
@@ -99,15 +105,24 @@
   .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 6px 16px; }
   .top-bar .seal-title { font-size: 18px; margin: 0; text-align: left; }
   .turn-indicator {
-    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--night-indigo);
-    border: 1px solid var(--steppe-gold); border-radius: 20px; padding: 7px 16px; color: var(--parchment);
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    background: linear-gradient(160deg, #1c1c1c 0%, #131313 100%);
+    border: 1px solid var(--steppe-gold); border-radius: 20px; padding: 8px 18px; color: var(--parchment);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
   }
   .turn-indicator .pulse-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--grass-green); margin-right: 6px; animation: pulse 1.4s infinite; }
 
-  .game-layout { display: grid; grid-template-columns: minmax(0,1fr) 270px; gap: 16px; }
+  .game-layout { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 20px; }
   @media (max-width: 800px) { .game-layout { grid-template-columns: 1fr; } }
 
-  .board-outer { display: flex; justify-content: center; }
+  .board-outer {
+    display: flex; justify-content: center;
+    padding: clamp(10px, 2.5vw, 26px);
+    background:
+      radial-gradient(ellipse at 50% 40%, #1a2e24 0%, #0c1712 75%);
+    border-radius: 20px;
+    box-shadow: inset 0 4px 18px rgba(0,0,0,0.55), inset 0 -2px 8px rgba(0,0,0,0.4), 0 8px 26px rgba(0,0,0,0.4);
+  }
   .board {
     display: grid;
     grid-template-columns: repeat(8, minmax(32px, 1fr));
@@ -293,11 +308,17 @@
   .card-popup-money.positive { color: var(--grass-green); }
   .card-popup-money.negative { color: var(--seal-red); }
 
-  .side-panel { display: flex; flex-direction: column; gap: 12px; }
-  .panel-box { background: var(--night-indigo); border: 1px solid var(--slate-line); border-radius: 10px; padding: 13px; }
+  .side-panel { display: flex; flex-direction: column; gap: 14px; }
+  .panel-box {
+    background: linear-gradient(160deg, #1c1c1c 0%, #131313 100%);
+    border: 1px solid var(--slate-line);
+    border-radius: 12px; padding: 15px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
   .panel-box h3 {
     font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: 1.8px; text-transform: uppercase;
-    color: var(--steppe-gold); margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px dashed var(--slate-line);
+    color: var(--steppe-gold); margin: 0 0 11px; padding-bottom: 9px; border-bottom: 1px dashed var(--slate-line);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
   }
   .player-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
   .player-row:last-child { border-bottom: none; }
@@ -976,14 +997,16 @@ function renderLanding() {
       <div class="seal-title">Талын Эзэнт Улс</div>
       <div class="subtitle">Аймаг худалдаж ав, түрээсээ цуглуул, эзэнт улсаа өргөтгө</div>
       <div class="motif-strip">⛺ · 🐫 · 🏮 · 🏭 · 🏢</div>
-      <label>Таны нэр</label>
-      <input type="text" id="nameInput" maxlength="16" placeholder="Нэрээ бичнэ үү" value="${myName}">
-      <button class="btn btn-primary" id="createBtn">Шинэ өрөө үүсгэх</button>
-      <div class="divider">эсвэл</div>
-      <label>Өрөөний код</label>
-      <input type="text" id="codeInput" maxlength="4" placeholder="ЖИШЭЭ: ABCD" style="text-transform:uppercase;letter-spacing:3px;">
-      <button class="btn btn-secondary" id="joinBtn">Өрөөнд нэгдэх</button>
-      <div class="error-msg">${errorMsg}</div>
+      <div class="landing-card">
+        <label>Таны нэр</label>
+        <input type="text" id="nameInput" maxlength="16" placeholder="Нэрээ бичнэ үү" value="${myName}">
+        <button class="btn btn-primary" id="createBtn">Шинэ өрөө үүсгэх</button>
+        <div class="divider">эсвэл</div>
+        <label>Өрөөний код</label>
+        <input type="text" id="codeInput" maxlength="4" placeholder="ЖИШЭЭ: ABCD" style="text-transform:uppercase;letter-spacing:3px;">
+        <button class="btn btn-secondary" id="joinBtn">Өрөөнд нэгдэх</button>
+        <div class="error-msg">${errorMsg}</div>
+      </div>
     </div>
   `;
 }
@@ -1011,17 +1034,19 @@ function renderWaiting() {
     <div class="screen">
       <div class="eyebrow">Хүлээлгийн өрөө</div>
       <div class="seal-title">Тоглогчид цугларч байна</div>
-      <div class="room-code-box">
-        <div style="font-size:11px;color:#9AA6BE;letter-spacing:2px;text-transform:uppercase;">Өрөөний код</div>
-        <div class="room-code">${room.roomCode}</div>
-        <div style="font-size:12px;color:#6b7690;margin-top:4px;">Энэ кодыг найзууддаа илгээгээрэй</div>
+      <div class="landing-card">
+        <div class="room-code-box">
+          <div style="font-size:11px;color:#9AA6BE;letter-spacing:2px;text-transform:uppercase;">Өрөөний код</div>
+          <div class="room-code">${room.roomCode}</div>
+          <div style="font-size:12px;color:#6b7690;margin-top:4px;">Энэ кодыг найзууддаа илгээгээрэй</div>
+        </div>
+        <div class="wait-list">
+          ${room.players.map(p => `<div class="wait-player"><span class="wait-token" style="--token-color:${p.color}">${p.token}</span> <span>${p.name}</span> ${p.isHost ? '<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">эзэн</span>' : ''}</div>`).join('')}
+        </div>
+        ${isHost
+          ? `<button class="btn btn-primary" id="startBtn" ${room.players.length < 2 ? 'disabled' : ''}>Тоглоом эхлүүлэх ${room.players.length < 2 ? '(доод тал нь 2 тоглогч)' : ''}</button>`
+          : `<div class="waiting-note"><span class="pulse-dot"></span>Өрөөний эзний тоглоом эхлүүлэхийг хүлээж байна...</div>`}
       </div>
-      <div class="wait-list">
-        ${room.players.map(p => `<div class="wait-player"><span class="wait-token" style="--token-color:${p.color}">${p.token}</span> <span>${p.name}</span> ${p.isHost ? '<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">эзэн</span>' : ''}</div>`).join('')}
-      </div>
-      ${isHost
-        ? `<button class="btn btn-primary" id="startBtn" ${room.players.length < 2 ? 'disabled' : ''}>Тоглоом эхлүүлэх ${room.players.length < 2 ? '(доод тал нь 2 тоглогч)' : ''}</button>`
-        : `<div class="waiting-note"><span class="pulse-dot"></span>Өрөөний эзний тоглоом эхлүүлэхийг хүлээж байна...</div>`}
     </div>
   `;
 }
