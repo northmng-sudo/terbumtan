@@ -155,8 +155,7 @@
     box-sizing: border-box;
     pointer-events: none;
   }
-  .tile-building-badge:hover { transform: scale(2.1); z-index: 8; }
-  .tile-building-badge:active { transform: scale(2.3); z-index: 8; }
+  .tile-building-badge.badge-expanded { transform: scale(2.1); z-index: 8; }
   .tile-building-badge:hover .badge-ring { border-color: #ffd64d; box-shadow: 0 0 8px #ffd64d; }
   .building-flag-icon { position: absolute; top: -6px; right: -4px; font-size: clamp(7px, 1.2vw, 10px); z-index: 2; }
 
@@ -423,11 +422,11 @@ const BOARD_CONFIG = [
     "labelY": 766.2,
     "labelRotation": -33.4,
     "buildingType": "factory",
-    "buildingX": 717.4,
-    "buildingY": 755.1,
+    "buildingX": 729.2,
+    "buildingY": 763.3,
     "buildingWidth": 59.9,
     "buildingRotation": 0,
-    "depth": 755,
+    "depth": 763,
     "houseSlots": [
       [
         714.5,
@@ -475,11 +474,11 @@ const BOARD_CONFIG = [
     "labelY": 710.5,
     "labelRotation": -32.3,
     "buildingType": "telecom",
-    "buildingX": 639.5,
-    "buildingY": 701.4,
+    "buildingX": 648.2,
+    "buildingY": 712.7,
     "buildingWidth": 58.8,
     "buildingRotation": 0,
-    "depth": 701,
+    "depth": 713,
     "houseSlots": [
       [
         641.7,
@@ -527,11 +526,11 @@ const BOARD_CONFIG = [
     "labelY": 655.3,
     "labelRotation": -31.3,
     "buildingType": "technology",
-    "buildingX": 561.0,
-    "buildingY": 648.8,
+    "buildingX": 566.1,
+    "buildingY": 662.2,
     "buildingWidth": 58.1,
     "buildingRotation": 0,
-    "depth": 649,
+    "depth": 662,
     "houseSlots": [
       [
         567.8,
@@ -579,11 +578,11 @@ const BOARD_CONFIG = [
     "labelY": 602.1,
     "labelRotation": -30.1,
     "buildingType": "telecom",
-    "buildingX": 483.7,
-    "buildingY": 598.0,
+    "buildingX": 485.6,
+    "buildingY": 612.2,
     "buildingWidth": 56.6,
     "buildingRotation": 0,
-    "depth": 598,
+    "depth": 612,
     "houseSlots": [
       [
         493.8,
@@ -631,11 +630,11 @@ const BOARD_CONFIG = [
     "labelY": 551.0,
     "labelRotation": -28.9,
     "buildingType": "bank",
-    "buildingX": 409.1,
-    "buildingY": 548.8,
+    "buildingX": 408.7,
+    "buildingY": 563.1,
     "buildingWidth": 54.3,
     "buildingRotation": 0,
-    "depth": 549,
+    "depth": 563,
     "houseSlots": [
       [
         421.2,
@@ -712,11 +711,11 @@ const BOARD_CONFIG = [
     "labelY": 454.5,
     "labelRotation": -27.0,
     "buildingType": "retail",
-    "buildingX": 268.5,
-    "buildingY": 454.8,
+    "buildingX": 265.1,
+    "buildingY": 468.7,
     "buildingWidth": 52.2,
     "buildingRotation": 0,
-    "depth": 455,
+    "depth": 469,
     "houseSlots": [
       [
         282.7,
@@ -793,11 +792,11 @@ const BOARD_CONFIG = [
     "labelY": 312.8,
     "labelRotation": 34.6,
     "buildingType": "mining",
-    "buildingX": 307.9,
-    "buildingY": 316.2,
+    "buildingX": 301.1,
+    "buildingY": 328.8,
     "buildingWidth": 51.0,
     "buildingRotation": 0,
-    "depth": 316,
+    "depth": 329,
     "houseSlots": [
       [
         323.9,
@@ -845,11 +844,11 @@ const BOARD_CONFIG = [
     "labelY": 275.3,
     "labelRotation": 33.3,
     "buildingType": "construction",
-    "buildingX": 389.9,
-    "buildingY": 280.0,
+    "buildingX": 381.7,
+    "buildingY": 291.7,
     "buildingWidth": 49.9,
     "buildingRotation": 0,
-    "depth": 280,
+    "depth": 292,
     "houseSlots": [
       [
         406.3,
@@ -897,11 +896,11 @@ const BOARD_CONFIG = [
     "labelY": 239.6,
     "labelRotation": 32.0,
     "buildingType": "technology",
-    "buildingX": 468.7,
-    "buildingY": 245.9,
+    "buildingX": 458.9,
+    "buildingY": 256.2,
     "buildingWidth": 48.5,
     "buildingRotation": 0,
-    "depth": 246,
+    "depth": 256,
     "houseSlots": [
       [
         485.4,
@@ -949,11 +948,11 @@ const BOARD_CONFIG = [
     "labelY": 205.0,
     "labelRotation": 30.3,
     "buildingType": "factory",
-    "buildingX": 543.2,
-    "buildingY": 212.9,
+    "buildingX": 531.7,
+    "buildingY": 221.5,
     "buildingWidth": 48.0,
     "buildingRotation": 0,
-    "depth": 213,
+    "depth": 222,
     "houseSlots": [
       [
         559.7,
@@ -1001,11 +1000,11 @@ const BOARD_CONFIG = [
     "labelY": 171.6,
     "labelRotation": 29.5,
     "buildingType": "fuel",
-    "buildingX": 614.7,
-    "buildingY": 181.1,
+    "buildingX": 601.7,
+    "buildingY": 187.3,
     "buildingWidth": 46.1,
     "buildingRotation": 0,
-    "depth": 181,
+    "depth": 187,
     "houseSlots": [
       [
         630.3,
@@ -1083,8 +1082,8 @@ const BOARD_CONFIG = [
     "labelY": 109.9,
     "labelRotation": 28.3,
     "buildingType": "mining",
-    "buildingX": 745.8,
-    "buildingY": 121.5,
+    "buildingX": 731.5,
+    "buildingY": 122.1,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
     "depth": 122,
@@ -1164,11 +1163,11 @@ const BOARD_CONFIG = [
     "labelY": 109.7,
     "labelRotation": -28.5,
     "buildingType": "mining",
-    "buildingX": 927.8,
-    "buildingY": 121.3,
+    "buildingX": 915.1,
+    "buildingY": 114.8,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
-    "depth": 121,
+    "depth": 115,
     "houseSlots": [
       [
         933.0,
@@ -1216,11 +1215,11 @@ const BOARD_CONFIG = [
     "labelY": 139.6,
     "labelRotation": -29.5,
     "buildingType": "fashion",
-    "buildingX": 990.6,
-    "buildingY": 150.4,
+    "buildingX": 979.3,
+    "buildingY": 141.6,
     "buildingWidth": 43.5,
     "buildingRotation": 0,
-    "depth": 150,
+    "depth": 142,
     "houseSlots": [
       [
         992.6,
@@ -1268,11 +1267,11 @@ const BOARD_CONFIG = [
     "labelY": 170.8,
     "labelRotation": -29.7,
     "buildingType": "mining",
-    "buildingX": 1057.1,
-    "buildingY": 180.3,
+    "buildingX": 1047.8,
+    "buildingY": 169.5,
     "buildingWidth": 45.8,
     "buildingRotation": 0,
-    "depth": 180,
+    "depth": 170,
     "houseSlots": [
       [
         1055.8,
@@ -1320,11 +1319,11 @@ const BOARD_CONFIG = [
     "labelY": 204.3,
     "labelRotation": -31.0,
     "buildingType": "bank",
-    "buildingX": 1127.7,
-    "buildingY": 212.3,
+    "buildingX": 1120.7,
+    "buildingY": 199.8,
     "buildingWidth": 47.3,
     "buildingRotation": 0,
-    "depth": 212,
+    "depth": 200,
     "houseSlots": [
       [
         1123.2,
@@ -1372,11 +1371,11 @@ const BOARD_CONFIG = [
     "labelY": 238.2,
     "labelRotation": -31.8,
     "buildingType": "bank",
-    "buildingX": 1201.9,
-    "buildingY": 244.5,
+    "buildingX": 1197.1,
+    "buildingY": 231.0,
     "buildingWidth": 48.1,
     "buildingRotation": 0,
-    "depth": 244,
+    "depth": 231,
     "houseSlots": [
       [
         1194.7,
@@ -1453,11 +1452,11 @@ const BOARD_CONFIG = [
     "labelY": 312.1,
     "labelRotation": -34.4,
     "buildingType": "bank",
-    "buildingX": 1360.7,
-    "buildingY": 315.5,
+    "buildingX": 1359.6,
+    "buildingY": 301.2,
     "buildingWidth": 51.1,
     "buildingRotation": 0,
-    "depth": 316,
+    "depth": 301,
     "houseSlots": [
       [
         1349.8,
@@ -1534,11 +1533,11 @@ const BOARD_CONFIG = [
     "labelY": 453.7,
     "labelRotation": 26.6,
     "buildingType": "mining",
-    "buildingX": 1401.9,
-    "buildingY": 454.0,
+    "buildingX": 1404.5,
+    "buildingY": 440.0,
     "buildingWidth": 53.1,
     "buildingRotation": 0,
-    "depth": 454,
+    "depth": 440,
     "houseSlots": [
       [
         1388.2,
@@ -1586,11 +1585,11 @@ const BOARD_CONFIG = [
     "labelY": 501.8,
     "labelRotation": 27.5,
     "buildingType": "mining",
-    "buildingX": 1334.1,
-    "buildingY": 501.1,
+    "buildingX": 1338.0,
+    "buildingY": 487.3,
     "buildingWidth": 54.2,
     "buildingRotation": 0,
-    "depth": 501,
+    "depth": 487,
     "houseSlots": [
       [
         1319.6,
@@ -1638,11 +1637,11 @@ const BOARD_CONFIG = [
     "labelY": 550.8,
     "labelRotation": 29.2,
     "buildingType": "retail",
-    "buildingX": 1262.6,
-    "buildingY": 548.6,
+    "buildingX": 1268.1,
+    "buildingY": 535.4,
     "buildingWidth": 55.5,
     "buildingRotation": 0,
-    "depth": 549,
+    "depth": 535,
     "houseSlots": [
       [
         1247.2,
@@ -1690,11 +1689,11 @@ const BOARD_CONFIG = [
     "labelY": 602.6,
     "labelRotation": 30.3,
     "buildingType": "mining",
-    "buildingX": 1188.4,
-    "buildingY": 598.5,
+    "buildingX": 1196.0,
+    "buildingY": 586.4,
     "buildingWidth": 58.0,
     "buildingRotation": 0,
-    "depth": 598,
+    "depth": 586,
     "houseSlots": [
       [
         1172.2,
@@ -1742,11 +1741,11 @@ const BOARD_CONFIG = [
     "labelY": 656.6,
     "labelRotation": 31.4,
     "buildingType": "mining",
-    "buildingX": 1110.6,
-    "buildingY": 650.0,
+    "buildingX": 1120.7,
+    "buildingY": 640.0,
     "buildingWidth": 59.2,
     "buildingRotation": 0,
-    "depth": 650,
+    "depth": 640,
     "houseSlots": [
       [
         1093.9,
@@ -1824,11 +1823,11 @@ const BOARD_CONFIG = [
     "labelY": 767.8,
     "labelRotation": 33.4,
     "buildingType": "construction",
-    "buildingX": 953.7,
-    "buildingY": 756.7,
+    "buildingX": 967.8,
+    "buildingY": 754.2,
     "buildingWidth": 59.5,
     "buildingRotation": 0,
-    "depth": 757,
+    "depth": 754,
     "houseSlots": [
       [
         940.1,
@@ -2320,7 +2319,7 @@ function renderUpgradeIcons(tile, level, idx, ownerIdx) {
 
 function renderBuildingIcon(tile, level, idx) {
   const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-  const w = tile.buildingWidth * 0.7;
+  const w = tile.buildingWidth * 1.0;
   const x = tile.buildingX - w / 2;
   const y = tile.buildingY - w / 2;
   const leftPct = (x / 1672 * 100).toFixed(2);
