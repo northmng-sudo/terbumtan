@@ -80,7 +80,7 @@
   .room-code { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: var(--steppe-gold); }
 
   /* Game screen */
-  .game-wrap { max-width: 1400px; margin: 0 auto; padding: 12px; }
+  .game-wrap { max-width: 1900px; margin: 0 auto; padding: 12px; }
   .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 6px 16px; }
   .top-bar .seal-title { font-size: 18px; margin: 0; text-align: left; }
   .top-bar-right { display: flex; align-items: center; gap: 10px; }
@@ -103,11 +103,12 @@
   .board-outer { display: flex; justify-content: center; min-width: 0; overflow: hidden; }
   .board {
     position: relative;
-    width: min(100%, 1400px);
+    width: min(100%, 1600px);
     max-width: 100%;
     aspect-ratio: 1672 / 941;
     user-select: none;
     margin: 0 auto;
+    overflow: hidden;
   }
   .board-image, .board-overlay {
     position: absolute; inset: 0;
@@ -1805,7 +1806,7 @@ let seenBuildings = new Set();
 
 function renderBuildingIcon(tile, level, idx) {
   const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-  const w = tile.buildingWidth * 1.25;
+  const w = tile.buildingWidth * 1.7;
   const x = tile.buildingX - w / 2;
   const y = tile.buildingY - w;
   const leftPct = (x / 1672 * 100).toFixed(2);
@@ -1948,13 +1949,14 @@ function renderGame() {
   buildingsToRender.sort((a, b) => a.depth - b.depth);
   const buildingsHtml = buildingsToRender.map(b => renderBuildingIcon(b.tile, b.level, b.idx)).join('');
 
+  const clampPct = v => Math.min(97, Math.max(3, v));
   const tokensHtml = room.players.filter(p => !p.bankrupt).map((p, i) => {
     const pos = displayPos(room, p);
     const tile = BOARD_CONFIG[pos];
     const offsets = [[-14,-14],[14,-14],[-14,14],[14,14]];
     const off = offsets[i % 4];
-    const left = (tile.labelX + off[0]) / 1672 * 100;
-    const top = (tile.labelY + off[1]) / 941 * 100;
+    const left = clampPct((tile.labelX + off[0]) / 1672 * 100);
+    const top = clampPct((tile.labelY + off[1]) / 941 * 100);
     return `<div class="ptoken ${justRolled && p.id === currentPlayer.id ? 'moving' : ''}" style="left:${left}%; top:${top}%; --token-ring:${p.color}">${p.token}</div>`;
   }).join('');
 
