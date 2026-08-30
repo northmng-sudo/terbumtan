@@ -174,6 +174,10 @@
   }
   .cell.owned-glow { box-shadow: inset 0 0 0 2.5px #241a0d, inset 0 0 0 5px var(--owner-color, var(--steppe-gold)), 0 0 10px -2px var(--owner-color, var(--steppe-gold)); }
   .cell.group-complete { box-shadow: inset 0 0 0 2.5px #241a0d, inset 0 0 0 5px var(--owner-color, var(--steppe-gold)), 0 0 14px var(--owner-color, var(--steppe-gold)); }
+  .cell.active-position { animation: activePulse 1.3s infinite; }
+  @media (hover: hover) {
+    .cell:not(.corner):hover { transform: translateY(-2px); box-shadow: inset 0 0 0 2.5px #241a0d, 0 6px 10px rgba(0,0,0,0.35); z-index: 2; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+  }
   .cell-tint { position: absolute; inset: 0; pointer-events: none; z-index: 0; border-radius: 8px; overflow: hidden; }
   .cell-header {
     flex: 0 0 38%;
@@ -294,6 +298,16 @@
     padding: clamp(4px, 1vw, 7px) clamp(8px, 1.6vw, 12px); border-top: 1px dashed rgba(212,175,55,0.3);
     animation: tickerFade 0.4s ease;
   }
+  .money-float-anchor { position: relative; height: 0; width: 100%; }
+  .money-float {
+    position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: clamp(12px, 2.2vw, 17px);
+    animation: moneyFloat 1s ease-out forwards;
+    pointer-events: none; white-space: nowrap;
+    text-shadow: 0 2px 3px rgba(0,0,0,0.6);
+  }
+  .money-float.positive { color: #4ADE80; }
+  .money-float.negative { color: #FF6B6B; }
   .dice-result-text { font-size: 12.5px; color: #9AA6BE; margin-bottom: 10px; min-height: 16px; }
   .tokens-row { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; flex-wrap: wrap; z-index: 2; }
   .token-dot {
@@ -439,6 +453,16 @@
     0% { opacity: 0; transform: translateY(4px); }
     100% { opacity: 1; transform: translateY(0); }
   }
+  @keyframes activePulse {
+    0%, 100% { outline: 3px solid var(--steppe-gold); outline-offset: 0px; }
+    50% { outline: 3px solid var(--steppe-gold); outline-offset: 3px; }
+  }
+  @keyframes moneyFloat {
+    0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+    20% { opacity: 1; transform: translateY(0) scale(1.1); }
+    80% { opacity: 1; transform: translateY(-14px) scale(1); }
+    100% { opacity: 0; transform: translateY(-24px) scale(0.95); }
+  }
 </style>
 </head>
 <body>
@@ -471,7 +495,7 @@ const spaces = [
   { type:'property',  name:'Премиум Нэксус',          icon:'🏬', price:140, rent:17 },
   { type:'property',  name:'НИК',                     icon:'🧴', price:160, rent:20 },
   { type:'tax',        name:'Гаалийн татвар',          icon:'💰', amount:100 },
-  { type:'parking',    name:'Чөлөөт зогсоол',          icon:'🅿️' },
+  { type:'parking',    name:'АМРАЛТ',                  icon:'🅿️' },
   { type:'property',  name:'Алтан Жолоо Групп',       icon:'🚗', price:180, rent:22 },
   { type:'property',  name:'Болдтөмөр Ерөө Гол',      icon:'🪨', price:180, rent:22 },
   { type:'property',  name:'Саусгоби Сэндс',          icon:'⛏️', price:200, rent:24 },
@@ -966,6 +990,10 @@ function renderEmblemSvg() {
         <stop offset="45%" stop-color="#D4AF37"/>
         <stop offset="100%" stop-color="#8a6d1f"/>
       </linearGradient>
+      <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#9AE87E"/>
+        <stop offset="100%" stop-color="#2C6E24"/>
+      </linearGradient>
     </defs>
     <g stroke="url(#goldGrad)" stroke-width="1" opacity="0.65" stroke-linecap="round">
       <line x1="50" y1="21" x2="50" y2="3"/>
@@ -983,6 +1011,16 @@ function renderEmblemSvg() {
     <polygon points="50,20 54,11 58,20" fill="url(#goldGrad)"/>
     <rect x="60" y="31" width="6" height="21" fill="url(#goldGrad)"/>
     <rect x="68" y="38" width="5" height="14" fill="url(#goldGrad)"/>
+    <line x1="3" y1="55" x2="97" y2="55" stroke="url(#goldGrad)" stroke-width="1" stroke-dasharray="2.5,2" opacity="0.45"/>
+    <g transform="translate(9,44)" opacity="0.9">
+      <path d="M0,9 L1.5,0 L10.5,0 L12,9 Z" fill="url(#goldGrad)"/>
+      <ellipse cx="6" cy="0" rx="6" ry="1.8" fill="url(#goldGrad)"/>
+      <circle cx="6" cy="0" r="1" fill="#0f2a1f"/>
+    </g>
+    <g transform="translate(84,40)">
+      <rect x="1.5" y="7" width="1.6" height="6" fill="#6b4f1a"/>
+      <circle cx="2.3" cy="5" r="4.6" fill="url(#greenGrad)"/>
+    </g>
   </svg>`;
 }
 
@@ -1001,6 +1039,26 @@ function renderDie(value, rolling, large) {
   return `<div class="die ${large ? 'die-large' : ''} ${rolling ? 'rolling' : ''}">${pipsHtml}</div>`;
 }
 
+let lastKnownMoney = null;
+function maybeFlashMoney(room) {
+  if (!room) return;
+  const me = room.players.find(p => p.id === myId);
+  if (!me) return;
+  if (lastKnownMoney !== null && me.money !== lastKnownMoney) {
+    flashMoneyFloat(me.money - lastKnownMoney);
+  }
+  lastKnownMoney = me.money;
+}
+function flashMoneyFloat(delta) {
+  const anchor = document.getElementById('moneyFloatAnchor');
+  if (!anchor) return;
+  const el = document.createElement('div');
+  el.className = 'money-float ' + (delta >= 0 ? 'positive' : 'negative');
+  el.textContent = (delta >= 0 ? '+' : '−') + '₮' + fmt(Math.abs(delta));
+  anchor.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
 function render() {
   const app = document.getElementById('app');
   if (currentRoom) {
@@ -1014,6 +1072,7 @@ function render() {
     justRolled = false;
     app.innerHTML = renderGame(rollingNow);
     attachGameEvents();
+    maybeFlashMoney(currentRoom);
     return;
   }
 }
@@ -1119,8 +1178,9 @@ function renderGame(rollingNow) {
     const cellInner = isCorner
       ? `<div class="corner-badge">${sp.icon}</div><div class="cell-name corner-name">${sp.name}</div>`
       : `<div class="cell-header ${sideOf(idx)}"><span class="icon-standee">${sp.icon}</span></div><div class="cell-body">${bodyInner}</div>`;
+    const isActivePos = displayPos(room, currentPlayer) === idx;
     cellsHtml += `
-      <div class="cell ${isCorner ? 'corner' : ''} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
+      <div class="cell ${isCorner ? 'corner' : ''} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''} ${isActivePos ? 'active-position' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
         ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}" title="${owner.name} эзэмшдэг">${owner.token}</span>` : ''}
         ${cellInner}
         <div class="cell-tint" style="${tintStyle}"></div>
@@ -1131,6 +1191,7 @@ function renderGame(rollingNow) {
     <div class="center-seal">${renderEmblemSvg()}</div>
     <div class="center-title">ТАЛЫН ЭЗЭНТ УЛС</div>
     <div class="center-subtitle">БИЗНЕС · ХӨРӨНГӨ · СТРАТЕГИ</div>
+    <div class="money-float-anchor" id="moneyFloatAnchor"></div>
     <div class="center-dice-row">${renderDie(centerD1, rollingNow, true)}${renderDie(centerD2, rollingNow, true)}</div>
     ${renderCenterLeaderboard(room)}
     ${renderCenterTicker(room)}
