@@ -709,6 +709,7 @@ async function rollDice() {
   const d2 = 1 + Math.floor(Math.random() * 6);
   const sum = d1 + d2;
   room.lastDice = [d1, d2];
+  room.diceRollId = Date.now() + Math.random();
   const oldPos = player.position;
   const newPos = (oldPos + sum) % spaces.length;
   const passedGo = newPos < oldPos;
@@ -900,6 +901,9 @@ let animOverride = null;
 let lastAnimId = null;
 let lastCardId = null;
 let cardPopupTimer = null;
+let lastDiceRollId = null;
+let diceRollingNow = false;
+let diceTempFaces = null;
 
 function maybeTriggerMoveAnimation(room) {
   const ap = room.animPath;
@@ -908,6 +912,29 @@ function maybeTriggerMoveAnimation(room) {
     animOverride = { playerId: ap.playerId, pos: ap.from };
     animateTokenMove(ap.playerId, ap.from, ap.steps);
   }
+}
+function maybeTriggerDiceAnimation(room) {
+  if (room.diceRollId && room.diceRollId !== lastDiceRollId) {
+    lastDiceRollId = room.diceRollId;
+    animateDiceRoll();
+  }
+}
+function animateDiceRoll() {
+  diceRollingNow = true;
+  let ticks = 0;
+  const maxTicks = 6;
+  function tick() {
+    diceTempFaces = [1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6)];
+    render();
+    ticks++;
+    if (ticks < maxTicks) {
+      setTimeout(tick, 90);
+    } else {
+      diceRollingNow = false;
+      diceTempFaces = null;
+    }
+  }
+  tick();
 }
 function animateTokenMove(playerId, from, steps) {
   let i = 1;
@@ -1075,7 +1102,10 @@ function render() {
   if (view === 'landing') { app.innerHTML = renderLanding(); attachLandingEvents(); return; }
   if (view === 'waiting') { app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
   if (view === 'game') {
-    if (currentRoom) maybeTriggerMoveAnimation(currentRoom);
+    if (currentRoom) {
+      maybeTriggerMoveAnimation(currentRoom);
+      maybeTriggerDiceAnimation(currentRoom);
+    }
     const rollingNow = justRolled;
     justRolled = false;
     app.innerHTML = renderGame(rollingNow);
@@ -1166,8 +1196,8 @@ function renderGame(rollingNow) {
   const me = room.players.find(p => p.id === myId);
   const myTurn = isMyTurn(room);
   const currentPlayer = room.players[room.currentPlayerIndex];
-  const centerD1 = room.lastDice ? room.lastDice[0] : null;
-  const centerD2 = room.lastDice ? room.lastDice[1] : null;
+  const centerD1 = diceRollingNow && diceTempFaces ? diceTempFaces[0] : (room.lastDice ? room.lastDice[0] : null);
+  const centerD2 = diceRollingNow && diceTempFaces ? diceTempFaces[1] : (room.lastDice ? room.lastDice[1] : null);
 
   let cellsHtml = '';
   spaces.forEach((sp, idx) => {
@@ -1200,7 +1230,7 @@ function renderGame(rollingNow) {
     <div class="center-title">ТАЛЫН ЭЗЭНТ УЛС</div>
     <div class="center-subtitle">БИЗНЕС · ХӨРӨНГӨ · СТРАТЕГИ</div>
     <div class="money-float-anchor" id="moneyFloatAnchor"></div>
-    <div class="center-dice-row">${renderDie(centerD1, rollingNow, true)}${renderDie(centerD2, rollingNow, true)}</div>
+    <div class="center-dice-row">${renderDie(centerD1, diceRollingNow, true)}${renderDie(centerD2, diceRollingNow, true)}</div>
     ${renderCenterLeaderboard(room)}
     ${renderCenterTicker(room)}
   </div>`;
