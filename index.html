@@ -178,6 +178,8 @@
   @media (hover: hover) {
     .cell:not(.corner):hover { transform: translateY(-2px); box-shadow: inset 0 0 0 2.5px #241a0d, 0 6px 10px rgba(0,0,0,0.35); z-index: 2; transition: transform 0.12s ease, box-shadow 0.12s ease; }
   }
+  .cell[data-idx] { cursor: pointer; }
+  .cell[data-idx]:active { transform: scale(0.95); transition: transform 0.08s ease; }
   .cell-tint { position: absolute; inset: 0; pointer-events: none; z-index: 0; border-radius: 8px; overflow: hidden; }
   .cell-header {
     flex: 0 0 38%;
@@ -346,6 +348,12 @@
   }
   .card-popup-player { font-size: 13px; color: #9AA6BE; margin-bottom: 14px; }
   .card-popup-text { font-size: 17px; line-height: 1.5; color: var(--parchment); margin-bottom: 16px; }
+  .detail-popup { text-align: left; }
+  .detail-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13.5px; color: var(--parchment); }
+  .detail-row:last-of-type { border-bottom: none; }
+  .detail-row span:first-child { color: #9AA6BE; }
+  .detail-row span:last-child { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--steppe-gold); }
+  .detail-row-single { font-size: 13px; color: #9AA6BE; padding: 8px 0; text-align: center; }
   .card-popup-money { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; }
   .card-popup-money.positive { color: var(--grass-green); }
   .card-popup-money.negative { color: var(--seal-red); }
@@ -1180,7 +1188,7 @@ function renderGame(rollingNow) {
       : `<div class="cell-header ${sideOf(idx)}"><span class="icon-standee">${sp.icon}</span></div><div class="cell-body">${bodyInner}</div>`;
     const isActivePos = displayPos(room, currentPlayer) === idx;
     cellsHtml += `
-      <div class="cell ${isCorner ? 'corner' : ''} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''} ${isActivePos ? 'active-position' : ''}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
+      <div class="cell ${isCorner ? 'corner' : ''} ${owner ? 'owned-glow' : ''} ${isFullGroup ? 'group-complete' : ''} ${isActivePos ? 'active-position' : ''}" data-idx="${idx}" style="grid-row:${pos.row};grid-column:${pos.col};${owner ? `--owner-color:${owner.color}` : ''}">
         ${owner ? `<span class="owner-badge" style="--owner-color:${owner.color}" title="${owner.name} эзэмшдэг">${owner.token}</span>` : ''}
         ${cellInner}
         <div class="cell-tint" style="${tintStyle}"></div>
@@ -1287,6 +1295,48 @@ function attachGameEvents() {
   const skip = document.getElementById('skipBtn'); if (skip) skip.onclick = skipBuy;
   const build = document.getElementById('buildBtn'); if (build) build.onclick = buildProperty;
   const skipBuild2 = document.getElementById('skipBuildBtn'); if (skipBuild2) skipBuild2.onclick = skipBuild;
+  document.querySelectorAll('.cell[data-idx]').forEach(el => {
+    el.onclick = () => showCellDetail(parseInt(el.dataset.idx, 10));
+  });
+}
+
+function showCellDetail(idx) {
+  const room = currentRoom;
+  const sp = spaces[idx];
+  const root = document.getElementById('card-popup-root');
+  if (!root || !room) return;
+  const ownerId = room.propOwner[idx];
+  const owner = ownerId ? room.players.find(p => p.id === ownerId) : null;
+  const level = sp.type === 'property' ? houseLevel(room, idx) : 0;
+  const fullGroup = owner && sp.type === 'property' ? ownsFullGroup(room, owner.id, idx) : false;
+
+  let bodyHtml = '';
+  if (sp.type === 'property') {
+    const effectiveRent = level > 0 ? sp.rent * [1,2,4,6,10][level] : (fullGroup ? sp.rent * 2 : sp.rent);
+    bodyHtml = `
+      <div class="detail-row"><span>Үнэ</span><span>₮${fmt(sp.price)}</span></div>
+      <div class="detail-row"><span>Суурь түрээс</span><span>₮${fmt(sp.rent)}</span></div>
+      <div class="detail-row"><span>Одоогийн түрээс</span><span>₮${fmt(effectiveRent)}${level > 0 ? ' (' + buildLevelLabel(level) + ')' : (fullGroup ? ' (бүлэг ×2)' : '')}</span></div>
+      <div class="detail-row"><span>Эзэмшигч</span><span>${owner ? owner.token + ' ' + owner.name : 'Хэн ч биш'}</span></div>
+    `;
+  } else if (sp.type === 'tax') {
+    bodyHtml = `<div class="detail-row"><span>Татварын хэмжээ</span><span>₮${fmt(sp.amount)}</span></div>`;
+  } else {
+    bodyHtml = `<div class="detail-row-single">Тусгай нүд — худалдаж авах боломжгүй</div>`;
+  }
+
+  root.innerHTML = `
+    <div class="card-popup-backdrop" id="detailBackdrop">
+      <div class="card-popup detail-popup" onclick="event.stopPropagation()">
+        <div class="card-popup-eyebrow">${sp.icon} ${sp.name}</div>
+        ${bodyHtml}
+        <button class="btn btn-secondary" id="closeDetailBtn" style="margin-top:14px;">Хаах</button>
+      </div>
+    </div>`;
+  const backdrop = document.getElementById('detailBackdrop');
+  if (backdrop) backdrop.onclick = () => { root.innerHTML = ''; };
+  const closeBtn = document.getElementById('closeDetailBtn');
+  if (closeBtn) closeBtn.onclick = () => { root.innerHTML = ''; };
 }
 
 render();
