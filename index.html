@@ -127,28 +127,37 @@
   .tile .tile-icon { font-size: 15px; pointer-events: none; }
   .owner-dot { pointer-events: none; }
 
-  .tile-building {
+  .tile-building-badge {
     position: absolute;
     cursor: pointer;
-    transform-origin: center bottom;
-    transition: transform 0.25s ease, filter 0.25s ease;
+    transform-origin: center center;
+    transition: transform 0.2s ease, filter 0.2s ease;
     z-index: 5;
     pointer-events: auto;
+    border-radius: 50%;
   }
-  .tile-building img {
+  .badge-ring {
+    position: absolute; inset: -2px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.55) 60%, transparent 78%);
+    border: 1.5px solid var(--steppe-gold);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    z-index: 0;
+  }
+  .tile-building-badge img {
+    position: relative; z-index: 1;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: bottom center;
-    filter: drop-shadow(0 8px 5px rgba(0,0,0,0.35));
+    object-position: center;
+    padding: 12%;
+    box-sizing: border-box;
     pointer-events: none;
   }
-  .tile-building:hover img {
-    filter: drop-shadow(0 10px 7px rgba(0,0,0,0.4)) drop-shadow(0 0 8px #ffd64d);
-  }
-  .tile-building:hover { transform: translateY(-6px) scale(1.08); }
-  .building-flag-icon { position: absolute; top: -8px; right: -4px; font-size: clamp(9px, 1.6vw, 14px); }
+  .tile-building-badge:hover { transform: scale(1.25); z-index: 7; }
+  .tile-building-badge:hover .badge-ring { border-color: #ffd64d; box-shadow: 0 0 8px #ffd64d; }
+  .building-flag-icon { position: absolute; top: -6px; right: -4px; font-size: clamp(7px, 1.2vw, 10px); z-index: 2; }
 
   .upgrade-icon {
     position: absolute;
@@ -195,16 +204,16 @@
   .corp-particles i:nth-child(4) { left: 68%; animation-delay: 0.9s; }
   .corp-particles i:nth-child(5) { left: 82%; animation-delay: 1.2s; }
   .corp-particles i:nth-child(6) { left: 46%; animation-delay: 1.5s; }
-  .tile-building.level-0 { scale: 0.62; }
-  .tile-building.level-1 { scale: 0.75; }
-  .tile-building.level-2 { scale: 0.88; }
-  .tile-building.level-3 { scale: 1; }
-  .tile-building.level-4 { scale: 1.12; }
-  .tile-building.level-0.building-appear { animation: buildingAppear0 0.5s cubic-bezier(.2,1.4,.4,1); }
-  .tile-building.level-1.building-appear { animation: buildingAppear1 0.5s cubic-bezier(.2,1.4,.4,1); }
-  .tile-building.level-2.building-appear { animation: buildingAppear2 0.5s cubic-bezier(.2,1.4,.4,1); }
-  .tile-building.level-3.building-appear { animation: buildingAppear3 0.5s cubic-bezier(.2,1.4,.4,1); }
-  .tile-building.level-4.building-appear { animation: buildingAppear4 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building-badge.level-0 { scale: 0.85; }
+  .tile-building-badge.level-1 { scale: 0.92; }
+  .tile-building-badge.level-2 { scale: 1; }
+  .tile-building-badge.level-3 { scale: 1.08; }
+  .tile-building-badge.level-4 { scale: 1.18; }
+  .tile-building-badge.level-0.building-appear { animation: buildingAppear0 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building-badge.level-1.building-appear { animation: buildingAppear1 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building-badge.level-2.building-appear { animation: buildingAppear2 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building-badge.level-3.building-appear { animation: buildingAppear3 0.5s cubic-bezier(.2,1.4,.4,1); }
+  .tile-building-badge.level-4.building-appear { animation: buildingAppear4 0.5s cubic-bezier(.2,1.4,.4,1); }
   .building-flag { animation: flagWave 1.6s ease-in-out infinite; transform-origin: left center; }
   .building-light { animation: lightBlink 1.2s ease-in-out infinite; }
   .debug-poly { display: none; }
@@ -2310,9 +2319,9 @@ function renderUpgradeIcons(tile, level, idx, ownerIdx) {
 
 function renderBuildingIcon(tile, level, idx) {
   const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-  const w = tile.buildingWidth * 1.05;
+  const w = tile.buildingWidth * 0.55;
   const x = tile.buildingX - w / 2;
-  const y = tile.buildingY - w;
+  const y = tile.buildingY - w / 2;
   const leftPct = (x / 1672 * 100).toFixed(2);
   const topPct = (y / 941 * 100).toFixed(2);
   const widthPct = (w / 1672 * 100).toFixed(2);
@@ -2321,8 +2330,9 @@ function renderBuildingIcon(tile, level, idx) {
   seenBuildings.add(idx);
   const flagHtml = level >= 4 ? `<span class="building-flag-icon">\ud83c\udfc1</span>` : '';
   return `<div data-idx="${idx}"
-    class="tile-building level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}"
+    class="tile-building-badge level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}"
     style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --depth:${tile.depth};">
+    <span class="badge-ring"></span>
     <img src="${fileName}.png" alt="${tile.name}" loading="lazy" onerror="this.style.display='none'">
     ${flagHtml}
   </div>`;
@@ -2615,7 +2625,7 @@ function attachGameEvents() {
     };
     el.onmouseleave = () => { if (tooltip) tooltip.style.display = 'none'; };
   });
-  document.querySelectorAll('.tile-building[data-idx]').forEach(el => {
+  document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
     el.onclick = (e) => { e.stopPropagation(); showCellDetail(idx); };
   });
