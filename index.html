@@ -2319,7 +2319,7 @@ function renderUpgradeIcons(tile, level, idx, ownerIdx) {
 
 function renderBuildingIcon(tile, level, idx) {
   const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-  const w = tile.buildingWidth * 0.55;
+  const w = tile.buildingWidth * 0.78;
   const x = tile.buildingX - w / 2;
   const y = tile.buildingY - w / 2;
   const leftPct = (x / 1672 * 100).toFixed(2);
