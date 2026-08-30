@@ -149,6 +149,43 @@
   }
   .tile-building:hover { transform: translateY(-6px) scale(1.08); }
   .building-flag-icon { position: absolute; top: -8px; right: -4px; font-size: clamp(9px, 1.6vw, 14px); }
+
+  .upgrade-icon {
+    position: absolute;
+    pointer-events: auto;
+    cursor: pointer;
+    transform-origin: center bottom;
+    z-index: 6;
+  }
+  .upgrade-icon img {
+    display: block; width: 100%; height: 100%;
+    object-fit: contain; object-position: bottom center;
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,0.4));
+    pointer-events: none;
+    position: relative; z-index: 2;
+  }
+  .upgrade-glow-ring {
+    position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%);
+    width: 85%; height: 22%; border-radius: 50%;
+    background: radial-gradient(ellipse, var(--glow) 0%, transparent 72%);
+    opacity: 0.75; z-index: 1; pointer-events: none;
+    box-shadow: 0 0 6px 1px var(--glow);
+  }
+  .upgrade-icon.upgrade-appear { animation: upgradeBounce 0.55s cubic-bezier(.34,1.56,.64,1); }
+  .upgrade-corp img { filter: drop-shadow(0 6px 5px rgba(0,0,0,0.45)) drop-shadow(0 0 10px rgba(255,215,90,0.55)); }
+  .corp-particles { position: absolute; inset: -20% -20% 0 -20%; z-index: 3; pointer-events: none; }
+  .corp-particles i {
+    position: absolute; bottom: 15%; left: 50%; width: 4px; height: 4px; border-radius: 50%;
+    background: radial-gradient(circle, #FFE58A 0%, #D4AF37 100%);
+    box-shadow: 0 0 4px 1px #FFE58A;
+    animation: particleRise 1.8s ease-in infinite;
+  }
+  .corp-particles i:nth-child(1) { left: 20%; animation-delay: 0s; }
+  .corp-particles i:nth-child(2) { left: 38%; animation-delay: 0.3s; }
+  .corp-particles i:nth-child(3) { left: 55%; animation-delay: 0.6s; }
+  .corp-particles i:nth-child(4) { left: 68%; animation-delay: 0.9s; }
+  .corp-particles i:nth-child(5) { left: 82%; animation-delay: 1.2s; }
+  .corp-particles i:nth-child(6) { left: 46%; animation-delay: 1.5s; }
   .tile-building.level-0 { scale: 0.62; }
   .tile-building.level-1 { scale: 0.75; }
   .tile-building.level-2 { scale: 0.88; }
@@ -275,6 +312,8 @@
   @keyframes buildingAppear2 { 0% { opacity: 0; scale: 0.25; } 60% { opacity: 1; scale: 1.02; } 100% { opacity: 1; scale: 0.88; } }
   @keyframes buildingAppear3 { 0% { opacity: 0; scale: 0.3; } 60% { opacity: 1; scale: 1.15; } 100% { opacity: 1; scale: 1; } }
   @keyframes buildingAppear4 { 0% { opacity: 0; scale: 0.35; } 60% { opacity: 1; scale: 1.28; } 100% { opacity: 1; scale: 1.12; } }
+  @keyframes upgradeBounce { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1.25); opacity: 1; } 75% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes particleRise { 0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(-50%, -140%) scale(0.2); opacity: 0; } }
   @keyframes diceRoll {
     0% { transform: rotate(0deg) scale(1); } 12% { transform: rotate(-45deg) scale(1.1); }
     24% { transform: rotate(110deg) scale(0.95); } 36% { transform: rotate(-160deg) scale(1.08); }
@@ -368,7 +407,24 @@ const BOARD_CONFIG = [
     "buildingY": 734.8,
     "buildingWidth": 59.9,
     "buildingRotation": 0,
-    "depth": 735
+    "depth": 735,
+    "houseSlots": [
+      [
+        720.8,
+        713.2
+      ],
+      [
+        732.8,
+        718.2
+      ],
+      [
+        744.8,
+        723.2
+      ]
+    ],
+    "corporationX": 732.8,
+    "corporationY": 718.2,
+    "buildingScale": 1.0
   },
   {
     "id": 2,
@@ -403,7 +459,24 @@ const BOARD_CONFIG = [
     "buildingY": 684.6,
     "buildingWidth": 58.8,
     "buildingRotation": 0,
-    "depth": 685
+    "depth": 685,
+    "houseSlots": [
+      [
+        655.5,
+        662.5
+      ],
+      [
+        665.4,
+        670.9
+      ],
+      [
+        675.3,
+        679.3
+      ]
+    ],
+    "corporationX": 665.4,
+    "corporationY": 670.9,
+    "buildingScale": 1.0
   },
   {
     "id": 3,
@@ -438,7 +511,24 @@ const BOARD_CONFIG = [
     "buildingY": 636.8,
     "buildingWidth": 58.1,
     "buildingRotation": 0,
-    "depth": 637
+    "depth": 637,
+    "houseSlots": [
+      [
+        587.5,
+        616.1
+      ],
+      [
+        594.5,
+        627.0
+      ],
+      [
+        601.6,
+        637.9
+      ]
+    ],
+    "corporationX": 594.5,
+    "corporationY": 627.0,
+    "buildingScale": 1.0
   },
   {
     "id": 4,
@@ -473,7 +563,24 @@ const BOARD_CONFIG = [
     "buildingY": 590.5,
     "buildingWidth": 56.6,
     "buildingRotation": 0,
-    "depth": 590
+    "depth": 590,
+    "houseSlots": [
+      [
+        516.9,
+        572.2
+      ],
+      [
+        521.3,
+        584.4
+      ],
+      [
+        525.7,
+        596.6
+      ]
+    ],
+    "corporationX": 521.3,
+    "corporationY": 584.4,
+    "buildingScale": 1.0
   },
   {
     "id": 5,
@@ -508,7 +615,24 @@ const BOARD_CONFIG = [
     "buildingY": 544.9,
     "buildingWidth": 54.3,
     "buildingRotation": 0,
-    "depth": 545
+    "depth": 545,
+    "houseSlots": [
+      [
+        446.1,
+        528.8
+      ],
+      [
+        448.4,
+        541.6
+      ],
+      [
+        450.8,
+        554.4
+      ]
+    ],
+    "corporationX": 448.4,
+    "corporationY": 541.6,
+    "buildingScale": 1.0
   },
   {
     "id": 6,
@@ -572,7 +696,24 @@ const BOARD_CONFIG = [
     "buildingY": 455.4,
     "buildingWidth": 52.2,
     "buildingRotation": 0,
-    "depth": 455
+    "depth": 455,
+    "houseSlots": [
+      [
+        308.8,
+        442.9
+      ],
+      [
+        308.5,
+        455.9
+      ],
+      [
+        308.1,
+        468.9
+      ]
+    ],
+    "corporationX": 308.5,
+    "corporationY": 455.9,
+    "buildingScale": 1.0
   },
   {
     "id": 8,
@@ -636,7 +777,24 @@ const BOARD_CONFIG = [
     "buildingY": 322.3,
     "buildingWidth": 51.0,
     "buildingRotation": 0,
-    "depth": 322
+    "depth": 322,
+    "houseSlots": [
+      [
+        350.0,
+        314.9
+      ],
+      [
+        346.3,
+        327.4
+      ],
+      [
+        342.7,
+        339.9
+      ]
+    ],
+    "corporationX": 346.3,
+    "corporationY": 327.4,
+    "buildingScale": 1.0
   },
   {
     "id": 10,
@@ -671,7 +829,24 @@ const BOARD_CONFIG = [
     "buildingY": 288.7,
     "buildingWidth": 49.9,
     "buildingRotation": 0,
-    "depth": 289
+    "depth": 289,
+    "houseSlots": [
+      [
+        431.8,
+        283.8
+      ],
+      [
+        426.7,
+        295.7
+      ],
+      [
+        421.6,
+        307.7
+      ]
+    ],
+    "corporationX": 426.7,
+    "corporationY": 295.7,
+    "buildingScale": 1.0
   },
   {
     "id": 11,
@@ -706,7 +881,24 @@ const BOARD_CONFIG = [
     "buildingY": 257.3,
     "buildingWidth": 48.5,
     "buildingRotation": 0,
-    "depth": 257
+    "depth": 257,
+    "houseSlots": [
+      [
+        509.6,
+        255.6
+      ],
+      [
+        502.9,
+        266.7
+      ],
+      [
+        496.1,
+        277.8
+      ]
+    ],
+    "corporationX": 502.9,
+    "corporationY": 266.7,
+    "buildingScale": 1.0
   },
   {
     "id": 12,
@@ -741,7 +933,24 @@ const BOARD_CONFIG = [
     "buildingY": 227.5,
     "buildingWidth": 48.0,
     "buildingRotation": 0,
-    "depth": 228
+    "depth": 228,
+    "houseSlots": [
+      [
+        581.8,
+        229.6
+      ],
+      [
+        573.2,
+        239.3
+      ],
+      [
+        564.7,
+        249.1
+      ]
+    ],
+    "corporationX": 573.2,
+    "corporationY": 239.3,
+    "buildingScale": 1.0
   },
   {
     "id": 13,
@@ -776,7 +985,24 @@ const BOARD_CONFIG = [
     "buildingY": 198.6,
     "buildingWidth": 46.1,
     "buildingRotation": 0,
-    "depth": 199
+    "depth": 199,
+    "houseSlots": [
+      [
+        649.3,
+        205.0
+      ],
+      [
+        639.0,
+        212.9
+      ],
+      [
+        628.7,
+        220.8
+      ]
+    ],
+    "corporationX": 639.0,
+    "corporationY": 212.9,
+    "buildingScale": 1.0
   },
   {
     "id": 14,
@@ -841,7 +1067,24 @@ const BOARD_CONFIG = [
     "buildingY": 142.8,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
-    "depth": 143
+    "depth": 143,
+    "houseSlots": [
+      [
+        768.4,
+        157.0
+      ],
+      [
+        755.8,
+        160.2
+      ],
+      [
+        743.2,
+        163.5
+      ]
+    ],
+    "corporationX": 755.8,
+    "corporationY": 160.2,
+    "buildingScale": 1.0
   },
   {
     "id": 16,
@@ -905,7 +1148,24 @@ const BOARD_CONFIG = [
     "buildingY": 142.6,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
-    "depth": 143
+    "depth": 143,
+    "houseSlots": [
+      [
+        930.2,
+        163.3
+      ],
+      [
+        917.7,
+        160.0
+      ],
+      [
+        905.1,
+        156.7
+      ]
+    ],
+    "corporationX": 917.7,
+    "corporationY": 160.0,
+    "buildingScale": 1.0
   },
   {
     "id": 18,
@@ -940,7 +1200,24 @@ const BOARD_CONFIG = [
     "buildingY": 170.2,
     "buildingWidth": 43.5,
     "buildingRotation": 0,
-    "depth": 170
+    "depth": 170,
+    "houseSlots": [
+      [
+        984.9,
+        192.1
+      ],
+      [
+        973.2,
+        186.4
+      ],
+      [
+        961.5,
+        180.8
+      ]
+    ],
+    "corporationX": 973.2,
+    "corporationY": 186.4,
+    "buildingScale": 1.0
   },
   {
     "id": 19,
@@ -975,7 +1252,24 @@ const BOARD_CONFIG = [
     "buildingY": 197.8,
     "buildingWidth": 45.8,
     "buildingRotation": 0,
-    "depth": 198
+    "depth": 198,
+    "houseSlots": [
+      [
+        1043.2,
+        220.0
+      ],
+      [
+        1032.9,
+        212.2
+      ],
+      [
+        1022.5,
+        204.3
+      ]
+    ],
+    "corporationX": 1032.9,
+    "corporationY": 212.2,
+    "buildingScale": 1.0
   },
   {
     "id": 20,
@@ -1010,7 +1304,24 @@ const BOARD_CONFIG = [
     "buildingY": 226.8,
     "buildingWidth": 47.3,
     "buildingRotation": 0,
-    "depth": 227
+    "depth": 227,
+    "houseSlots": [
+      [
+        1106.4,
+        248.5
+      ],
+      [
+        1097.8,
+        238.8
+      ],
+      [
+        1089.1,
+        229.0
+      ]
+    ],
+    "corporationX": 1097.8,
+    "corporationY": 238.8,
+    "buildingScale": 1.0
   },
   {
     "id": 21,
@@ -1045,7 +1356,24 @@ const BOARD_CONFIG = [
     "buildingY": 256.1,
     "buildingWidth": 48.1,
     "buildingRotation": 0,
-    "depth": 256
+    "depth": 256,
+    "houseSlots": [
+      [
+        1174.7,
+        276.6
+      ],
+      [
+        1167.9,
+        265.5
+      ],
+      [
+        1161.0,
+        254.5
+      ]
+    ],
+    "corporationX": 1167.9,
+    "corporationY": 265.5,
+    "buildingScale": 1.0
   },
   {
     "id": 22,
@@ -1109,7 +1437,24 @@ const BOARD_CONFIG = [
     "buildingY": 321.7,
     "buildingWidth": 51.1,
     "buildingRotation": 0,
-    "depth": 322
+    "depth": 322,
+    "houseSlots": [
+      [
+        1326.0,
+        339.3
+      ],
+      [
+        1322.3,
+        326.8
+      ],
+      [
+        1318.6,
+        314.4
+      ]
+    ],
+    "corporationX": 1322.3,
+    "corporationY": 326.8,
+    "buildingScale": 1.0
   },
   {
     "id": 24,
@@ -1173,7 +1518,24 @@ const BOARD_CONFIG = [
     "buildingY": 454.7,
     "buildingWidth": 53.1,
     "buildingRotation": 0,
-    "depth": 455
+    "depth": 455,
+    "houseSlots": [
+      [
+        1362.3,
+        468.2
+      ],
+      [
+        1361.9,
+        455.2
+      ],
+      [
+        1361.5,
+        442.2
+      ]
+    ],
+    "corporationX": 1361.9,
+    "corporationY": 455.2,
+    "buildingScale": 1.0
   },
   {
     "id": 26,
@@ -1208,7 +1570,24 @@ const BOARD_CONFIG = [
     "buildingY": 499.7,
     "buildingWidth": 54.2,
     "buildingRotation": 0,
-    "depth": 500
+    "depth": 500,
+    "houseSlots": [
+      [
+        1293.4,
+        511.6
+      ],
+      [
+        1294.2,
+        498.6
+      ],
+      [
+        1295.0,
+        485.6
+      ]
+    ],
+    "corporationX": 1294.2,
+    "corporationY": 498.6,
+    "buildingScale": 1.0
   },
   {
     "id": 27,
@@ -1243,7 +1622,24 @@ const BOARD_CONFIG = [
     "buildingY": 544.7,
     "buildingWidth": 55.5,
     "buildingRotation": 0,
-    "depth": 545
+    "depth": 545,
+    "houseSlots": [
+      [
+        1220.9,
+        554.2
+      ],
+      [
+        1223.3,
+        541.4
+      ],
+      [
+        1225.6,
+        528.6
+      ]
+    ],
+    "corporationX": 1223.3,
+    "corporationY": 541.4,
+    "buildingScale": 1.0
   },
   {
     "id": 28,
@@ -1278,7 +1674,24 @@ const BOARD_CONFIG = [
     "buildingY": 591.0,
     "buildingWidth": 58.0,
     "buildingRotation": 0,
-    "depth": 591
+    "depth": 591,
+    "houseSlots": [
+      [
+        1146.4,
+        597.1
+      ],
+      [
+        1150.8,
+        584.8
+      ],
+      [
+        1155.3,
+        572.6
+      ]
+    ],
+    "corporationX": 1150.8,
+    "corporationY": 584.8,
+    "buildingScale": 1.0
   },
   {
     "id": 29,
@@ -1313,7 +1726,24 @@ const BOARD_CONFIG = [
     "buildingY": 638.0,
     "buildingWidth": 59.2,
     "buildingRotation": 0,
-    "depth": 638
+    "depth": 638,
+    "houseSlots": [
+      [
+        1070.0,
+        639.0
+      ],
+      [
+        1077.1,
+        628.1
+      ],
+      [
+        1084.2,
+        617.3
+      ]
+    ],
+    "corporationX": 1077.1,
+    "corporationY": 628.1,
+    "buildingScale": 1.0
   },
   {
     "id": 30,
@@ -1378,7 +1808,24 @@ const BOARD_CONFIG = [
     "buildingY": 736.4,
     "buildingWidth": 59.5,
     "buildingRotation": 0,
-    "depth": 736
+    "depth": 736,
+    "houseSlots": [
+      [
+        926.5,
+        724.7
+      ],
+      [
+        938.5,
+        719.7
+      ],
+      [
+        950.5,
+        714.8
+      ]
+    ],
+    "corporationX": 938.5,
+    "corporationY": 719.7,
+    "buildingScale": 1.0
   }
 ];
 
@@ -1804,6 +2251,52 @@ const BUILDING_ICON_SHAPES = {
 const BUILDING_FILE_MAP = { mining: 'mine' };
 let seenBuildings = new Set();
 
+const PLAYER_GLOW_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#a855f7'];
+let seenUpgrades = new Set();
+
+function renderUpgradeIcons(tile, level, idx, ownerIdx) {
+  if (!level || level < 1) return '';
+  const glow = PLAYER_GLOW_COLORS[((ownerIdx % 4) + 4) % 4];
+  const scale = tile.buildingScale || 1;
+
+  if (level >= 4) {
+    const key = 'corp-' + idx;
+    const isNew = !seenUpgrades.has(key);
+    seenUpgrades.add(key);
+    const w = 34 * scale;
+    const leftPct = ((tile.corporationX - w / 2) / 1672 * 100).toFixed(2);
+    const topPct = ((tile.corporationY - w) / 941 * 100).toFixed(2);
+    const widthPct = (w / 1672 * 100).toFixed(2);
+    const heightPct = (w / 941 * 100).toFixed(2);
+    return `<div class="upgrade-icon upgrade-corp ${isNew ? 'upgrade-appear' : ''}" data-idx="${idx}"
+      style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --glow:${glow}; --depth:${tile.depth + 0.5};">
+      <span class="upgrade-glow-ring"></span>
+      <span class="corp-particles"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <img src="corporation-hq.png" alt="Corporation HQ" onerror="this.style.display='none'">
+    </div>`;
+  }
+
+  const count = Math.min(level, 3);
+  let html = '';
+  for (let s = 0; s < count; s++) {
+    const [hx, hy] = tile.houseSlots[s];
+    const key = 'house-' + idx + '-' + s;
+    const isNew = !seenUpgrades.has(key);
+    seenUpgrades.add(key);
+    const w = 16 * scale;
+    const leftPct = ((hx - w / 2) / 1672 * 100).toFixed(2);
+    const topPct = ((hy - w) / 941 * 100).toFixed(2);
+    const widthPct = (w / 1672 * 100).toFixed(2);
+    const heightPct = (w / 941 * 100).toFixed(2);
+    html += `<div class="upgrade-icon upgrade-house ${isNew ? 'upgrade-appear' : ''}" data-idx="${idx}"
+      style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --glow:${glow}; --depth:${tile.depth + 0.5};">
+      <span class="upgrade-glow-ring"></span>
+      <img src="player-house.png" alt="House" onerror="this.style.display='none'">
+    </div>`;
+  }
+  return html;
+}
+
 function renderBuildingIcon(tile, level, idx) {
   const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
   const w = tile.buildingWidth * 1.7;
@@ -1922,6 +2415,7 @@ function renderGame() {
   const CORNER_IDS = [0,8,16,24];
   let tilesHtml = '';
   const buildingsToRender = [];
+  const upgradesToRender = [];
   BOARD_CONFIG.forEach(tile => {
     const idx = tile.id;
     const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
@@ -1943,11 +2437,15 @@ function renderGame() {
       ${owner ? `<circle class="owner-dot" cx="${tile.labelX + 22}" cy="${tile.labelY - 22}" r="9" fill="${owner.color}" stroke="#18382d" stroke-width="1.5"></circle>` : ''}
     </g>`;
     if (owner && tile.buildingType) {
+      const ownerIdx = room.players.findIndex(p => p.id === owner.id);
       buildingsToRender.push({ tile, level, idx, depth: tile.depth });
+      upgradesToRender.push({ tile, level, idx, depth: tile.depth + 0.5, ownerIdx, owner });
     }
   });
   buildingsToRender.sort((a, b) => a.depth - b.depth);
   const buildingsHtml = buildingsToRender.map(b => renderBuildingIcon(b.tile, b.level, b.idx)).join('');
+  upgradesToRender.sort((a, b) => a.depth - b.depth);
+  const upgradesHtml = upgradesToRender.map(u => renderUpgradeIcons(u.tile, u.level, u.idx, u.ownerIdx)).join('');
 
   const clampPct = v => Math.min(97, Math.max(3, v));
   const tokensHtml = room.players.filter(p => !p.bankrupt).map((p, i) => {
@@ -2021,6 +2519,7 @@ function renderGame() {
             ${tilesHtml}
           </svg>
           ${buildingsHtml}
+          ${upgradesHtml}
           <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
           ${tokensHtml}
         </div>
@@ -2106,6 +2605,10 @@ function attachGameEvents() {
     el.onmouseleave = () => { if (tooltip) tooltip.style.display = 'none'; };
   });
   document.querySelectorAll('.tile-building[data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    el.onclick = (e) => { e.stopPropagation(); showCellDetail(idx); };
+  });
+  document.querySelectorAll('.upgrade-icon[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
     el.onclick = (e) => { e.stopPropagation(); showCellDetail(idx); };
   });
