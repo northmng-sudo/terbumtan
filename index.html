@@ -100,10 +100,11 @@
   .game-layout { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 20px; }
   @media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } }
 
-  .board-outer { display: flex; justify-content: center; }
+  .board-outer { display: flex; justify-content: center; min-width: 0; overflow: hidden; }
   .board {
     position: relative;
-    width: min(96vw, 1400px);
+    width: min(100%, 1400px);
+    max-width: 100%;
     aspect-ratio: 1672 / 941;
     user-select: none;
     margin: 0 auto;
@@ -117,9 +118,9 @@
 
   .tile polygon { fill: transparent; stroke: transparent; stroke-width: 3px; cursor: pointer; transition: fill 0.15s ease, stroke 0.15s ease; }
   .tile:hover polygon { fill: rgba(255,215,70,0.35); stroke: #ffd84d; }
-  .tile.owned polygon { fill: var(--owner-fill, rgba(212,175,55,0.22)); stroke: var(--owner-color, var(--steppe-gold)); stroke-width: 3px; }
-  .tile.group-complete polygon { stroke-width: 4px; filter: drop-shadow(0 0 4px var(--owner-color, var(--steppe-gold))); }
-  .tile.active-position polygon { animation: activePulseSvg 1.3s infinite; }
+  .tile.owned polygon { fill: transparent; stroke: transparent; }
+  .tile.group-complete polygon { fill: transparent; stroke: transparent; }
+  .tile.active-position polygon { fill: transparent; stroke: transparent; }
   .tile text { fill: #172a22; font-weight: 800; pointer-events: none; paint-order: stroke; stroke: rgba(255,255,255,0.85); stroke-width: 3px; stroke-linejoin: round; font-family: 'Work Sans', sans-serif; }
   .tile .tile-price { font-size: 0.8em; fill: #6b4f1a; }
   .tile .tile-icon { font-size: 15px; pointer-events: none; }
@@ -1804,7 +1805,7 @@ let seenBuildings = new Set();
 
 function renderBuildingIcon(tile, level, idx) {
   const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-  const w = tile.buildingWidth * 2.1;
+  const w = tile.buildingWidth * 1.25;
   const x = tile.buildingX - w / 2;
   const y = tile.buildingY - w;
   const leftPct = (x / 1672 * 100).toFixed(2);
