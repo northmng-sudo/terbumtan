@@ -126,16 +126,27 @@
   .owner-dot { pointer-events: none; }
 
   .tile-building {
+    position: absolute;
     cursor: pointer;
-    transform-box: fill-box;
     transform-origin: center bottom;
-    filter: drop-shadow(0 8px 5px rgba(0,0,0,0.35));
     transition: transform 0.25s ease, filter 0.25s ease;
+    z-index: 5;
+    pointer-events: auto;
   }
-  .tile-building:hover {
-    transform: translateY(-6px) scale(1.08);
+  .tile-building img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    filter: drop-shadow(0 8px 5px rgba(0,0,0,0.35));
+    pointer-events: none;
+  }
+  .tile-building:hover img {
     filter: drop-shadow(0 10px 7px rgba(0,0,0,0.4)) drop-shadow(0 0 8px #ffd64d);
   }
+  .tile-building:hover { transform: translateY(-6px) scale(1.08); }
+  .building-flag-icon { position: absolute; top: -8px; right: -4px; font-size: clamp(9px, 1.6vw, 14px); }
   .tile-building.level-0 { scale: 0.62; }
   .tile-building.level-1 { scale: 0.75; }
   .tile-building.level-2 { scale: 0.88; }
@@ -1796,17 +1807,19 @@ function renderBuildingIcon(tile, level, idx) {
   const w = tile.buildingWidth * 2.1;
   const x = tile.buildingX - w / 2;
   const y = tile.buildingY - w;
-  let extra = '';
-  if (level >= 4) {
-    extra = `<g class="building-flag"><line x1="${x+w-6}" y1="${y-2}" x2="${x+w-6}" y2="${y+10}" stroke="#8a6d1f" stroke-width="1.5"/><polygon points="${x+w-6},${y-2} ${x+w+4},${y+1} ${x+w-6},${y+4}" fill="#D4AF37"/></g>
-      <circle cx="${x+6}" cy="${y+w-4}" r="2" fill="#FFE58A" class="building-light"/><circle cx="${x+w-6}" cy="${y+w-4}" r="2" fill="#FFE58A" class="building-light"/>`;
-  }
+  const leftPct = (x / 1672 * 100).toFixed(2);
+  const topPct = (y / 941 * 100).toFixed(2);
+  const widthPct = (w / 1672 * 100).toFixed(2);
+  const heightPct = (w / 941 * 100).toFixed(2);
   const isNew = !seenBuildings.has(idx);
   seenBuildings.add(idx);
-  return `<g class="tile-building level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}" data-idx="${idx}" style="--depth:${tile.depth}">
-    <image href="${fileName}.png" x="${x}" y="${y}" width="${w}" height="${w}" preserveAspectRatio="xMidYMax meet"></image>
-    ${extra}
-  </g>`;
+  const flagHtml = level >= 4 ? `<span class="building-flag-icon">\ud83c\udfc1</span>` : '';
+  return `<div data-idx="${idx}"
+    class="tile-building level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}"
+    style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --depth:${tile.depth};">
+    <img src="${fileName}.png" alt="${tile.name}" loading="lazy" onerror="this.style.display='none'">
+    ${flagHtml}
+  </div>`;
 }
 
 function renderBuildings(level) {
@@ -2003,8 +2016,8 @@ function renderGame() {
           <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
           <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
             ${tilesHtml}
-            ${buildingsHtml}
           </svg>
+          ${buildingsHtml}
           <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
           ${tokensHtml}
         </div>
