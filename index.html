@@ -330,11 +330,46 @@
   .board-image { object-fit: contain; pointer-events: none; border-radius: 14px; }
   .board-overlay { overflow: visible; }
 
-  .tile polygon { fill: transparent; stroke: transparent; stroke-width: 3px; cursor: pointer; transition: fill 0.15s ease, stroke 0.15s ease; }
-  .tile:hover polygon { fill: rgba(255,215,70,0.35); stroke: #ffd84d; }
-  .tile.owned polygon { fill: transparent; stroke: transparent; }
-  .tile.group-complete polygon { fill: transparent; stroke: transparent; }
-  .tile.active-position polygon { fill: transparent; stroke: transparent; }
+  /* ===== TILE INTERACTION STATE SYSTEM ===== */
+  .tile-hit-area { fill: transparent; stroke: none; cursor: pointer; pointer-events: all; }
+  .tile-surface { fill: transparent; stroke: transparent; stroke-width: 2; pointer-events: none; transition: fill 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease; }
+  .tile-owner-ring { fill: none; stroke-width: 4; opacity: 0.85; pointer-events: none; }
+  .tile { transform-box: fill-box; transform-origin: center; transition: filter 0.2s ease; }
+  .tile:focus-visible .tile-surface { stroke: #ffe08a; stroke-width: 3.5; }
+  .tile:focus-visible { outline: none; }
+
+  /* 1. available */
+  .tile--available .tile-surface { fill: rgba(255,244,214,0.08); stroke: rgba(245,201,79,0.35); stroke-width: 2; }
+
+  /* 2. owned (base ring stays visible under other states) */
+  .tile--owned .tile-surface { fill: transparent; }
+
+  /* 3. hovered */
+  .tile--hovered { filter: drop-shadow(0 0 7px rgba(255,218,92,0.85)) drop-shadow(0 5px 5px rgba(0,0,0,0.35)); transform: translateY(-2px); transition: transform 0.18s ease-out, filter 0.18s ease-out; }
+  .tile--hovered .tile-surface { fill: rgba(255,223,112,0.18); stroke: #ffe08a; stroke-width: 3; }
+
+  /* 4. buildable */
+  .tile--buildable .tile-surface { stroke: #25c98e; stroke-width: 2.5; animation: buildablePulse 1.6s ease-in-out infinite; }
+  @keyframes buildablePulse {
+    0%,100% { stroke-opacity: 0.45; filter: drop-shadow(0 0 3px rgba(37,201,142,0.35)); }
+    50% { stroke-opacity: 1; filter: drop-shadow(0 0 10px rgba(37,201,142,0.9)); }
+  }
+
+  /* 5. current (player standing here) */
+  .tile--current .tile-surface { stroke: var(--gold-light, #ffe69a); stroke-width: 2.5; }
+  .tile--current::before { content: ''; }
+
+  /* 6. selected (strongest, drawn last visually via filter+transform) */
+  .tile--selected { transform: translateY(-5px) scale(1.025); filter: drop-shadow(0 10px 14px rgba(0,0,0,0.45)) drop-shadow(0 0 10px rgba(245,202,85,0.7)); transition: transform 0.2s ease-out, filter 0.2s ease-out; }
+  .tile--selected .tile-surface { fill: rgba(245,202,85,0.14); stroke: var(--gold, #f5ca55); stroke-width: 3.5; }
+
+  /* 7. mortgaged (strongest precedence, dampens everything else) */
+  .tile--mortgaged .tile-surface { fill: rgba(20,25,30,0.55); stroke: #6b7688; stroke-width: 2; }
+  .tile--mortgaged { filter: saturate(0.45) brightness(0.75); }
+  .tile--mortgaged.tile--buildable .tile-surface { animation: none; stroke: #6b7688; }
+  .tile--mortgaged.tile--available .tile-surface { fill: rgba(20,25,30,0.55); stroke: #6b7688; }
+  .mortgage-lock { pointer-events: none; }
+
   .tile text { fill: #172a22; font-weight: 800; pointer-events: none; paint-order: stroke; stroke: rgba(255,255,255,0.85); stroke-width: 3px; stroke-linejoin: round; font-family: 'Work Sans', sans-serif; }
   .tile .tile-price { font-size: 0.8em; fill: #6b4f1a; }
   .tile .tile-icon { font-size: 15px; pointer-events: none; }
@@ -557,7 +592,7 @@
   .building-flag { animation: flagWave 1.6s ease-in-out infinite; transform-origin: left center; }
   .building-light { animation: lightBlink 1.2s ease-in-out infinite; }
   .debug-poly { display: none; }
-  .board.debug .tile polygon { fill: rgba(255,0,0,0.28) !important; stroke: #ff2b2b !important; }
+  .board.debug .tile .tile-surface { fill: rgba(255,0,0,0.28) !important; stroke: #ff2b2b !important; stroke-width: 1.5 !important; }
   .board.debug .debug-poly { display: block; }
 
   .ptoken {
@@ -687,6 +722,10 @@
   .card-popup-money.positive { color: var(--grass-green); }
   .card-popup-money.negative { color: var(--seal-red); }
   .detail-popup { text-align: left; }
+  .detail-thumb-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .detail-thumb { width: 52px; height: 52px; border-radius: 12px; background: rgba(255,255,255,0.92); border: 1px solid color-mix(in srgb, var(--grp) 60%, transparent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .detail-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 5px; }
+  .detail-group-chip { flex: 1; height: 6px; border-radius: 4px; align-self: center; }
   .detail-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13.5px; }
   .detail-row:last-of-type { border-bottom: none; }
   .detail-row span:first-child { color: #9AA6BE; }
@@ -3161,6 +3200,54 @@ let diceTempFaces = null;
 let lastKnownMoney = null;
 let isAnimatingMovement = false;
 let buildingAnim = null; // { tileId, playerId, type: 'house'|'corp', stage, particleSeed }
+let selectedTileId = null;
+let hoveredTileId = null;
+
+function canBuildOnTile(tile, room, player) {
+  if (!player || tile.type !== 'property') return false;
+  const ownerId = room.propOwner[tile.id];
+  if (ownerId !== player.id) return false;
+  const level = houseLevel(room, tile.id);
+  if (level >= 4) return false;
+  return level > 0 || ownsFullGroup(room, player.id, tile.id);
+}
+
+function getTileVisualState(tile, room, currentPlayer, me) {
+  const ownerId = room.propOwner[tile.id];
+  const owner = ownerId ? room.players.find(p => p.id === ownerId) : null;
+  const isMortgaged = Boolean(room.mortgaged && room.mortgaged[tile.id]);
+  return {
+    available: tile.type === 'property' && !ownerId && !isMortgaged,
+    owned: Boolean(ownerId),
+    mortgaged: isMortgaged,
+    buildable: !isMortgaged && canBuildOnTile(tile, room, me),
+    current: room.players.some(p => !p.bankrupt && displayPos(room, p) === tile.id),
+    selected: selectedTileId === tile.id,
+    hovered: hoveredTileId === tile.id,
+    ownerColor: owner ? owner.color : null,
+    ownerName: owner ? owner.name : null,
+  };
+}
+
+function tileStateClasses(vs) {
+  const cls = [];
+  if (vs.mortgaged) cls.push('tile--mortgaged');
+  if (vs.selected) cls.push('tile--selected');
+  if (vs.current) cls.push('tile--current');
+  if (vs.buildable) cls.push('tile--buildable');
+  if (vs.hovered) cls.push('tile--hovered');
+  if (vs.owned) cls.push('tile--owned');
+  if (vs.available) cls.push('tile--available');
+  return cls.join(' ');
+}
+
+function tileAriaLabel(tile, vs) {
+  let label = tile.name;
+  if (vs.owned) label += `, \u044d\u0437\u044d\u043c\u0448\u0438\u0433\u0447 ${vs.ownerName}`;
+  if (vs.mortgaged) label += ', \u0431\u0430\u0440\u044c\u0446\u0430\u0430\u043b\u0441\u0430\u043d';
+  return label;
+}
+
 let buildingAnimationActive = false;
 let knownLevels = {};
 let levelsInitialized = false;
@@ -3872,12 +3959,21 @@ function renderGame() {
     let tspans = `<tspan x="${tile.labelX}" dy="${lines.length > 1 ? '-0.55em' : '0.3em'}">${lines[0]}</tspan>`;
     if (lines[1]) tspans += `<tspan x="${tile.labelX}" dy="1.05em">${lines[1]}</tspan>`;
     if (tile.price) tspans += `<tspan class="tile-price" x="${tile.labelX}" dy="1.15em" font-size="${fontSize*0.78}">\u20ae${fmt(tile.price)}</tspan>`;
+    const vs = getTileVisualState(tile, room, currentPlayer, me);
     const ownerStyle = owner ? `--owner-color:${owner.color}; --owner-fill:${hexToRgba(owner.color,0.28)};` : '';
-    tilesHtml += `<g class="tile ${owner?'owned':''} ${isFullGroup?'group-complete':''} ${isActivePos?'active-position':''}"
-      data-idx="${idx}" style="${ownerStyle}">
-      <polygon points="${pts}"></polygon>
+    const stateClasses = tileStateClasses(vs);
+    const ariaLabel = tileAriaLabel(tile, vs);
+    const debugStateLabel = debugMode ? Object.keys(vs).filter(k => vs[k] === true).join(' ') : '';
+    tilesHtml += `<g class="tile ${stateClasses} ${isFullGroup?'group-complete':''}"
+      data-idx="${idx}" style="${ownerStyle}"
+      role="button" tabindex="0" aria-label="${ariaLabel}">
+      <polygon class="tile-hit-area" points="${pts}" vector-effect="non-scaling-stroke"></polygon>
+      <polygon class="tile-surface" points="${pts}" vector-effect="non-scaling-stroke"></polygon>
+      ${vs.owned ? `<polygon class="tile-owner-ring" points="${pts}" stroke="${owner.color}" vector-effect="non-scaling-stroke"></polygon>` : ''}
       <text x="${tile.labelX}" y="${tile.labelY}" text-anchor="middle" font-size="${fontSize}" transform="rotate(${tile.labelRotation} ${tile.labelX} ${tile.labelY})">${tspans}</text>
       ${owner ? `<circle class="owner-dot" cx="${tile.labelX + 22}" cy="${tile.labelY - 22}" r="9" fill="${owner.color}" stroke="#18382d" stroke-width="1.5"></circle>` : ''}
+      ${vs.mortgaged ? `<g class="mortgage-lock" transform="translate(${tile.labelX},${tile.labelY + 20})"><rect x="-7" y="-2" width="14" height="10" rx="2" fill="#2b3440" stroke="#c8ccd6" stroke-width="1"></rect><path d="M -4 -2 L -4 -6 A 4 4 0 0 1 4 -6 L 4 -2" fill="none" stroke="#c8ccd6" stroke-width="1.6"></path></g>` : ''}
+      ${debugMode ? `<text x="${tile.labelX}" y="${tile.labelY + 34}" text-anchor="middle" font-size="6.5" fill="#fff" stroke="#000" stroke-width="0.3" paint-order="stroke">${idx}: ${debugStateLabel}</text>` : ''}
     </g>`;
     if (debugMode && tile.type === 'property') {
       const zonePts = tile.buildingZone ? tile.buildingZone.map(p => p.join(',')).join(' ') : '';
@@ -4027,6 +4123,16 @@ function renderBuyModal(room) {
   if (skipBtn) skipBtn.onclick = async () => { await skipBuy(); };
 }
 
+function closeCellDetail() {
+  const root = document.getElementById('card-popup-root');
+  if (root) root.innerHTML = '';
+  selectedTileId = null;
+  document.removeEventListener('keydown', handleDetailEscape);
+  render();
+}
+function handleDetailEscape(e) {
+  if (e.key === 'Escape') closeCellDetail();
+}
 function showCellDetail(idx) {
   const room = currentRoom;
   const sp = BOARD_CONFIG[idx];
@@ -4036,14 +4142,23 @@ function showCellDetail(idx) {
   const owner = ownerId ? room.players.find(p => p.id === ownerId) : null;
   const level = sp.type === 'property' ? houseLevel(room, idx) : 0;
   const fullGroup = owner && sp.type === 'property' ? ownsFullGroup(room, owner.id, idx) : false;
+  const isMortgaged = Boolean(room.mortgaged && room.mortgaged[idx]);
   let bodyHtml = '';
   if (sp.type === 'property') {
     const effectiveRent = level > 0 ? sp.rent*[1,2,4,6,10][level] : (fullGroup ? sp.rent*2 : sp.rent);
+    const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
+    const groupColor = GROUP_COLORS[sp.colorGroup] || 'var(--gold)';
     bodyHtml = `
+      <div class="detail-thumb-row">
+        <div class="detail-thumb" style="--grp:${groupColor};"><img src="${fileName}.png" alt="" onerror="this.style.display='none'"></div>
+        <div class="detail-group-chip" style="background:${groupColor};"></div>
+      </div>
       <div class="detail-row"><span>\u04ae\u043d\u044d</span><span>\u20ae${fmt(sp.price)}</span></div>
       <div class="detail-row"><span>\u0421\u0443\u0443\u0440\u044c \u0442\u04af\u0440\u044d\u044d\u0441</span><span>\u20ae${fmt(sp.rent)}</span></div>
       <div class="detail-row"><span>\u041e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u0442\u04af\u0440\u044d\u044d\u0441</span><span>\u20ae${fmt(effectiveRent)}</span></div>
-      <div class="detail-row"><span>\u042d\u0437\u044d\u043c\u0448\u0438\u0433\u0447</span><span>${owner ? owner.token+' '+owner.name : '\u0425\u044d\u043d \u0447 \u0431\u0438\u0448'}</span></div>`;
+      <div class="detail-row"><span>\u042d\u0437\u044d\u043c\u0448\u0438\u0433\u0447</span><span>${owner ? owner.token+' '+owner.name : '\u0425\u044d\u043d \u0447 \u0431\u0438\u0448'}</span></div>
+      <div class="detail-row"><span>Upgrade</span><span>${level >= 4 ? '\ud83c\udfe6 \u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : level > 0 ? `LV.${level}` : '\u2014'}</span></div>
+      <div class="detail-row"><span>\u0411\u0430\u0440\u044c\u0446\u0430\u0430</span><span>${isMortgaged ? '\ud83d\udd12 \u0411\u0430\u0440\u044c\u0446\u0430\u0430\u043b\u0441\u0430\u043d' : '\u0423\u0433\u0443\u0439'}</span></div>`;
   } else if (sp.type === 'tax') {
     bodyHtml = `<div class="detail-row"><span>\u0422\u0430\u0442\u0432\u0430\u0440</span><span>\u20ae${fmt(sp.amount)}</span></div>`;
   } else {
@@ -4054,9 +4169,10 @@ function showCellDetail(idx) {
     <button class="btn btn-secondary" id="closeDetailBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
   </div></div>`;
   const backdrop = document.getElementById('detailBackdrop');
-  if (backdrop) backdrop.onclick = () => { root.innerHTML = ''; };
+  if (backdrop) backdrop.onclick = closeCellDetail;
   const closeBtn = document.getElementById('closeDetailBtn');
-  if (closeBtn) closeBtn.onclick = () => { root.innerHTML = ''; };
+  if (closeBtn) closeBtn.onclick = closeCellDetail;
+  document.addEventListener('keydown', handleDetailEscape);
 }
 
 function attachGameEvents() {
@@ -4075,8 +4191,19 @@ function attachGameEvents() {
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => { if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
+    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive;
+    const selectTile = () => {
+      if (tileInteractionDisabled) return;
+      selectedTileId = idx;
+      showCellDetail(idx);
+    };
+    el.onclick = selectTile;
+    el.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTile(); }
+    };
     el.onmouseenter = (e) => {
+      hoveredTileId = idx;
+      el.classList.add('tile--hovered');
       if (!tooltip || !currentRoom) return;
       const sp = BOARD_CONFIG[idx];
       const priceLine = sp.price ? `\u20ae${fmt(sp.price)}` : (sp.amount ? `\u20ae${fmt(sp.amount)}` : '');
@@ -4088,7 +4215,11 @@ function attachGameEvents() {
       tooltip.style.left = (e.clientX + 14) + 'px';
       tooltip.style.top = (e.clientY + 14) + 'px';
     };
-    el.onmouseleave = () => { if (tooltip) tooltip.style.display = 'none'; };
+    el.onmouseleave = () => {
+      if (hoveredTileId === idx) hoveredTileId = null;
+      el.classList.remove('tile--hovered');
+      if (tooltip) tooltip.style.display = 'none';
+    };
   });
   document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
