@@ -155,7 +155,6 @@
     border-radius: var(--radius-medium);
     padding: 12px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -3px 8px rgba(0,0,0,0.25), 0 10px 24px rgba(0,0,0,0.32);
-    animation: sbCardEnter 0.35s ease;
   }
   .sb-panel-title {
     font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 11.5px; letter-spacing: 1.5px;
@@ -195,13 +194,12 @@
   .sb-player-card {
     position: relative; background: rgba(0,0,0,0.18); border: 1px solid rgba(245,202,85,0.18);
     border-radius: 12px; padding: 8px 10px; margin-bottom: 8px;
-    animation: sbCardEnter 0.35s ease;
   }
   .sb-player-card:last-child { margin-bottom: 0; }
   .sb-player-card.sb-player-current {
     border-color: var(--gold); background: rgba(245,202,85,0.08);
     box-shadow: 0 0 0 1px rgba(245,202,85,0.3), 0 0 14px rgba(245,202,85,0.2);
-    animation: sbCardEnter 0.35s ease, sbPulseGlow 2.2s ease-in-out infinite;
+    animation: sbPulseGlow 2.2s ease-in-out infinite;
   }
   .sb-player-card.sb-player-bankrupt { opacity: 0.4; }
   .sb-crown { position: absolute; top: -9px; left: 8px; font-size: 13px; }
@@ -262,7 +260,6 @@
     background: linear-gradient(90deg, color-mix(in srgb, var(--grp-color) 22%, transparent) 0%, rgba(0,0,0,0.2) 100%);
     border: 1px solid color-mix(in srgb, var(--grp-color) 55%, transparent);
     border-radius: 12px; padding: 7px 9px;
-    animation: sbCardEnter 0.3s ease;
   }
   .sb-company-icon {
     width: 34px; height: 34px; border-radius: 9px; overflow: hidden; flex-shrink: 0;
@@ -294,7 +291,7 @@
   .sb-timeline { display: flex; flex-direction: column; gap: 10px; }
   .sb-timeline-item {
     display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 8px;
-    animation: sbSlideIn 0.3s ease;
+    animation: none;
   }
   .sb-timeline-dot { width: 8px; height: 8px; border-radius: 50%; }
   .sb-timeline-avatar { font-size: 15px; }
@@ -443,7 +440,7 @@
   .board.debug .debug-poly { display: block; }
 
   .ptoken {
-    position: absolute; z-index: 10;
+    position: absolute;
     display: grid; place-items: center;
     width: clamp(18px, 2.6vw, 32px); height: clamp(18px, 2.6vw, 32px);
     font-size: clamp(12px, 1.8vw, 20px);
@@ -451,11 +448,22 @@
     background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--token-ring, var(--steppe-gold)) 55%, white 45%) 0%, var(--night-indigo-deep) 78%);
     border: 4px solid #241a0d;
     box-shadow: inset -3px -3px 4px rgba(0,0,0,0.55), inset 3px 3px 4px rgba(255,255,255,0.3), 0 5px 8px rgba(0,0,0,0.55);
-    transition: left 0.45s ease, top 0.45s ease, transform 0.25s ease;
     filter: drop-shadow(0 6px 5px rgba(0,0,0,0.4));
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(var(--token-scale, 0.85));
+    transform-origin: center center;
   }
-  .ptoken.moving { transform: translate(-50%, -50%) translateY(-14px) scale(1.18); }
+  .ptoken.token-hop { animation: tokenHop 0.26s cubic-bezier(.33,.1,.4,1); }
+  .ptoken.token-hop-reduced { animation: tokenHopReduced 0.15s ease; }
+
+  .passgo-toast {
+    position: fixed; top: 18%; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(160deg, #1c1c1c 0%, #0c0c0c 100%);
+    border: 2px solid var(--steppe-gold); border-radius: 30px;
+    padding: 10px 22px; font-weight: 800; font-size: 15px; color: var(--steppe-gold);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.3);
+    z-index: 2100; animation: passGoPop 1.7s ease forwards;
+    pointer-events: none;
+  }
 
   .tile-tooltip {
     position: fixed; z-index: 500; pointer-events: none;
@@ -554,6 +562,24 @@
   @keyframes buildingAppear4 { 0% { opacity: 0; scale: 0.35; } 60% { opacity: 1; scale: 1.28; } 100% { opacity: 1; scale: 1.12; } }
   @keyframes upgradeBounce { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1.25); opacity: 1; } 75% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
   @keyframes particleRise { 0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(-50%, -140%) scale(0.2); opacity: 0; } }
+  @keyframes tokenHop {
+    0%   { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(1); }
+    45%  { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(-24px) scale(1.08); }
+    80%  { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(0.90) scaleX(1.06); }
+    100% { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(1); }
+  }
+  @keyframes tokenHopReduced {
+    0%   { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0); }
+    50%  { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(-8px); }
+    100% { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0); }
+  }
+  @keyframes passGoPop {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.8); }
+    15%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.05); }
+    25%  { transform: translateX(-50%) translateY(0) scale(1); }
+    85%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.95); }
+  }
   @keyframes burstSpin { from { transform: translate(-50%, 0) rotate(0deg); } to { transform: translate(-50%, 0) rotate(360deg); } }
   @keyframes diceRoll {
     0% { transform: rotate(0deg) scale(1); } 12% { transform: rotate(-45deg) scale(1.1); }
@@ -613,7 +639,21 @@ const BOARD_CONFIG = [
     "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null
+    "rent": null,
+    "tokenX": 836.1,
+    "tokenY": 859.2,
+    "tokenDepth": 859,
+    "tokenScale": 0.85,
+    "movementWaypoints": [
+      [
+        836.1,
+        877.2
+      ],
+      [
+        836.1,
+        859.2
+      ]
+    ]
   },
   {
     "id": 1,
@@ -683,7 +723,11 @@ const BOARD_CONFIG = [
         669.2,
         768.0
       ]
-    ]
+    ],
+    "tokenX": 705.1,
+    "tokenY": 784.7,
+    "tokenDepth": 785,
+    "tokenScale": 0.95
   },
   {
     "id": 2,
@@ -753,7 +797,11 @@ const BOARD_CONFIG = [
         588.8,
         711.6
       ]
-    ]
+    ],
+    "tokenX": 618.7,
+    "tokenY": 725.7,
+    "tokenDepth": 726,
+    "tokenScale": 0.95
   },
   {
     "id": 3,
@@ -823,7 +871,11 @@ const BOARD_CONFIG = [
         508.5,
         656.0
       ]
-    ]
+    ],
+    "tokenX": 534.1,
+    "tokenY": 666.2,
+    "tokenDepth": 666,
+    "tokenScale": 0.95
   },
   {
     "id": 4,
@@ -893,7 +945,11 @@ const BOARD_CONFIG = [
         430.9,
         602.4
       ]
-    ]
+    ],
+    "tokenX": 453.6,
+    "tokenY": 608.9,
+    "tokenDepth": 609,
+    "tokenScale": 0.95
   },
   {
     "id": 5,
@@ -963,7 +1019,11 @@ const BOARD_CONFIG = [
         357.3,
         551.2
       ]
-    ]
+    ],
+    "tokenX": 377.6,
+    "tokenY": 554.6,
+    "tokenDepth": 555,
+    "tokenScale": 0.95
   },
   {
     "id": 6,
@@ -992,7 +1052,11 @@ const BOARD_CONFIG = [
     ],
     "labelX": 325.3,
     "labelY": 502.1,
-    "labelRotation": -27.9
+    "labelRotation": -27.9,
+    "tokenX": 305.3,
+    "tokenY": 503.3,
+    "tokenDepth": 503,
+    "tokenScale": 0.95
   },
   {
     "id": 7,
@@ -1062,7 +1126,11 @@ const BOARD_CONFIG = [
         233.9,
         485.9
       ]
-    ]
+    ],
+    "tokenX": 236.5,
+    "tokenY": 453.9,
+    "tokenDepth": 454,
+    "tokenScale": 0.95
   },
   {
     "id": 8,
@@ -1091,7 +1159,21 @@ const BOARD_CONFIG = [
     "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null
+    "rent": null,
+    "tokenX": 159.7,
+    "tokenY": 375.7,
+    "tokenDepth": 376,
+    "tokenScale": 0.85,
+    "movementWaypoints": [
+      [
+        141.8,
+        373.2
+      ],
+      [
+        159.7,
+        375.7
+      ]
+    ]
   },
   {
     "id": 9,
@@ -1161,7 +1243,11 @@ const BOARD_CONFIG = [
         275.6,
         343.7
       ]
-    ]
+    ],
+    "tokenX": 277.2,
+    "tokenY": 307.2,
+    "tokenDepth": 307,
+    "tokenScale": 0.82
   },
   {
     "id": 10,
@@ -1231,7 +1317,11 @@ const BOARD_CONFIG = [
         358.9,
         305.6
       ]
-    ]
+    ],
+    "tokenX": 360.5,
+    "tokenY": 267.4,
+    "tokenDepth": 267,
+    "tokenScale": 0.82
   },
   {
     "id": 11,
@@ -1301,7 +1391,11 @@ const BOARD_CONFIG = [
         475.2,
         270.9
       ]
-    ]
+    ],
+    "tokenX": 441.4,
+    "tokenY": 229.2,
+    "tokenDepth": 229,
+    "tokenScale": 0.82
   },
   {
     "id": 12,
@@ -1371,7 +1465,11 @@ const BOARD_CONFIG = [
         552.7,
         235.2
       ]
-    ]
+    ],
+    "tokenX": 519.2,
+    "tokenY": 191.8,
+    "tokenDepth": 192,
+    "tokenScale": 0.82
   },
   {
     "id": 13,
@@ -1441,7 +1539,11 @@ const BOARD_CONFIG = [
         625.9,
         200.3
       ]
-    ]
+    ],
+    "tokenX": 595.3,
+    "tokenY": 155.7,
+    "tokenDepth": 156,
+    "tokenScale": 0.82
   },
   {
     "id": 14,
@@ -1471,7 +1573,11 @@ const BOARD_CONFIG = [
     ],
     "labelX": 676.7,
     "labelY": 140.0,
-    "labelRotation": 28.6
+    "labelRotation": 28.6,
+    "tokenX": 668.0,
+    "tokenY": 122.0,
+    "tokenDepth": 122,
+    "tokenScale": 0.7
   },
   {
     "id": 15,
@@ -1541,7 +1647,11 @@ const BOARD_CONFIG = [
         761.3,
         135.8
       ]
-    ]
+    ],
+    "tokenX": 737.8,
+    "tokenY": 90.5,
+    "tokenDepth": 91,
+    "tokenScale": 0.7
   },
   {
     "id": 16,
@@ -1570,7 +1680,21 @@ const BOARD_CONFIG = [
     "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null
+    "rent": null,
+    "tokenX": 837.6,
+    "tokenY": 47.2,
+    "tokenDepth": 47,
+    "tokenScale": 0.85,
+    "movementWaypoints": [
+      [
+        837.7,
+        29.2
+      ],
+      [
+        837.6,
+        47.2
+      ]
+    ]
   },
   {
     "id": 17,
@@ -1640,7 +1764,11 @@ const BOARD_CONFIG = [
         899.1,
         111.2
       ]
-    ]
+    ],
+    "tokenX": 936.0,
+    "tokenY": 90.4,
+    "tokenDepth": 90,
+    "tokenScale": 0.7
   },
   {
     "id": 18,
@@ -1710,7 +1838,11 @@ const BOARD_CONFIG = [
         963.4,
         141.1
       ]
-    ]
+    ],
+    "tokenX": 1004.5,
+    "tokenY": 121.6,
+    "tokenDepth": 122,
+    "tokenScale": 0.7
   },
   {
     "id": 19,
@@ -1780,7 +1912,11 @@ const BOARD_CONFIG = [
         1030.5,
         172.1
       ]
-    ]
+    ],
+    "tokenX": 1076.5,
+    "tokenY": 154.9,
+    "tokenDepth": 155,
+    "tokenScale": 0.7
   },
   {
     "id": 20,
@@ -1850,7 +1986,11 @@ const BOARD_CONFIG = [
         1101.8,
         205.9
       ]
-    ]
+    ],
+    "tokenX": 1151.7,
+    "tokenY": 191.0,
+    "tokenDepth": 191,
+    "tokenScale": 0.7
   },
   {
     "id": 21,
@@ -1920,7 +2060,11 @@ const BOARD_CONFIG = [
         1176.8,
         239.6
       ]
-    ]
+    ],
+    "tokenX": 1229.1,
+    "tokenY": 227.7,
+    "tokenDepth": 228,
+    "tokenScale": 0.7
   },
   {
     "id": 22,
@@ -1949,7 +2093,11 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1290.4,
     "labelY": 274.4,
-    "labelRotation": -32.9
+    "labelRotation": -32.9,
+    "tokenX": 1308.8,
+    "tokenY": 266.5,
+    "tokenDepth": 266,
+    "tokenScale": 0.82
   },
   {
     "id": 23,
@@ -2019,7 +2167,11 @@ const BOARD_CONFIG = [
         1335.2,
         316.3
       ]
-    ]
+    ],
+    "tokenX": 1391.4,
+    "tokenY": 306.4,
+    "tokenDepth": 306,
+    "tokenScale": 0.82
   },
   {
     "id": 24,
@@ -2048,7 +2200,21 @@ const BOARD_CONFIG = [
     "labelRotation": 0,
     "colorGroup": null,
     "price": null,
-    "rent": null
+    "rent": null,
+    "tokenX": 1510.3,
+    "tokenY": 374.7,
+    "tokenDepth": 375,
+    "tokenScale": 0.85,
+    "movementWaypoints": [
+      [
+        1528.2,
+        372.2
+      ],
+      [
+        1510.3,
+        374.7
+      ]
+    ]
   },
   {
     "id": 25,
@@ -2118,7 +2284,11 @@ const BOARD_CONFIG = [
         1374.5,
         454.2
       ]
-    ]
+    ],
+    "tokenX": 1433.9,
+    "tokenY": 453.1,
+    "tokenDepth": 453,
+    "tokenScale": 0.82
   },
   {
     "id": 26,
@@ -2188,7 +2358,11 @@ const BOARD_CONFIG = [
         1305.9,
         501.9
       ]
-    ]
+    ],
+    "tokenX": 1366.1,
+    "tokenY": 503.0,
+    "tokenDepth": 503,
+    "tokenScale": 0.82
   },
   {
     "id": 27,
@@ -2258,7 +2432,11 @@ const BOARD_CONFIG = [
         1296.1,
         585.4
       ]
-    ]
+    ],
+    "tokenX": 1294.1,
+    "tokenY": 554.4,
+    "tokenDepth": 554,
+    "tokenScale": 0.82
   },
   {
     "id": 28,
@@ -2328,7 +2506,11 @@ const BOARD_CONFIG = [
         1157.4,
         602.7
       ]
-    ]
+    ],
+    "tokenX": 1218.5,
+    "tokenY": 609.4,
+    "tokenDepth": 609,
+    "tokenScale": 0.82
   },
   {
     "id": 29,
@@ -2398,7 +2580,11 @@ const BOARD_CONFIG = [
         1140.8,
         694.8
       ]
-    ]
+    ],
+    "tokenX": 1137.3,
+    "tokenY": 667.5,
+    "tokenDepth": 668,
+    "tokenScale": 0.82
   },
   {
     "id": 30,
@@ -2428,7 +2614,11 @@ const BOARD_CONFIG = [
     ],
     "labelX": 1039.4,
     "labelY": 711.6,
-    "labelRotation": 33.0
+    "labelRotation": 33.0,
+    "tokenX": 1052.3,
+    "tokenY": 726.9,
+    "tokenDepth": 727,
+    "tokenScale": 0.82
   },
   {
     "id": 31,
@@ -2498,7 +2688,11 @@ const BOARD_CONFIG = [
         977.5,
         806.8
       ]
-    ]
+    ],
+    "tokenX": 965.9,
+    "tokenY": 786.3,
+    "tokenDepth": 786,
+    "tokenScale": 0.82
   }
 ];
 
@@ -2780,24 +2974,64 @@ let lastDiceRollId = null;
 let diceRollingNow = false;
 let diceTempFaces = null;
 let lastKnownMoney = null;
+let isAnimatingMovement = false;
+let movingPlayerId = null;
+let reducedMotion = false;
+try { reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+function playStepSound() {
+  try {
+    if (!playStepSound._ctx) playStepSound._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = playStepSound._ctx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = 480;
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.1);
+  } catch (e) { /* audio unavailable - ignore, animation continues */ }
+}
+function showPassGoToast() {
+  const root = document.getElementById('card-popup-root');
+  if (!root) return;
+  const el = document.createElement('div');
+  el.className = 'passgo-toast';
+  el.textContent = '\ud83e\ude99 \u042d\u0425\u041b\u042d\u041b \u0414\u0410\u0412\u041b\u0410\u0410! +\u20ae200';
+  root.appendChild(el);
+  setTimeout(() => { el.remove(); }, 1700);
+}
 
 function maybeTriggerMoveAnimation(room) {
   const ap = room.animPath;
   if (ap && ap.id !== lastAnimId) {
     lastAnimId = ap.id;
-    animOverride = { playerId: ap.playerId, pos: ap.from };
     animateTokenMove(ap.playerId, ap.from, ap.steps);
   }
 }
-function animateTokenMove(playerId, from, steps) {
-  let i = 1;
-  function step() {
-    animOverride = { playerId, pos: (from + i) % BOARD_CONFIG.length };
+async function animateTokenMove(playerId, from, steps) {
+  if (!Number.isFinite(steps) || steps <= 0) return;
+  if (!BOARD_CONFIG || BOARD_CONFIG.length === 0) return;
+  if (isAnimatingMovement) return;
+  isAnimatingMovement = true;
+  movingPlayerId = playerId;
+  try {
+    const stepDur = reducedMotion ? 150 : 260;
+    for (let i = 1; i <= steps; i++) {
+      const nextPos = (from + i) % BOARD_CONFIG.length;
+      if (!BOARD_CONFIG[nextPos]) break;
+      animOverride = { playerId, pos: nextPos };
+      render();
+      await new Promise(res => setTimeout(res, stepDur));
+      playStepSound();
+      if (nextPos === 0) showPassGoToast();
+    }
+  } finally {
+    animOverride = null;
+    isAnimatingMovement = false;
+    movingPlayerId = null;
     render();
-    i++;
-    if (i <= steps) setTimeout(step, 160); else animOverride = null;
   }
-  setTimeout(step, 160);
 }
 function displayPos(room, p) {
   if (animOverride && animOverride.playerId === p.id) return animOverride.pos;
@@ -3128,6 +3362,13 @@ function renderPlayersPanel(room, currentPlayer) {
 }
 
 function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling) {
+  if (isAnimatingMovement) {
+    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
+      <div class="sb-waiting"><span class="pulse-dot"></span>\u0422\u043e\u0433\u043b\u043e\u0433\u0447 \u0445\u04e9\u0434\u04e9\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+      <button class="sb-dice-btn" disabled>\ud83d\udd12 \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
+      <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
+    </div>`;
+  }
   if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy') {
     const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
     return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0410\u041d\u042b \u0417\u04e9\u0412\u0428\u04e8\u04e8\u0420\u0415\u041b \u25c8</div>
@@ -3290,7 +3531,14 @@ function renderGame() {
         ${zonePts ? `<polygon points="${zonePts}" fill="rgba(40,140,255,0.35)" stroke="#2b8cff" stroke-width="1.5"></polygon>` : ''}
         <circle cx="${tile.buildingX}" cy="${tile.buildingY}" r="4" fill="#ffd400" stroke="#000" stroke-width="0.8"></circle>
         <circle cx="${tile.labelX}" cy="${tile.labelY}" r="4" fill="#22c55e" stroke="#000" stroke-width="0.8"></circle>
-        <text x="${tile.buildingX}" y="${tile.buildingY - 8}" text-anchor="middle" font-size="9" fill="#fff" stroke="#000" stroke-width="0.4" paint-order="stroke">${idx}</text>
+      </g>`;
+    }
+    if (debugMode) {
+      const wpPts = tile.movementWaypoints ? tile.movementWaypoints.map(p => `${p[0]},${p[1]}`).join(' ') : '';
+      debugZonesHtml += `<g class="debug-overlay">
+        ${wpPts ? `<polyline points="${wpPts}" fill="none" stroke="#ff8a00" stroke-width="1.5" stroke-dasharray="3,2"></polyline>` : ''}
+        <circle cx="${tile.tokenX}" cy="${tile.tokenY}" r="4.5" fill="#ff8a00" stroke="#000" stroke-width="1"></circle>
+        <text x="${tile.tokenX}" y="${tile.tokenY - 9}" text-anchor="middle" font-size="9" fill="#fff" stroke="#000" stroke-width="0.4" paint-order="stroke">${idx}</text>
       </g>`;
     }
     if (owner && tile.buildingType) {
@@ -3305,14 +3553,19 @@ function renderGame() {
   const upgradesHtml = upgradesToRender.map(u => renderUpgradeIcons(u.tile, u.level, u.idx, u.ownerIdx)).join('');
 
   const clampPct = v => Math.min(97, Math.max(3, v));
-  const tokensHtml = room.players.filter(p => !p.bankrupt).map((p, i) => {
+  const tokenOffsets = [[-14,-8],[14,-8],[-14,10],[14,10]];
+  const tokensHtml = room.players.filter(p => !p.bankrupt).map(p => {
     const pos = displayPos(room, p);
     const tile = BOARD_CONFIG[pos];
-    const offsets = [[-14,-14],[14,-14],[-14,14],[14,14]];
-    const off = offsets[i % 4];
-    const left = clampPct((tile.labelX + off[0]) / 1672 * 100);
-    const top = clampPct((tile.labelY + off[1]) / 941 * 100);
-    return `<div class="ptoken ${justRolled && p.id === currentPlayer.id ? 'moving' : ''}" style="left:${left}%; top:${top}%; --token-ring:${p.color}">${p.token}</div>`;
+    const sameTile = room.players.filter(o => !o.bankrupt && displayPos(room, o) === pos).sort((a,b) => a.id.localeCompare(b.id));
+    const slot = Math.max(0, sameTile.findIndex(o => o.id === p.id));
+    const off = tokenOffsets[slot % 4];
+    const left = clampPct((tile.tokenX + off[0]) / 1672 * 100);
+    const top = clampPct((tile.tokenY + off[1]) / 941 * 100);
+    const isMover = isAnimatingMovement && movingPlayerId === p.id;
+    const scale = tile.tokenScale || 0.85;
+    return `<div class="ptoken ${isMover ? (reducedMotion ? 'token-hop-reduced' : 'token-hop') : ''}"
+      style="left:${left}%; top:${top}%; --token-ring:${p.color}; --token-scale:${scale}; z-index:${isMover ? 20 : 10 + Math.round(tile.tokenY / 20)};">${p.token}</div>`;
   }).join('');
 
   return `<div class="game-wrap">
