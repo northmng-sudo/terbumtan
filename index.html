@@ -314,7 +314,7 @@
 
 
   .board-outer { display: flex; justify-content: center; min-width: 0; overflow: hidden; }
-  .board {
+  .board-viewport {
     position: relative;
     width: min(100%, 1600px);
     max-width: 100%;
@@ -322,6 +322,13 @@
     user-select: none;
     margin: 0 auto;
     overflow: hidden;
+    border-radius: 14px;
+  }
+  .board-camera {
+    position: absolute; inset: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   .board-image, .board-overlay {
     position: absolute; inset: 0;
@@ -329,6 +336,18 @@
   }
   .board-image { object-fit: contain; pointer-events: none; border-radius: 14px; }
   .board-overlay { overflow: visible; }
+  .camera-dim-overlay {
+    position: absolute; inset: 0; z-index: 30; pointer-events: none;
+    background: rgba(2,10,8,0.4);
+    animation: dimFadeIn 0.4s ease forwards;
+  }
+  @keyframes dimFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .camera-debug-panel {
+    position: absolute; top: 8px; left: 8px; z-index: 40;
+    background: rgba(0,0,0,0.75); border: 1px solid #ff2b2b; border-radius: 8px;
+    padding: 6px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #fff;
+    line-height: 1.5; pointer-events: none;
+  }
 
   /* ===== TILE INTERACTION STATE SYSTEM ===== */
   .tile-hit-area { fill: transparent; stroke: none; cursor: pointer; pointer-events: all; }
@@ -551,7 +570,6 @@
     100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), var(--dy)) rotate(var(--rot)); }
   }
 
-  .board-zoom { transition: transform 0.3s ease; transform: scale(1.06); }
 
   .corp-notice-toast { background: linear-gradient(160deg, #1c1c1c 0%, #0c0c0c 100%); border-color: var(--gold-light); }
 
@@ -592,8 +610,8 @@
   .building-flag { animation: flagWave 1.6s ease-in-out infinite; transform-origin: left center; }
   .building-light { animation: lightBlink 1.2s ease-in-out infinite; }
   .debug-poly { display: none; }
-  .board.debug .tile .tile-surface { fill: rgba(255,0,0,0.28) !important; stroke: #ff2b2b !important; stroke-width: 1.5 !important; }
-  .board.debug .debug-poly { display: block; }
+  .board-viewport.debug .tile .tile-surface { fill: rgba(255,0,0,0.28) !important; stroke: #ff2b2b !important; stroke-width: 1.5 !important; }
+  .board-viewport.debug .debug-poly { display: block; }
 
   .ptoken {
     position: absolute;
@@ -1949,11 +1967,11 @@ const BOARD_CONFIG = [
     "labelY": 109.7,
     "labelRotation": -28.5,
     "buildingType": "mining",
-    "buildingX": 941.5,
-    "buildingY": 123.8,
+    "buildingX": 915.7,
+    "buildingY": 113.0,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
-    "depth": 124,
+    "depth": 113,
     "houseSlots": [
       [
         933.0,
@@ -2023,11 +2041,11 @@ const BOARD_CONFIG = [
     "labelY": 139.6,
     "labelRotation": -29.5,
     "buildingType": "fashion",
-    "buildingX": 1004.6,
-    "buildingY": 153.5,
+    "buildingX": 979.2,
+    "buildingY": 141.9,
     "buildingWidth": 43.5,
     "buildingRotation": 0,
-    "depth": 154,
+    "depth": 142,
     "houseSlots": [
       [
         992.6,
@@ -2097,11 +2115,11 @@ const BOARD_CONFIG = [
     "labelY": 170.8,
     "labelRotation": -29.7,
     "buildingType": "mining",
-    "buildingX": 1071.7,
-    "buildingY": 183.8,
+    "buildingX": 1046.2,
+    "buildingY": 172.1,
     "buildingWidth": 45.8,
     "buildingRotation": 0,
-    "depth": 184,
+    "depth": 172,
     "houseSlots": [
       [
         1055.8,
@@ -2171,11 +2189,11 @@ const BOARD_CONFIG = [
     "labelY": 204.3,
     "labelRotation": -31.0,
     "buildingType": "bank",
-    "buildingX": 1142.7,
-    "buildingY": 216.1,
+    "buildingX": 1117.2,
+    "buildingY": 204.5,
     "buildingWidth": 47.3,
     "buildingRotation": 0,
-    "depth": 216,
+    "depth": 204,
     "houseSlots": [
       [
         1123.2,
@@ -2245,11 +2263,11 @@ const BOARD_CONFIG = [
     "labelY": 238.2,
     "labelRotation": -31.8,
     "buildingType": "bank",
-    "buildingX": 1217.2,
-    "buildingY": 248.7,
+    "buildingX": 1191.7,
+    "buildingY": 237.1,
     "buildingWidth": 48.1,
     "buildingRotation": 0,
-    "depth": 249,
+    "depth": 237,
     "houseSlots": [
       [
         1194.7,
@@ -2352,11 +2370,11 @@ const BOARD_CONFIG = [
     "labelY": 312.1,
     "labelRotation": -34.4,
     "buildingType": "bank",
-    "buildingX": 1375.9,
-    "buildingY": 321.3,
+    "buildingX": 1351.2,
+    "buildingY": 308.0,
     "buildingWidth": 51.1,
     "buildingRotation": 0,
-    "depth": 321,
+    "depth": 308,
     "houseSlots": [
       [
         1349.8,
@@ -3136,6 +3154,8 @@ async function buyProperty() {
   pushLog(room, `${player.name} "${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432.`);
   room.pendingAction = null;
   await saveRoom(room); currentRoom = room; render();
+  focusCameraOnBuilding(idx, { mode: 'purchase', scale: reducedMotion ? 1.1 : 1.34 });
+  setTimeout(() => { if (cameraState.mode === 'purchase') returnCameraToOverview(); }, reducedMotion ? 300 : 900);
 }
 async function skipBuy() {
   const room = await getRoom(currentRoom.roomCode);
@@ -3200,6 +3220,100 @@ let diceTempFaces = null;
 let lastKnownMoney = null;
 let isAnimatingMovement = false;
 let buildingAnim = null; // { tileId, playerId, type: 'house'|'corp', stage, particleSeed }
+/* ===== CAMERA SYSTEM ===== */
+let cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
+let cameraSeq = 0;
+const CAMERA_PRIORITY = { corporation: 5, purchase: 4, landing: 3, following: 2, returning: 1, overview: 0 };
+
+function isCinematicCamera() { return cameraState.mode === 'purchase' || cameraState.mode === 'corporation'; }
+
+function computeCameraTransform(targetXvb, targetYvb, scale) {
+  const viewport = document.getElementById('boardViewport');
+  if (!viewport) return { tx: 0, ty: 0, scale: 1 };
+  const rect = viewport.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  if (!w || !h) return { tx: 0, ty: 0, scale: 1 };
+  const fx = targetXvb / 1672, fy = targetYvb / 941;
+  const px = fx * w, py = fy * h;
+  let tx = w / 2 - scale * px;
+  let ty = h / 2 - scale * py;
+  const minX = Math.min(0, w - scale * w);
+  const minY = Math.min(0, h - scale * h);
+  tx = Math.min(0, Math.max(minX, tx));
+  ty = Math.min(0, Math.max(minY, ty));
+  return { tx, ty, scale };
+}
+
+function canOverrideCamera(newMode) {
+  return CAMERA_PRIORITY[newMode] >= CAMERA_PRIORITY[cameraState.mode];
+}
+
+function applyCameraDirect(targetXvb, targetYvb, scale, mode, tileId) {
+  const t = computeCameraTransform(targetXvb, targetYvb, scale);
+  cameraState = { mode, x: t.tx, y: t.ty, scale: t.scale, targetTileId: tileId, isMoving: true };
+  const cam = document.getElementById('boardCamera');
+  if (cam) cam.style.transform = `translate(${t.tx}px, ${t.ty}px) scale(${t.scale})`;
+  const viewport = document.getElementById('boardViewport');
+  if (viewport) { viewport.classList.toggle('debug', debugMode); if (debugMode) render(); }
+}
+
+function focusCameraOnTile(tileId, options = {}) {
+  try {
+    const mode = options.mode || 'landing';
+    if (!canOverrideCamera(mode)) return;
+    const tile = BOARD_CONFIG[tileId];
+    if (!tile) return;
+    const scale = options.scale || (reducedMotion ? 1.05 : 1.2);
+    applyCameraDirect(tile.tokenX, tile.tokenY, scale, mode, tileId);
+  } catch (e) { /* camera errors never block game logic */ }
+}
+function followPlayerStep(playerId, tileIndex) {
+  try {
+    if (reducedMotion) return;
+    if (!canOverrideCamera('following')) return;
+    const tile = BOARD_CONFIG[tileIndex];
+    if (!tile) return;
+    applyCameraDirect(tile.tokenX, tile.tokenY, 1.07, 'following', tileIndex);
+  } catch (e) {}
+}
+function focusCameraOnBuilding(tileId, options = {}) {
+  try {
+    const mode = options.mode || 'purchase';
+    if (!canOverrideCamera(mode)) return;
+    const tile = BOARD_CONFIG[tileId];
+    if (!tile) return;
+    const tx = tile.buildingX != null ? tile.buildingX : tile.tokenX;
+    const ty = tile.buildingY != null ? tile.buildingY : tile.tokenY;
+    const scale = options.scale || (reducedMotion ? 1.08 : 1.32);
+    applyCameraDirect(tx, ty, scale, mode, tileId);
+  } catch (e) {}
+}
+function returnCameraToOverview() {
+  try {
+    cameraSeq++;
+    cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
+    const cam = document.getElementById('boardCamera');
+    if (cam) cam.style.transform = `translate(0px, 0px) scale(1)`;
+  } catch (e) {}
+}
+function cancelCameraSequence() {
+  cameraSeq++;
+  returnCameraToOverview();
+}
+function renderCameraTransformStyle() {
+  return `transform: translate(${cameraState.x}px, ${cameraState.y}px) scale(${cameraState.scale}); transform-origin: 0 0;`;
+}
+function renderCameraDebugPanel() {
+  const t = cameraState.targetTileId;
+  const tile = (t !== null && BOARD_CONFIG[t]) ? BOARD_CONFIG[t] : null;
+  return `<div class="camera-debug-panel">
+    mode: ${cameraState.mode}<br>
+    target: ${t !== null ? t : '\u2014'}${tile ? ' (' + tile.name + ')' : ''}<br>
+    x: ${cameraState.x.toFixed(1)} y: ${cameraState.y.toFixed(1)}<br>
+    scale: ${cameraState.scale.toFixed(2)}
+  </div>`;
+}
+
 let selectedTileId = null;
 let hoveredTileId = null;
 
@@ -3297,12 +3411,14 @@ async function runBuildingAnimation(tileId, playerId, type) {
   buildingAnim = { tileId, playerId, type, stage: 'preparing', particleSeed: seed };
   const t = reducedMotion ? 0.35 : 1;
   try {
+    if (type === 'corp') focusCameraOnTile(tileId, { mode: 'corporation', scale: reducedMotion ? 1.1 : 1.3 });
     render();
     await new Promise(r => setTimeout(r, 150 * t));
     buildingAnim.stage = 'dust'; render();
     if (!reducedMotion) { playHammerSound(); setTimeout(playHammerSound, 130); setTimeout(playHammerSound, 260); }
     await new Promise(r => setTimeout(r, (type === 'corp' ? 350 : 400) * t));
     buildingAnim.stage = 'hammer'; render();
+    if (type === 'corp') focusCameraOnBuilding(tileId, { mode: 'corporation', scale: reducedMotion ? 1.15 : 1.46 });
     await new Promise(r => setTimeout(r, (type === 'corp' ? 400 : 200) * t));
     buildingAnim.stage = 'rising'; render();
     await new Promise(r => setTimeout(r, (type === 'corp' ? 500 : 600) * t));
@@ -3314,6 +3430,7 @@ async function runBuildingAnimation(tileId, playerId, type) {
     buildingAnim = null;
     buildingAnimationActive = false;
     render();
+    if (cameraState.mode === 'corporation') returnCameraToOverview();
   }
 }
 
@@ -3381,13 +3498,16 @@ async function animateTokenMove(playerId, from, steps) {
   if (isAnimatingMovement) return;
   isAnimatingMovement = true;
   movingPlayerId = playerId;
+  let finalPos = from;
   try {
     const stepDur = reducedMotion ? 150 : 260;
     for (let i = 1; i <= steps; i++) {
       const nextPos = (from + i) % BOARD_CONFIG.length;
       if (!BOARD_CONFIG[nextPos]) break;
       animOverride = { playerId, pos: nextPos };
+      finalPos = nextPos;
       render();
+      followPlayerStep(playerId, nextPos);
       await new Promise(res => setTimeout(res, stepDur));
       playStepSound();
       if (nextPos === 0) showPassGoToast();
@@ -3397,6 +3517,10 @@ async function animateTokenMove(playerId, from, steps) {
     isAnimatingMovement = false;
     movingPlayerId = null;
     render();
+    focusCameraOnTile(finalPos, { mode: 'landing', scale: reducedMotion ? 1.05 : 1.2 });
+    setTimeout(() => {
+      if (cameraState.mode === 'landing') returnCameraToOverview();
+    }, reducedMotion ? 250 : 650);
   }
 }
 function displayPos(room, p) {
@@ -3969,7 +4093,7 @@ function renderGame() {
       role="button" tabindex="0" aria-label="${ariaLabel}">
       <polygon class="tile-hit-area" points="${pts}" vector-effect="non-scaling-stroke"></polygon>
       <polygon class="tile-surface" points="${pts}" vector-effect="non-scaling-stroke"></polygon>
-      ${vs.owned ? `<polygon class="tile-owner-ring" points="${pts}" stroke="${owner.color}" vector-effect="non-scaling-stroke"></polygon>` : ''}
+      ${''}
       <text x="${tile.labelX}" y="${tile.labelY}" text-anchor="middle" font-size="${fontSize}" transform="rotate(${tile.labelRotation} ${tile.labelX} ${tile.labelY})">${tspans}</text>
       ${owner ? `<circle class="owner-dot" cx="${tile.labelX + 22}" cy="${tile.labelY - 22}" r="9" fill="${owner.color}" stroke="#18382d" stroke-width="1.5"></circle>` : ''}
       ${vs.mortgaged ? `<g class="mortgage-lock" transform="translate(${tile.labelX},${tile.labelY + 20})"><rect x="-7" y="-2" width="14" height="10" rx="2" fill="#2b3440" stroke="#c8ccd6" stroke-width="1"></rect><path d="M -4 -2 L -4 -6 A 4 4 0 0 1 4 -6 L 4 -2" fill="none" stroke="#c8ccd6" stroke-width="1.6"></path></g>` : ''}
@@ -4027,26 +4151,25 @@ function renderGame() {
 
   const camZoom = (buildingAnim && buildingAnim.type === 'corp' && (buildingAnim.stage === 'rising' || buildingAnim.stage === 'celebration') && !reducedMotion);
   let camStyle = '';
-  if (camZoom) {
-    const zt = BOARD_CONFIG[buildingAnim.tileId];
-    const originX = (zt.corporationX / 1672 * 100).toFixed(1);
-    const originY = (zt.corporationY / 941 * 100).toFixed(1);
-    camStyle = `transform-origin:${originX}% ${originY}%;`;
-  }
+  const camTransform = renderCameraTransformStyle();
 
   return `<div class="game-wrap">
     <div class="game-layout">
       <div class="board-outer">
-        <div class="board ${debugMode?'debug':''} ${camZoom ? 'board-zoom' : ''}" id="boardEl" style="${camStyle}">
-          <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
-          <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-            ${tilesHtml}
-            ${debugMode ? debugZonesHtml : ''}
-          </svg>
-          ${buildingsHtml}
-          ${upgradesHtml}
-          <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
-          ${tokensHtml}
+        <div class="board-viewport ${debugMode?'debug':''}" id="boardViewport">
+          <div class="board-camera" id="boardCamera" style="${camTransform}">
+            <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
+            <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+              ${tilesHtml}
+              ${debugMode ? debugZonesHtml : ''}
+            </svg>
+            ${buildingsHtml}
+            ${upgradesHtml}
+            <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
+            ${tokensHtml}
+          </div>
+          ${cameraState.mode === 'corporation' ? '<div class="camera-dim-overlay"></div>' : ''}
+          ${debugMode ? renderCameraDebugPanel() : ''}
         </div>
       </div>
       <div class="game-sidebar">
@@ -4070,13 +4193,17 @@ function maybeShowBuyModal(room) {
   const shouldShow = room && room.pendingAction && room.pendingAction.type === 'buy'
     && room.pendingAction.playerId === myId && !isAnimatingMovement && !buildingAnimationActive;
   if (!shouldShow) {
-    if (buyModalOpen) { root.innerHTML = ''; buyModalOpen = false; buyModalKey = null; }
+    if (buyModalOpen) {
+      root.innerHTML = ''; buyModalOpen = false; buyModalKey = null;
+      if (cameraState.mode === 'purchase') returnCameraToOverview();
+    }
     return;
   }
   const key = room.pendingAction.spaceIndex + ':' + room.pendingAction.playerId;
   if (buyModalOpen && buyModalKey === key) return;
   buyModalOpen = true;
   buyModalKey = key;
+  focusCameraOnBuilding(room.pendingAction.spaceIndex, { mode: 'purchase' });
   renderBuyModal(room);
 }
 
@@ -4230,6 +4357,13 @@ function attachGameEvents() {
     el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
   });
 }
+
+window.addEventListener('resize', () => {
+  if (cameraState.mode !== 'overview' && cameraState.targetTileId !== null) {
+    const tile = BOARD_CONFIG[cameraState.targetTileId];
+    if (tile) applyCameraDirect(tile.tokenX, tile.tokenY, cameraState.scale, cameraState.mode, cameraState.targetTileId);
+  }
+});
 
 render();
 </script>
