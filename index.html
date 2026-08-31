@@ -398,6 +398,128 @@
     opacity: 0.75; z-index: 1; pointer-events: none;
     box-shadow: 0 0 6px 1px var(--glow);
   }
+
+  /* ===== BUILDING CONSTRUCTION ANIMATION ===== */
+  .construction-fx { position: absolute; z-index: 15; pointer-events: none; }
+  .tile-prep-glow {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 220%; height: 90%; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(245,202,85,0.55) 0%, transparent 70%);
+    animation: prepGlow 0.5s ease-in-out infinite;
+  }
+  @keyframes prepGlow { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  .dust-mote {
+    position: absolute; left: 50%; bottom: 4%; width: 4px; height: 4px; border-radius: 50%;
+    background: radial-gradient(circle, var(--cream) 0%, var(--gold-dark) 100%);
+    animation: dustFly 0.5s ease-out both; animation-delay: var(--delay, 0ms);
+  }
+  @keyframes dustFly { 0% { opacity: 1; transform: translate(-50%,0) scale(1); } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), -14px) scale(0.3); } }
+
+  .gold-mote {
+    position: absolute; left: 50%; bottom: 30%; width: 5px; height: 5px;
+    background: linear-gradient(160deg, var(--gold-light), var(--gold-dark));
+    clip-path: polygon(50% 0%, 61% 35%, 100% 35%, 69% 57%, 82% 100%, 50% 75%, 18% 100%, 31% 57%, 0% 35%, 39% 35%);
+    animation: goldMoteFly 0.9s ease-out both; animation-delay: var(--delay, 0ms);
+  }
+  @keyframes goldMoteFly {
+    0% { opacity: 1; transform: translate(-50%,0) rotate(0deg) scale(0.6); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), var(--dy)) rotate(var(--rot)) scale(1); }
+  }
+
+  .hammer-icon {
+    position: absolute; left: 68%; bottom: 30%; width: 16px; height: 16px;
+    transform-origin: 20% 80%;
+    animation: hammerSwing 0.42s ease-in-out infinite;
+  }
+  .hammer-icon::before {
+    content: ''; position: absolute; left: 40%; top: 0; width: 3px; height: 12px; background: #8a6d1f; border-radius: 2px;
+  }
+  .hammer-icon::after {
+    content: ''; position: absolute; left: 20%; top: -3px; width: 10px; height: 6px; background: #cfd6dd; border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  @keyframes hammerSwing { 0%,100% { transform: rotate(-35deg); } 50% { transform: rotate(10deg); } }
+
+  .house-rising-img, .corp-rising-img {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 100%; height: auto; object-fit: contain;
+    filter: drop-shadow(0 8px 6px rgba(0,0,0,0.4));
+  }
+  .house-rising-img.stage-rising { animation: buildingRise 0.6s cubic-bezier(.2,.9,.3,1) forwards; }
+  .house-rising-img.stage-settled { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+  .corp-rising-img { width: 130%; }
+  .corp-rising-img.stage-rising { animation: buildingRise 0.5s cubic-bezier(.2,.9,.3,1) forwards; }
+  .corp-rising-img.stage-settled { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+
+  @keyframes buildingRise {
+    0% { opacity: 0; transform: translateX(-50%) translateY(35px) scaleY(0.05) scaleX(0.75); }
+    65% { opacity: 1; transform: translateX(-50%) translateY(-5px) scaleY(1.08) scaleX(1.03); }
+    82% { transform: translateX(-50%) translateY(2px) scaleY(0.96) scaleX(1.02); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+
+  .house-dissolve { animation: houseDissolve 0.5s ease-in forwards; }
+  @keyframes houseDissolve { 0% { opacity: 1; filter: brightness(1); } 100% { opacity: 0; filter: brightness(2.4); transform: scale(0.6) translateY(-8px); } }
+
+  .corp-ring {
+    position: absolute; left: 50%; bottom: 6%; transform: translate(-50%, 50%);
+    width: 40px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--gold-light);
+    box-shadow: 0 0 14px 4px rgba(245,202,85,0.55);
+    animation: ringPulse 0.9s ease-out infinite;
+  }
+  @keyframes ringPulse { 0% { transform: translate(-50%,50%) scale(0.6); opacity: 0.9; } 100% { transform: translate(-50%,50%) scale(2.2); opacity: 0; } }
+
+  .corp-spotlight {
+    position: absolute; left: 50%; top: -60%; transform: translateX(-50%);
+    width: 90px; height: 130%;
+    background: linear-gradient(180deg, rgba(255,229,138,0.5) 0%, rgba(255,229,138,0.06) 70%, transparent 100%);
+    clip-path: polygon(45% 0%, 55% 0%, 80% 100%, 20% 100%);
+    animation: spotlightFlicker 1.2s ease-in-out infinite;
+  }
+  @keyframes spotlightFlicker { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+
+  .crane-arm {
+    position: absolute; left: 50%; top: -70%; width: 2px; height: 70%;
+    background: #8a6d1f;
+  }
+  .crane-hook {
+    position: absolute; left: -3px; top: 0; width: 8px; height: 8px;
+    border: 2px solid #cfae4a; border-top: none; border-radius: 0 0 8px 8px;
+    animation: craneLower 0.9s ease-in-out forwards;
+  }
+  @keyframes craneLower { 0% { top: 0; } 60% { top: 65%; } 100% { top: 55%; } }
+
+  .player-flag {
+    position: absolute; left: 62%; bottom: 55%; width: 2px; height: 22px;
+    background: #8a6d1f;
+    animation: flagPoleRise 0.4s ease-out both;
+  }
+  .player-flag::after {
+    content: ''; position: absolute; top: 0; left: 2px; width: 14px; height: 9px;
+    background: var(--flag-color, var(--steppe-gold));
+    clip-path: polygon(0 0, 100% 20%, 0 100%);
+    animation: flagWaveSmall 1.4s ease-in-out infinite;
+  }
+  @keyframes flagPoleRise { 0% { transform: scaleY(0); } 100% { transform: scaleY(1); } }
+  @keyframes flagWaveSmall { 0%,100% { transform: skewY(0deg); } 50% { transform: skewY(-10deg); } }
+
+  .confetti-burst { position: absolute; inset: -30% -50% 0; z-index: 4; }
+  .confetti-burst i {
+    position: absolute; left: 50%; bottom: 30%; width: 5px; height: 8px;
+    background: hsl(var(--hue, 40deg), 85%, 60%);
+    animation: confettiFly 1s ease-out both; animation-delay: var(--delay, 0ms);
+  }
+  @keyframes confettiFly {
+    0% { opacity: 1; transform: translate(-50%,0) rotate(0deg); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), var(--dy)) rotate(var(--rot)); }
+  }
+
+  .board-zoom { transition: transform 0.3s ease; transform: scale(1.06); }
+
+  .corp-notice-toast { background: linear-gradient(160deg, #1c1c1c 0%, #0c0c0c 100%); border-color: var(--gold-light); }
+
   .upgrade-icon.upgrade-appear { animation: upgradeBounce 0.55s cubic-bezier(.34,1.56,.64,1); }
   .upgrade-corp img { filter: drop-shadow(0 6px 5px rgba(0,0,0,0.45)) drop-shadow(0 0 10px rgba(255,215,90,0.55)); }
   .corp-burst {
@@ -3038,6 +3160,100 @@ let diceRollingNow = false;
 let diceTempFaces = null;
 let lastKnownMoney = null;
 let isAnimatingMovement = false;
+let buildingAnim = null; // { tileId, playerId, type: 'house'|'corp', stage, particleSeed }
+let buildingAnimationActive = false;
+let knownLevels = {};
+let levelsInitialized = false;
+
+function playHammerSound() {
+  try {
+    if (!playHammerSound._ctx) playHammerSound._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = playHammerSound._ctx;
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = 180;
+    gain.gain.setValueAtTime(0.09, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.09);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.09);
+  } catch (e) {}
+}
+function playFanfareSound() {
+  try {
+    if (!playHammerSound._ctx) playHammerSound._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = playHammerSound._ctx;
+    [523, 659, 784, 1046].forEach((freq, i) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = freq;
+      const t0 = ctx.currentTime + i * 0.09;
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.07, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.35);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t0); osc.stop(t0 + 0.35);
+    });
+  } catch (e) {}
+}
+function showCorpNotice() {
+  const root = document.getElementById('card-popup-root');
+  if (!root) return;
+  const el = document.createElement('div');
+  el.className = 'passgo-toast corp-notice-toast';
+  el.textContent = '\ud83c\udfe6 \u041a\u041e\u0420\u041f\u041e\u0420\u0410\u0426\u0418 \u0411\u0410\u0419\u0413\u0423\u0423\u041b\u0410\u0413\u0414\u041b\u0410\u0410!';
+  root.appendChild(el);
+  setTimeout(() => { el.remove(); }, 2000);
+}
+
+async function runBuildingAnimation(tileId, playerId, type) {
+  if (buildingAnimationActive) return;
+  buildingAnimationActive = true;
+  const seed = Array.from({length: 10}, () => ({ dx: (Math.random()-0.5)*60, dy: -20-Math.random()*46, rot: Math.random()*360, delay: Math.random()*180 }));
+  buildingAnim = { tileId, playerId, type, stage: 'preparing', particleSeed: seed };
+  const t = reducedMotion ? 0.35 : 1;
+  try {
+    render();
+    await new Promise(r => setTimeout(r, 150 * t));
+    buildingAnim.stage = 'dust'; render();
+    if (!reducedMotion) { playHammerSound(); setTimeout(playHammerSound, 130); setTimeout(playHammerSound, 260); }
+    await new Promise(r => setTimeout(r, (type === 'corp' ? 350 : 400) * t));
+    buildingAnim.stage = 'hammer'; render();
+    await new Promise(r => setTimeout(r, (type === 'corp' ? 400 : 200) * t));
+    buildingAnim.stage = 'rising'; render();
+    await new Promise(r => setTimeout(r, (type === 'corp' ? 500 : 600) * t));
+    buildingAnim.stage = 'celebration'; render();
+    if (type === 'corp') { playFanfareSound(); showCorpNotice(); }
+    await new Promise(r => setTimeout(r, (type === 'corp' ? 500 : 500) * t));
+    buildingAnim.stage = 'completed'; render();
+  } finally {
+    buildingAnim = null;
+    buildingAnimationActive = false;
+    render();
+  }
+}
+
+function maybeTriggerBuildAnimation(room) {
+  if (!room) return;
+  const currentLevels = {};
+  BOARD_CONFIG.forEach(tile => {
+    if (tile.type !== 'property') return;
+    const lvl = houseLevel(room, tile.id);
+    currentLevels[tile.id] = lvl;
+  });
+  if (!levelsInitialized) { knownLevels = currentLevels; levelsInitialized = true; return; }
+  if (buildingAnimationActive) { knownLevels = currentLevels; return; }
+  for (const idx in currentLevels) {
+    const prev = knownLevels[idx] || 0;
+    const now = currentLevels[idx];
+    if (now > prev) {
+      const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
+      const type = now >= 4 ? 'corp' : 'house';
+      knownLevels = currentLevels;
+      runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, type);
+      return;
+    }
+  }
+  knownLevels = currentLevels;
+}
+
 let movingPlayerId = null;
 let reducedMotion = false;
 try { reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
@@ -3225,6 +3441,75 @@ let seenBuildings = new Set();
 const PLAYER_GLOW_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#a855f7'];
 let seenUpgrades = new Set();
 
+function renderBuildingConstructionOverlay(tile, idx, owner, anim, room) {
+  const ownerIdx = 0; // color resolved below via owner.color directly
+  const flagColor = owner.color;
+  const stage = anim.stage;
+  const seed = anim.particleSeed || [];
+  const dustHtml = (stage === 'dust' || stage === 'hammer') ? seed.slice(0, 7).map((p, i) =>
+    `<span class="dust-mote" style="--dx:${p.dx * 0.4}px; --delay:${p.delay}ms;"></span>`).join('') : '';
+  const goldParticlesHtml = (stage === 'celebration') ? seed.map((p, i) =>
+    `<span class="gold-mote" style="--dx:${p.dx}px; --dy:${p.dy}px; --rot:${p.rot}deg; --delay:${p.delay * 0.5}ms;"></span>`).join('') : '';
+
+  if (anim.type === 'corp') {
+    const w = 60;
+    const bx = tile.corporationX - w / 2;
+    const by = tile.corporationY - w;
+    const leftPct = (bx / 1672 * 100).toFixed(2);
+    const topPct = (by / 941 * 100).toFixed(2);
+    const widthPct = (w / 1672 * 100).toFixed(2);
+    const heightPct = (w / 941 * 100).toFixed(2);
+    const dissolving = (stage === 'preparing' || stage === 'dust');
+    const oldHouses = dissolving ? (tile.houseSlots || []).map(([hx, hy], s) => {
+      const hw = 16 * (tile.buildingScale || 1);
+      const hl = ((hx - hw/2) / 1672 * 100).toFixed(2), ht = ((hy - hw) / 941 * 100).toFixed(2);
+      const hwp = (hw/1672*100).toFixed(2), hhp = (hw/941*100).toFixed(2);
+      return `<div class="upgrade-icon upgrade-house house-dissolve" style="left:${hl}%; top:${ht}%; width:${hwp}%; height:${hhp}%;"><img src="player-house.png" onerror="this.style.display='none'"></div>`;
+    }).join('') : '';
+    const showRing = stage !== 'preparing';
+    const showCrane = stage === 'hammer' || stage === 'rising';
+    const showHq = stage === 'rising' || stage === 'celebration';
+    const showSpotlight = stage === 'rising' || stage === 'celebration';
+    return `${oldHouses}
+      <div class="construction-fx" style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%;">
+        ${showRing ? `<span class="corp-ring"></span>` : ''}
+        ${showSpotlight ? `<span class="corp-spotlight"></span>` : ''}
+        ${showCrane ? `<span class="crane-arm"><span class="crane-hook"></span></span>` : ''}
+        ${showHq ? `<img class="corp-rising-img ${stage === 'rising' ? 'stage-rising' : 'stage-settled'}" src="corporation-hq.png" alt="" onerror="this.style.display='none'">` : ''}
+        ${dustHtml}
+        ${stage === 'celebration' ? `<span class="player-flag" style="--flag-color:${flagColor};"></span>` : ''}
+        ${goldParticlesHtml}
+        ${stage === 'celebration' ? `<span class="confetti-burst">${seed.map((p,i)=>`<i style="--dx:${p.dx*1.4}px; --dy:${p.dy*1.6}px; --rot:${p.rot}deg; --hue:${(i*47)%360}deg; --delay:${p.delay*0.3}ms;"></i>`).join('')}</span>` : ''}
+      </div>`;
+  }
+
+  // house
+  const level = houseLevel(room, idx);
+  const prevCount = Math.max(0, Math.min(level - 1, 3));
+  const newSlotIndex = Math.min(level - 1, 2);
+  const staticHouses = tile.houseSlots.slice(0, prevCount).map(([hx, hy]) => {
+    const hw = 16 * (tile.buildingScale || 1);
+    const hl = ((hx - hw/2) / 1672 * 100).toFixed(2), ht = ((hy - hw) / 941 * 100).toFixed(2);
+    const hwp = (hw/1672*100).toFixed(2), hhp = (hw/941*100).toFixed(2);
+    return `<div class="upgrade-icon upgrade-house" style="left:${hl}%; top:${ht}%; width:${hwp}%; height:${hhp}%;"><span class="upgrade-glow-ring"></span><img src="player-house.png" onerror="this.style.display='none'"></div>`;
+  }).join('');
+  const [nx, ny] = tile.houseSlots[newSlotIndex];
+  const nw = 16 * (tile.buildingScale || 1);
+  const nl = ((nx - nw/2) / 1672 * 100).toFixed(2), nt = ((ny - nw) / 941 * 100).toFixed(2);
+  const nwp = (nw/1672*100).toFixed(2), nhp = (nw/941*100).toFixed(2);
+  const showHouse = stage === 'rising' || stage === 'hammer' || stage === 'celebration';
+  const riseClass = stage === 'rising' ? 'stage-rising' : (stage === 'celebration' ? 'stage-settled' : '');
+  return `${staticHouses}
+    <div class="construction-fx" style="left:${nl}%; top:${nt}%; width:${nwp}%; height:${nhp}%;">
+      ${stage === 'preparing' ? `<span class="tile-prep-glow"></span>` : ''}
+      ${dustHtml}
+      ${stage === 'dust' || stage === 'hammer' ? `<span class="hammer-icon"></span>` : ''}
+      ${showHouse ? `<img class="house-rising-img ${riseClass}" src="player-house.png" alt="" onerror="this.style.display='none'">` : ''}
+      ${stage === 'celebration' ? `<span class="player-flag" style="--flag-color:${flagColor};"></span>` : ''}
+      ${goldParticlesHtml}
+    </div>`;
+}
+
 function renderUpgradeIcons(tile, level, idx, ownerIdx) {
   if (!level || level < 1) return '';
   const glow = PLAYER_GLOW_COLORS[((ownerIdx % 4) + 4) % 4];
@@ -3321,7 +3606,7 @@ function render() {
   if (view === 'landing') { app.innerHTML = renderLanding(); attachLandingEvents(); return; }
   if (view === 'waiting') { app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
   if (view === 'game') {
-    if (currentRoom) { maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); }
+    if (currentRoom) { maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); maybeTriggerBuildAnimation(currentRoom); }
     app.innerHTML = renderGame();
     attachGameEvents();
     maybeFlashMoney(currentRoom);
@@ -3429,6 +3714,13 @@ function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling
   if (isAnimatingMovement) {
     return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
       <div class="sb-waiting"><span class="pulse-dot"></span>\u0422\u043e\u0433\u043b\u043e\u0433\u0447 \u0445\u04e9\u0434\u04e9\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+      <button class="sb-dice-btn" disabled>\ud83d\udd12 \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
+      <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
+    </div>`;
+  }
+  if (buildingAnimationActive) {
+    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
+      <div class="sb-waiting"><span class="pulse-dot"></span>\ud83c\udfd7\ufe0f \u0411\u0430\u0440\u0438\u043b\u0433\u0430 \u0431\u0430\u0440\u0438\u0433\u0434\u0430\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
       <button class="sb-dice-btn" disabled>\ud83d\udd12 \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
       <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
     </div>`;
@@ -3603,16 +3895,23 @@ function renderGame() {
         <text x="${tile.tokenX}" y="${tile.tokenY - 9}" text-anchor="middle" font-size="9" fill="#fff" stroke="#000" stroke-width="0.4" paint-order="stroke">${idx}</text>
       </g>`;
     }
+    let constructionHtml = '';
     if (owner && tile.buildingType) {
       const ownerIdx = room.players.findIndex(p => p.id === owner.id);
       buildingsToRender.push({ tile, level, idx, depth: tile.depth });
-      upgradesToRender.push({ tile, level, idx, depth: tile.depth + 0.5, ownerIdx, owner });
+      const isConstructing = buildingAnim && buildingAnim.tileId === idx && buildingAnim.stage !== 'completed';
+      if (isConstructing) {
+        constructionHtml = renderBuildingConstructionOverlay(tile, idx, owner, buildingAnim, room);
+      } else {
+        upgradesToRender.push({ tile, level, idx, depth: tile.depth + 0.5, ownerIdx, owner });
+      }
     }
+    if (constructionHtml) upgradesToRender.push({ tile, level, idx, depth: tile.depth + 0.5, ownerIdx: -1, owner, __rawHtml: constructionHtml });
   });
   buildingsToRender.sort((a, b) => a.depth - b.depth);
   const buildingsHtml = buildingsToRender.map(b => renderBuildingIcon(b.tile, b.level, b.idx)).join('');
   upgradesToRender.sort((a, b) => a.depth - b.depth);
-  const upgradesHtml = upgradesToRender.map(u => renderUpgradeIcons(u.tile, u.level, u.idx, u.ownerIdx)).join('');
+  const upgradesHtml = upgradesToRender.map(u => u.__rawHtml || renderUpgradeIcons(u.tile, u.level, u.idx, u.ownerIdx)).join('');
 
   const clampPct = v => Math.min(97, Math.max(3, v));
   const tokenOffsets = [[-14,-8],[14,-8],[-14,10],[14,10]];
@@ -3630,10 +3929,19 @@ function renderGame() {
       style="left:${left}%; top:${top}%; --token-ring:${p.color}; --token-scale:${scale}; z-index:${isMover ? 20 : 10 + Math.round(tile.tokenY / 20)};">${p.token}</div>`;
   }).join('');
 
+  const camZoom = (buildingAnim && buildingAnim.type === 'corp' && (buildingAnim.stage === 'rising' || buildingAnim.stage === 'celebration') && !reducedMotion);
+  let camStyle = '';
+  if (camZoom) {
+    const zt = BOARD_CONFIG[buildingAnim.tileId];
+    const originX = (zt.corporationX / 1672 * 100).toFixed(1);
+    const originY = (zt.corporationY / 941 * 100).toFixed(1);
+    camStyle = `transform-origin:${originX}% ${originY}%;`;
+  }
+
   return `<div class="game-wrap">
     <div class="game-layout">
       <div class="board-outer">
-        <div class="board ${debugMode?'debug':''}" id="boardEl">
+        <div class="board ${debugMode?'debug':''} ${camZoom ? 'board-zoom' : ''}" id="boardEl" style="${camStyle}">
           <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
           <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
             ${tilesHtml}
@@ -3664,7 +3972,7 @@ function maybeShowBuyModal(room) {
   const root = document.getElementById('buy-modal-root');
   if (!root) return;
   const shouldShow = room && room.pendingAction && room.pendingAction.type === 'buy'
-    && room.pendingAction.playerId === myId && !isAnimatingMovement;
+    && room.pendingAction.playerId === myId && !isAnimatingMovement && !buildingAnimationActive;
   if (!shouldShow) {
     if (buyModalOpen) { root.innerHTML = ''; buyModalOpen = false; buyModalKey = null; }
     return;
@@ -3762,12 +4070,12 @@ function attachGameEvents() {
   const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
   document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => { if (buyModalOpen) return; showCellDetail(idx); };
+    el.onclick = () => { if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
   });
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => { if (buyModalOpen) return; showCellDetail(idx); };
+    el.onclick = () => { if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
     el.onmouseenter = (e) => {
       if (!tooltip || !currentRoom) return;
       const sp = BOARD_CONFIG[idx];
@@ -3784,11 +4092,11 @@ function attachGameEvents() {
   });
   document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
   });
   document.querySelectorAll('.upgrade-icon[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
   });
 }
 
