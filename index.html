@@ -199,7 +199,6 @@
   .sb-player-card.sb-player-current {
     border-color: var(--gold); background: rgba(245,202,85,0.08);
     box-shadow: 0 0 0 1px rgba(245,202,85,0.3), 0 0 14px rgba(245,202,85,0.2);
-    animation: sbPulseGlow 2.2s ease-in-out infinite;
   }
   .sb-player-card.sb-player-bankrupt { opacity: 0.4; }
   .sb-crown { position: absolute; top: -9px; left: 8px; font-size: 13px; }
@@ -495,6 +494,69 @@
   .dice-result-text { font-size: 12.5px; color: #9AA6BE; text-align: center; min-height: 16px; }
 
   .card-popup-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: popIn 0.2s ease; }
+
+  .buy-modal-backdrop {
+    position: fixed; inset: 0; z-index: 2500;
+    background: rgba(2,10,8,0.78);
+    display: flex; align-items: center; justify-content: center; padding: 18px;
+    animation: popIn 0.25s ease;
+  }
+  .buy-modal {
+    width: min(94vw, 620px);
+    display: flex;
+    background: linear-gradient(160deg, var(--sidebar-bg-2) 0%, var(--sidebar-bg) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.6), 0 0 40px rgba(245,202,85,0.15);
+    animation: buyModalPop 0.4s cubic-bezier(.2,1.3,.4,1);
+  }
+  .buy-modal-visual {
+    flex: 0 0 42%;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--grp) 25%, var(--emerald-dark)) 0%, var(--sidebar-bg) 80%);
+    padding: 20px;
+  }
+  .buy-modal-group-tag { position: absolute; top: 0; left: 0; right: 0; height: 6px; }
+  .buy-modal-visual img { width: 100%; max-width: 220px; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(0,0,0,0.5)); }
+  .buy-modal-info { flex: 1; padding: 22px 22px 24px; display: flex; flex-direction: column; }
+  .buy-modal-eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--emerald-light); font-weight: 800; }
+  .buy-modal-name { font-size: 22px; font-weight: 800; color: var(--sb-text); margin: 4px 0 14px; line-height: 1.2; }
+  .buy-modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-bottom: 14px; }
+  .bm-stat { display: flex; flex-direction: column; gap: 2px; }
+  .bm-stat span { font-size: 10.5px; color: var(--sb-muted); }
+  .bm-stat b { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--gold-light); }
+  .buy-modal-money-row {
+    display: flex; justify-content: space-between; gap: 10px;
+    background: rgba(0,0,0,0.25); border-radius: 12px; padding: 10px 12px; margin-bottom: 6px;
+  }
+  .bm-money { display: flex; flex-direction: column; gap: 2px; }
+  .bm-money span { font-size: 10px; color: var(--sb-muted); }
+  .bm-money b { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+  .bm-ok { color: var(--emerald-light); }
+  .bm-bad { color: var(--sb-danger); }
+  .bm-short { font-size: 12px; color: var(--sb-danger); font-weight: 700; margin-bottom: 10px; text-align: center; }
+  .buy-modal-buy-btn {
+    margin-top: auto;
+    display: block; width: 100%; padding: 15px; border: none; border-radius: 14px;
+    font-weight: 800; font-size: 15px; letter-spacing: 0.4px; color: var(--cream); cursor: pointer;
+    background: linear-gradient(180deg, #ffcf6e 0%, #f39c1f 55%, #d9840d 100%);
+    border: 2px solid var(--gold-light);
+    box-shadow: 0 5px 0 var(--gold-dark), 0 8px 16px rgba(0,0,0,0.4);
+  }
+  .buy-modal-buy-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: 0 3px 0 rgba(0,0,0,0.3); }
+  .buy-modal-skip-btn {
+    display: block; width: 100%; margin-top: 8px; padding: 10px; border-radius: 12px;
+    background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: var(--sb-muted);
+    font-weight: 700; font-size: 12.5px; cursor: pointer;
+  }
+  @keyframes buyModalPop { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @media (max-width: 560px) {
+    .buy-modal { flex-direction: column; }
+    .buy-modal-visual { flex: 0 0 auto; padding: 20px 20px 6px; }
+    .buy-modal-visual img { max-width: 150px; }
+  }
   .card-popup { width: min(90vw, 380px); background: linear-gradient(155deg, #1c1c1c 0%, #0c0c0c 100%); border: 2px solid var(--steppe-gold); border-radius: 16px; padding: 28px 22px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.15); animation: cardFlip 0.4s cubic-bezier(.2,1.4,.4,1); }
   .card-popup-eyebrow { font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; letter-spacing: 1.5px; color: var(--steppe-gold); margin-bottom: 10px; }
   .card-popup-player { font-size: 13px; color: #9AA6BE; margin-bottom: 14px; }
@@ -598,6 +660,7 @@
 
 <div id="app"></div>
 <div id="card-popup-root"></div>
+<div id="buy-modal-root"></div>
 <div id="tile-tooltip" class="tile-tooltip"></div>
 
 <script>
@@ -684,11 +747,11 @@ const BOARD_CONFIG = [
     "labelY": 766.2,
     "labelRotation": -33.4,
     "buildingType": "factory",
-    "buildingX": 729.2,
-    "buildingY": 763.3,
+    "buildingX": 704.3,
+    "buildingY": 750.7,
     "buildingWidth": 59.9,
     "buildingRotation": 0,
-    "depth": 763,
+    "depth": 751,
     "houseSlots": [
       [
         714.5,
@@ -758,11 +821,11 @@ const BOARD_CONFIG = [
     "labelY": 710.5,
     "labelRotation": -32.3,
     "buildingType": "telecom",
-    "buildingX": 648.2,
-    "buildingY": 712.7,
+    "buildingX": 626.0,
+    "buildingY": 695.7,
     "buildingWidth": 58.8,
     "buildingRotation": 0,
-    "depth": 713,
+    "depth": 696,
     "houseSlots": [
       [
         641.7,
@@ -832,11 +895,11 @@ const BOARD_CONFIG = [
     "labelY": 655.3,
     "labelRotation": -31.3,
     "buildingType": "technology",
-    "buildingX": 566.1,
-    "buildingY": 662.2,
+    "buildingX": 546.9,
+    "buildingY": 642.5,
     "buildingWidth": 58.1,
     "buildingRotation": 0,
-    "depth": 662,
+    "depth": 642,
     "houseSlots": [
       [
         567.8,
@@ -906,11 +969,11 @@ const BOARD_CONFIG = [
     "labelY": 602.1,
     "labelRotation": -30.1,
     "buildingType": "telecom",
-    "buildingX": 485.6,
-    "buildingY": 612.2,
+    "buildingX": 469.3,
+    "buildingY": 591.2,
     "buildingWidth": 56.6,
     "buildingRotation": 0,
-    "depth": 612,
+    "depth": 591,
     "houseSlots": [
       [
         493.8,
@@ -980,11 +1043,11 @@ const BOARD_CONFIG = [
     "labelY": 551.0,
     "labelRotation": -28.9,
     "buildingType": "bank",
-    "buildingX": 408.7,
-    "buildingY": 563.1,
+    "buildingX": 394.6,
+    "buildingY": 541.5,
     "buildingWidth": 54.3,
     "buildingRotation": 0,
-    "depth": 563,
+    "depth": 542,
     "houseSlots": [
       [
         421.2,
@@ -1087,11 +1150,11 @@ const BOARD_CONFIG = [
     "labelY": 454.5,
     "labelRotation": -27.0,
     "buildingType": "retail",
-    "buildingX": 265.1,
-    "buildingY": 468.7,
+    "buildingX": 255.0,
+    "buildingY": 445.5,
     "buildingWidth": 52.2,
     "buildingRotation": 0,
-    "depth": 469,
+    "depth": 446,
     "houseSlots": [
       [
         282.7,
@@ -1204,11 +1267,11 @@ const BOARD_CONFIG = [
     "labelY": 312.8,
     "labelRotation": 34.6,
     "buildingType": "mining",
-    "buildingX": 301.1,
-    "buildingY": 328.8,
+    "buildingX": 317.4,
+    "buildingY": 308.7,
     "buildingWidth": 51.0,
     "buildingRotation": 0,
-    "depth": 329,
+    "depth": 309,
     "houseSlots": [
       [
         323.9,
@@ -1278,11 +1341,11 @@ const BOARD_CONFIG = [
     "labelY": 275.3,
     "labelRotation": 33.3,
     "buildingType": "construction",
-    "buildingX": 381.7,
-    "buildingY": 291.7,
+    "buildingX": 399.9,
+    "buildingY": 273.1,
     "buildingWidth": 49.9,
     "buildingRotation": 0,
-    "depth": 292,
+    "depth": 273,
     "houseSlots": [
       [
         406.3,
@@ -1352,11 +1415,11 @@ const BOARD_CONFIG = [
     "labelY": 239.6,
     "labelRotation": 32.0,
     "buildingType": "technology",
-    "buildingX": 458.9,
-    "buildingY": 256.2,
+    "buildingX": 478.9,
+    "buildingY": 238.5,
     "buildingWidth": 48.5,
     "buildingRotation": 0,
-    "depth": 256,
+    "depth": 238,
     "houseSlots": [
       [
         485.4,
@@ -1426,11 +1489,11 @@ const BOARD_CONFIG = [
     "labelY": 205.0,
     "labelRotation": 30.3,
     "buildingType": "factory",
-    "buildingX": 531.7,
-    "buildingY": 221.5,
+    "buildingX": 553.7,
+    "buildingY": 205.1,
     "buildingWidth": 48.0,
     "buildingRotation": 0,
-    "depth": 222,
+    "depth": 205,
     "houseSlots": [
       [
         559.7,
@@ -1500,11 +1563,11 @@ const BOARD_CONFIG = [
     "labelY": 171.6,
     "labelRotation": 29.5,
     "buildingType": "fuel",
-    "buildingX": 601.7,
-    "buildingY": 187.3,
+    "buildingX": 625.6,
+    "buildingY": 172.9,
     "buildingWidth": 46.1,
     "buildingRotation": 0,
-    "depth": 187,
+    "depth": 173,
     "houseSlots": [
       [
         630.3,
@@ -1608,11 +1671,11 @@ const BOARD_CONFIG = [
     "labelY": 109.9,
     "labelRotation": 28.3,
     "buildingType": "mining",
-    "buildingX": 731.5,
-    "buildingY": 122.1,
+    "buildingX": 758.0,
+    "buildingY": 113.2,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
-    "depth": 122,
+    "depth": 113,
     "houseSlots": [
       [
         758.0,
@@ -1725,11 +1788,11 @@ const BOARD_CONFIG = [
     "labelY": 109.7,
     "labelRotation": -28.5,
     "buildingType": "mining",
-    "buildingX": 915.1,
-    "buildingY": 114.8,
+    "buildingX": 941.5,
+    "buildingY": 123.8,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
-    "depth": 115,
+    "depth": 124,
     "houseSlots": [
       [
         933.0,
@@ -1799,11 +1862,11 @@ const BOARD_CONFIG = [
     "labelY": 139.6,
     "labelRotation": -29.5,
     "buildingType": "fashion",
-    "buildingX": 979.3,
-    "buildingY": 141.6,
+    "buildingX": 1004.6,
+    "buildingY": 153.5,
     "buildingWidth": 43.5,
     "buildingRotation": 0,
-    "depth": 142,
+    "depth": 154,
     "houseSlots": [
       [
         992.6,
@@ -1873,11 +1936,11 @@ const BOARD_CONFIG = [
     "labelY": 170.8,
     "labelRotation": -29.7,
     "buildingType": "mining",
-    "buildingX": 1047.8,
-    "buildingY": 169.5,
+    "buildingX": 1071.7,
+    "buildingY": 183.8,
     "buildingWidth": 45.8,
     "buildingRotation": 0,
-    "depth": 170,
+    "depth": 184,
     "houseSlots": [
       [
         1055.8,
@@ -1947,11 +2010,11 @@ const BOARD_CONFIG = [
     "labelY": 204.3,
     "labelRotation": -31.0,
     "buildingType": "bank",
-    "buildingX": 1120.7,
-    "buildingY": 199.8,
+    "buildingX": 1142.7,
+    "buildingY": 216.1,
     "buildingWidth": 47.3,
     "buildingRotation": 0,
-    "depth": 200,
+    "depth": 216,
     "houseSlots": [
       [
         1123.2,
@@ -2021,11 +2084,11 @@ const BOARD_CONFIG = [
     "labelY": 238.2,
     "labelRotation": -31.8,
     "buildingType": "bank",
-    "buildingX": 1197.1,
-    "buildingY": 231.0,
+    "buildingX": 1217.2,
+    "buildingY": 248.7,
     "buildingWidth": 48.1,
     "buildingRotation": 0,
-    "depth": 231,
+    "depth": 249,
     "houseSlots": [
       [
         1194.7,
@@ -2128,11 +2191,11 @@ const BOARD_CONFIG = [
     "labelY": 312.1,
     "labelRotation": -34.4,
     "buildingType": "bank",
-    "buildingX": 1359.6,
-    "buildingY": 301.2,
+    "buildingX": 1375.9,
+    "buildingY": 321.3,
     "buildingWidth": 51.1,
     "buildingRotation": 0,
-    "depth": 301,
+    "depth": 321,
     "houseSlots": [
       [
         1349.8,
@@ -2245,11 +2308,11 @@ const BOARD_CONFIG = [
     "labelY": 453.7,
     "labelRotation": 26.6,
     "buildingType": "mining",
-    "buildingX": 1404.5,
-    "buildingY": 440.0,
+    "buildingX": 1394.5,
+    "buildingY": 463.3,
     "buildingWidth": 53.1,
     "buildingRotation": 0,
-    "depth": 440,
+    "depth": 463,
     "houseSlots": [
       [
         1388.2,
@@ -2319,11 +2382,11 @@ const BOARD_CONFIG = [
     "labelY": 501.8,
     "labelRotation": 27.5,
     "buildingType": "mining",
-    "buildingX": 1338.0,
-    "buildingY": 487.3,
+    "buildingX": 1325.6,
+    "buildingY": 509.2,
     "buildingWidth": 54.2,
     "buildingRotation": 0,
-    "depth": 487,
+    "depth": 509,
     "houseSlots": [
       [
         1319.6,
@@ -2393,11 +2456,11 @@ const BOARD_CONFIG = [
     "labelY": 550.8,
     "labelRotation": 29.2,
     "buildingType": "retail",
-    "buildingX": 1268.1,
-    "buildingY": 535.4,
+    "buildingX": 1254.0,
+    "buildingY": 557.1,
     "buildingWidth": 55.5,
     "buildingRotation": 0,
-    "depth": 535,
+    "depth": 557,
     "houseSlots": [
       [
         1247.2,
@@ -2467,11 +2530,11 @@ const BOARD_CONFIG = [
     "labelY": 602.6,
     "labelRotation": 30.3,
     "buildingType": "mining",
-    "buildingX": 1196.0,
-    "buildingY": 586.4,
+    "buildingX": 1179.7,
+    "buildingY": 607.5,
     "buildingWidth": 58.0,
     "buildingRotation": 0,
-    "depth": 586,
+    "depth": 608,
     "houseSlots": [
       [
         1172.2,
@@ -2541,11 +2604,11 @@ const BOARD_CONFIG = [
     "labelY": 656.6,
     "labelRotation": 31.4,
     "buildingType": "mining",
-    "buildingX": 1120.7,
-    "buildingY": 640.0,
+    "buildingX": 1101.5,
+    "buildingY": 659.5,
     "buildingWidth": 59.2,
     "buildingRotation": 0,
-    "depth": 640,
+    "depth": 660,
     "houseSlots": [
       [
         1093.9,
@@ -2649,11 +2712,11 @@ const BOARD_CONFIG = [
     "labelY": 767.8,
     "labelRotation": 33.4,
     "buildingType": "construction",
-    "buildingX": 967.8,
-    "buildingY": 754.2,
+    "buildingX": 942.9,
+    "buildingY": 766.7,
     "buildingWidth": 59.5,
     "buildingRotation": 0,
-    "depth": 754,
+    "depth": 767,
     "houseSlots": [
       [
         940.1,
@@ -3262,6 +3325,7 @@ function render() {
     app.innerHTML = renderGame();
     attachGameEvents();
     maybeFlashMoney(currentRoom);
+    if (currentRoom) maybeShowBuyModal(currentRoom);
     return;
   }
 }
@@ -3370,13 +3434,11 @@ function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling
     </div>`;
   }
   if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy') {
-    const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
     return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0410\u041d\u042b \u0417\u04e9\u0412\u0428\u04e8\u04e8\u0420\u0415\u041b \u25c8</div>
-      <div class="buy-prompt">
-        "${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0445 \u0443\u0443?<br><span style="color:var(--sb-muted);">\u0422\u04af\u0440\u044d\u044d\u0441: \u20ae${sp.rent}/\u0443\u0434\u0430\u0430</span>
-        <button class="sb-dice-btn" id="buyBtn" ${me.money < sp.price ? 'disabled' : ''}>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0445</button>
-        <button class="sb-endturn-btn" id="skipBtn">\u0410\u043b\u0433\u0430\u0441\u0430\u0445</button>
-      </div></div>`;
+      <div class="sb-waiting">\ud83d\udcc4 \u0421\u0430\u043d\u0430\u043b\u044b\u0433 \u0445\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+      <button class="sb-dice-btn" disabled>\ud83d\udd12 \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
+      <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
+    </div>`;
   }
   if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'build') {
     const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
@@ -3595,6 +3657,68 @@ function renderGame() {
   </div>`;
 }
 
+let buyModalOpen = false;
+let buyModalKey = null;
+
+function maybeShowBuyModal(room) {
+  const root = document.getElementById('buy-modal-root');
+  if (!root) return;
+  const shouldShow = room && room.pendingAction && room.pendingAction.type === 'buy'
+    && room.pendingAction.playerId === myId && !isAnimatingMovement;
+  if (!shouldShow) {
+    if (buyModalOpen) { root.innerHTML = ''; buyModalOpen = false; buyModalKey = null; }
+    return;
+  }
+  const key = room.pendingAction.spaceIndex + ':' + room.pendingAction.playerId;
+  if (buyModalOpen && buyModalKey === key) return;
+  buyModalOpen = true;
+  buyModalKey = key;
+  renderBuyModal(room);
+}
+
+function renderBuyModal(room) {
+  const root = document.getElementById('buy-modal-root');
+  if (!root) return;
+  const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
+  const me = room.players.find(p => p.id === myId);
+  const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
+  const houseCost = buildCost(sp);
+  const corpCost = buildCost(sp);
+  const groupColor = GROUP_COLORS[sp.colorGroup] || 'var(--gold)';
+  const canAfford = me.money >= sp.price;
+  const remaining = me.money - sp.price;
+  const shortBy = sp.price - me.money;
+  root.innerHTML = `<div class="buy-modal-backdrop">
+    <div class="buy-modal">
+      <div class="buy-modal-visual" style="--grp:${groupColor};">
+        <div class="buy-modal-group-tag" style="background:${groupColor};"></div>
+        <img src="${fileName}.png" alt="${sp.name}" onerror="this.style.display='none'">
+      </div>
+      <div class="buy-modal-info">
+        <div class="buy-modal-eyebrow">\u0428\u0438\u043d\u044d \u043a\u043e\u043c\u043f\u0430\u043d\u0438</div>
+        <div class="buy-modal-name">${sp.name}</div>
+        <div class="buy-modal-stats">
+          <div class="bm-stat"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u043d \u0430\u0432\u0430\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(sp.price)}</b></div>
+          <div class="bm-stat"><span>\u0421\u0443\u0443\u0440\u044c \u043e\u0440\u043b\u043e\u0433\u043e (\u0442\u04af\u0440\u044d\u044d\u0441)</span><b>\u20ae${fmt(sp.rent)}</b></div>
+          <div class="bm-stat"><span>\u0411\u0430\u0439\u0448\u0438\u043d \u0431\u0430\u0440\u0438\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(houseCost)}</b></div>
+          <div class="bm-stat"><span>\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446 \u0431\u043e\u043b\u0433\u043e\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(corpCost)}</b></div>
+        </div>
+        <div class="buy-modal-money-row">
+          <div class="bm-money"><span>\u0422\u0430\u043d\u044b \u043e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u043c\u04e9\u043d\u0433\u04e9</span><b>\u20ae${fmt(me.money)}</b></div>
+          <div class="bm-money"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0441\u0430\u043d\u044b \u0434\u0430\u0440\u0430\u0430</span><b class="${canAfford ? 'bm-ok' : 'bm-bad'}">\u20ae${fmt(Math.max(remaining,0))}</b></div>
+        </div>
+        ${!canAfford ? `<div class="bm-short">\u20ae${fmt(shortBy)} \u0434\u0443\u0442\u0443\u0443 \u0431\u0430\u0439\u043d\u0430</div>` : ''}
+        <button class="buy-modal-buy-btn" id="modalBuyBtn" ${canAfford ? '' : 'disabled'}>\ud83d\udcb0 \u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0416 \u0410\u0412\u0410\u0425</button>
+        <button class="buy-modal-skip-btn" id="modalSkipBtn">\u0410\u041b\u0413\u0410\u0421\u0410\u0425</button>
+      </div>
+    </div>
+  </div>`;
+  const buyBtn = document.getElementById('modalBuyBtn');
+  if (buyBtn) buyBtn.onclick = async () => { await buyProperty(); };
+  const skipBtn = document.getElementById('modalSkipBtn');
+  if (skipBtn) skipBtn.onclick = async () => { await skipBuy(); };
+}
+
 function showCellDetail(idx) {
   const room = currentRoom;
   const sp = BOARD_CONFIG[idx];
@@ -3638,12 +3762,12 @@ function attachGameEvents() {
   const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
   document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => showCellDetail(idx);
+    el.onclick = () => { if (buyModalOpen) return; showCellDetail(idx); };
   });
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => showCellDetail(idx);
+    el.onclick = () => { if (buyModalOpen) return; showCellDetail(idx); };
     el.onmouseenter = (e) => {
       if (!tooltip || !currentRoom) return;
       const sp = BOARD_CONFIG[idx];
@@ -3660,11 +3784,11 @@ function attachGameEvents() {
   });
   document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen) return; showCellDetail(idx); };
   });
   document.querySelectorAll('.upgrade-icon[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen) return; showCellDetail(idx); };
   });
 }
 
