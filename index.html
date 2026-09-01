@@ -4382,6 +4382,18 @@ let buyModalOpen = false;
 let cardModalOpen = false;
 let cardModalKey = null;
 let cardModalStage = 'revealing'; // revealing | reading | selecting | completed
+let currentCardModalCard = null;
+
+(function setupCardModalDelegation() {
+  const root = document.getElementById('buy-modal-root');
+  if (!root) return;
+  root.addEventListener('click', (e) => {
+    const contBtn = e.target.closest('#cardContinueBtn');
+    if (contBtn && currentCardModalCard) { onCardContinueClick(currentCardModalCard); return; }
+    const selItem = e.target.closest('.card-select-item');
+    if (selItem && currentCardModalCard) { resolveCardFinal(currentCardModalCard, parseInt(selItem.dataset.tile, 10)); return; }
+  });
+})();
 
 function playCardSound(kind) {
   try {
@@ -4475,11 +4487,7 @@ function renderCardModal(room, card) {
     </div>
   </div>`;
 
-  const contBtn = document.getElementById('cardContinueBtn');
-  if (contBtn) contBtn.onclick = () => onCardContinueClick(card);
-  document.querySelectorAll('.card-select-item').forEach(btn => {
-    btn.onclick = () => resolveCardFinal(card, parseInt(btn.dataset.tile, 10));
-  });
+  currentCardModalCard = card;
 }
 
 function renderCardParticles(card) {
