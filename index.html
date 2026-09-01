@@ -894,6 +894,78 @@
   .log-box { max-height: 170px; overflow-y: auto; font-size: 12px; color: #b8c2d9; display: flex; flex-direction: column-reverse; gap: 5px; }
 
   /* ===== GAME RESULTS CINEMATIC ===== */
+  /* ===== RENT PAYMENT CINEMATIC ===== */
+  .rent-cinematic { position: fixed; inset: 0; z-index: 2900; display: flex; align-items: center; justify-content: center; padding: 20px; pointer-events: none; }
+  .rent-cinematic-inner { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 4vw, 60px); width: min(94vw, 780px); flex-wrap: wrap; }
+  .rent-side { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; min-width: 110px; transition: transform 0.3s ease; }
+  .rent-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; background: rgba(255,255,255,0.08); border: 3px solid var(--ring-color, var(--gold)); }
+  .rent-avatar-payer { box-shadow: 0 0 0 3px rgba(232,93,93,0.4); }
+  .rent-avatar-owner { box-shadow: 0 0 0 3px rgba(245,202,85,0.4); }
+  .rent-pname { font-weight: 800; color: var(--sb-text); font-size: 13px; }
+  .rent-balance { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; color: var(--sb-muted); }
+  .rent-delta { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 17px; animation: rentDeltaPop 0.4s ease; }
+  .rent-delta-neg { color: var(--sb-danger); }
+  .rent-delta-pos { color: var(--emerald-light); }
+  @keyframes rentDeltaPop { 0% { transform: translateY(6px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  .rent-shake { animation: rentShake 0.4s ease; }
+  @keyframes rentShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  .rent-bounce { animation: rentBounce 0.5s ease; }
+  @keyframes rentBounce { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-10px); } }
+  .rent-owner-crown { position: absolute; top: -22px; font-size: 20px; animation: crownBounce 0.5s ease; }
+  .rent-owner-particles { position: absolute; inset: -20px -20px 0; pointer-events: none; }
+  .rent-owner-particles i {
+    position: absolute; left: 50%; bottom: 30%; width: 5px; height: 5px; border-radius: 50%;
+    background: radial-gradient(circle, var(--gold-light), var(--gold-dark));
+    animation: eventMoteFly 0.9s ease-out both; animation-delay: var(--delay, 0ms);
+  }
+
+  .rent-center {
+    background: var(--card-bg); border: 2px solid var(--gold); border-radius: 20px;
+    padding: 18px 24px; text-align: center; min-width: 220px; position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+  }
+  .rent-corp-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #241a0d; font-weight: 800; font-size: 10px; letter-spacing: 1px; border-radius: 20px; padding: 4px 12px; white-space: nowrap; }
+  .rent-title { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: 2px; color: var(--gold-light); margin-bottom: 8px; }
+  .rent-company-icon { width: 46px; height: 46px; margin: 0 auto 6px; background: rgba(255,255,255,0.92); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .rent-company-icon img { width: 100%; height: 100%; object-fit: contain; padding: 5px; }
+  .rent-company-name { font-weight: 800; color: var(--sb-text); font-size: 14px; margin-bottom: 8px; }
+  .rent-breakdown { text-align: left; font-size: 12px; }
+  .rent-breakdown-row { display: flex; justify-content: space-between; gap: 14px; padding: 3px 0; color: var(--sb-muted); }
+  .rent-breakdown-total { display: flex; justify-content: space-between; gap: 14px; padding-top: 6px; margin-top: 4px; border-top: 1px solid rgba(245,202,85,0.35); font-weight: 800; color: var(--gold-light); font-size: 15px; }
+  .rent-intensity-label { margin-top: 8px; font-weight: 800; font-size: 12px; letter-spacing: 1px; color: var(--sb-danger); }
+  .rent-big .rent-intensity-label, .rent-massive .rent-intensity-label { animation: prepGlow 0.6s ease-in-out infinite; }
+
+  .rent-coin-fly { position: absolute; top: 50%; left: 50%; width: 0; height: 0; pointer-events: none; }
+  .rent-coin-fly span { position: absolute; font-size: 16px; animation: rentCoinFly 0.9s ease-in both; animation-delay: var(--delay, 0ms); }
+  @keyframes rentCoinFly {
+    0% { transform: translate(-160px, 0) scale(1); opacity: 1; }
+    100% { transform: translate(160px, -10px) scale(0.7); opacity: 0; }
+  }
+
+  .rent-income-toast {
+    position: absolute; bottom: 6%; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.7); border: 1.5px solid var(--emerald-light); border-radius: 20px;
+    padding: 7px 18px; font-weight: 800; font-size: 12.5px; color: var(--emerald-light);
+    animation: passGoPop 2s ease forwards;
+  }
+  .rent-debt-notice {
+    position: absolute; bottom: 4%; left: 50%; transform: translateX(-50%);
+    background: rgba(40,10,10,0.85); border: 1.5px solid var(--sb-danger); border-radius: 14px;
+    padding: 10px 18px; min-width: 220px;
+  }
+  .rent-debt-title { text-align: center; font-weight: 800; color: var(--sb-danger); font-size: 12px; letter-spacing: 1px; margin-bottom: 6px; }
+  .rent-debt-row { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--sb-text); padding: 2px 0; }
+  .rent-debt-short { color: var(--sb-danger); font-weight: 800; }
+
+  @media (max-width: 640px) {
+    .rent-cinematic-inner { flex-direction: column; gap: 12px; }
+    .rent-side { flex-direction: row; gap: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rent-coin-fly, .rent-owner-particles { display: none; }
+    .rent-shake, .rent-bounce { animation: none; }
+  }
+
   .results-cinematic { position: fixed; inset: 0; z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
   .results-backdrop { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 50% 30%, var(--emerald-dark) 0%, var(--sidebar-bg) 70%); }
   .results-progress { display: flex; gap: 8px; margin-bottom: 18px; }
@@ -3277,6 +3349,7 @@ const SOUND_ASSETS = {
   corporationVictory: 'corporation-victory.mp3', auctionTick: 'auction-tick.mp3',
   buttonClick: 'button-click.mp3', cardFlip: 'card-flip.mp3', bonusUnlocked: 'bonus-unlocked.mp3',
   dayTheme: 'day-theme.mp3', nightTheme: 'night-theme.mp3', victoryTheme: 'victory-theme.mp3',
+  rentStart: 'rent-start.mp3', moneyTransfer: 'money-transfer.mp3', rentReceived: 'rent-received.mp3', bigRent: 'big-rent.mp3',
 };
 const AudioManager = (function () {
   const sfxCache = {};
@@ -3460,6 +3533,29 @@ function buildCost(sp, room) {
   return Math.round(base * mult / 10) * 10;
 }
 
+function calculateRentBreakdown(room, sp, idx, ownerId) {
+  const level = houseLevel(room, idx);
+  const baseRent = sp.rent;
+  let buildingBonus = 0, sectorBonus = 0, sectorBonusPct = 0;
+  if (level > 0) {
+    const multipliers = [1, 2, 4, 6, 10];
+    buildingBonus = sp.rent * (multipliers[level] - 1);
+  } else {
+    const fullGroup = ownsFullGroup(room, ownerId, idx);
+    if (fullGroup) { sectorBonus = sp.rent; sectorBonusPct = 100; }
+  }
+  const preMarket = baseRent + buildingBonus + sectorBonus;
+  const marketMultiplier = getActiveMultiplier(room, sp, 'income');
+  const total = Math.round(preMarket * marketMultiplier);
+  const marketBonus = total - preMarket;
+  return { baseRent, buildingBonus, sectorBonus, sectorBonusPct, marketMultiplier, marketBonus, total, level };
+}
+
+function ensureStats(player) {
+  if (!player.statistics) player.statistics = { rentPaid: 0, rentReceived: 0, highestRentPaid: 0, highestRentReceived: 0, rentTransactions: 0 };
+  return player.statistics;
+}
+
 function resolvePropertyOrTax(room, player, idx) {
   const sp = BOARD_CONFIG[idx];
   if (sp.type === 'property') {
@@ -3469,17 +3565,25 @@ function resolvePropertyOrTax(room, player, idx) {
     } else if (owner === player.id) {
       const level = houseLevel(room, idx);
       if (level < 4) room.pendingAction = { type: 'build', playerId: player.id, spaceIndex: idx };
+    } else if (room.mortgaged && room.mortgaged[idx]) {
+      pushLog(room, `${player.name} "${sp.name}" (\u0431\u0430\u0440\u044c\u0446\u0430\u0430\u043b\u0441\u0430\u043d) \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0432, \u0442\u04af\u0440\u044d\u044d\u0441\u0433\u04af\u0439 \u0431\u0430\u0439\u043d\u0430.`);
     } else {
       const ownerPlayer = room.players.find(p => p.id === owner);
-      const level = houseLevel(room, idx);
-      let baseRent, note;
-      if (level > 0) { baseRent = sp.rent * [1,2,4,6,10][level]; note = ` (${buildLevelLabel(level)})`; }
-      else { const fullGroup = ownsFullGroup(room, owner, idx); baseRent = fullGroup ? sp.rent * 2 : sp.rent; note = fullGroup ? ' (\u0431\u04af\u043b\u044d\u0433 \u0431\u04af\u0440\u044d\u043d \u2014 2x)' : ''; }
-      const incomeMultiplier = getActiveMultiplier(room, sp, 'income');
-      const rent = Math.round(baseRent * incomeMultiplier);
-      if (incomeMultiplier !== 1) note += ` [\u0437\u0430\u0445 \u0437\u044d\u044d\u043b \u00d7${incomeMultiplier.toFixed(2)}]`;
+      const breakdown = calculateRentBreakdown(room, sp, idx, owner);
+      const rent = breakdown.total;
+      const payerBalanceBefore = player.money;
+      const ownerBalanceBefore = ownerPlayer.money;
       player.money -= rent; ownerPlayer.money += rent;
-      pushLog(room, `${player.name} ${ownerPlayer.name}-\u0434 \u0442\u04af\u0440\u044d\u044d\u0441 \u20ae${rent} \u0442\u04e9\u043b\u04e9\u0432${note}.`);
+      const payerStats = ensureStats(player), ownerStats = ensureStats(ownerPlayer);
+      payerStats.rentPaid += rent; payerStats.highestRentPaid = Math.max(payerStats.highestRentPaid, rent); payerStats.rentTransactions++;
+      ownerStats.rentReceived += rent; ownerStats.highestRentReceived = Math.max(ownerStats.highestRentReceived, rent);
+      pushLog(room, `${player.name} "${sp.name}" \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436, ${ownerPlayer.name}-\u0434 \u20ae${rent} \u0442\u04af\u0440\u044d\u044d\u0441 \u0442\u04e9\u043b\u04e9\u0432.`);
+      room.lastRentTransaction = {
+        id: Date.now() + '-' + Math.random().toString(36).slice(2),
+        payerId: player.id, ownerId: owner, tileIdx: idx, breakdown,
+        payerBalanceBefore, payerBalanceAfter: player.money,
+        ownerBalanceBefore, ownerBalanceAfter: ownerPlayer.money,
+      };
       if (player.money < 0) bankrupt(room, player);
     }
   } else if (sp.type === 'tax') {
@@ -4270,6 +4374,7 @@ function render() {
       maybeTriggerGameResults(currentRoom);
       if (!gameResults.isOpen) {
         maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); maybeTriggerBuildAnimation(currentRoom);
+        maybeTriggerRentCinematic(currentRoom);
         updateEnvironment(Math.floor((currentRoom.turnCount || 0) / currentRoom.players.length) + 1);
       }
     }
@@ -4280,6 +4385,7 @@ function render() {
       attachGameEvents();
       maybeFlashMoney(currentRoom);
       if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); }
+      if (rentCinematicActive) animateRentCounters();
     }
     return;
   }
@@ -4392,6 +4498,13 @@ function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling
   if (buildingAnimationActive) {
     return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
       <div class="sb-waiting"><span class="pulse-dot"></span>\ud83c\udfd7\ufe0f \u0411\u0430\u0440\u0438\u043b\u0433\u0430 \u0431\u0430\u0440\u0438\u0433\u0434\u0430\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+      <button class="sb-dice-btn" disabled>\ud83d\udd12 \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
+      <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
+    </div>`;
+  }
+  if (rentCinematicActive) {
+    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
+      <div class="sb-waiting"><span class="pulse-dot"></span>\ud83d\udcb8 \u0422\u04af\u0440\u044d\u044d\u0441 \u0448\u0438\u043b\u0436\u0438\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
       <button class="sb-dice-btn" disabled>\ud83d\udd12 \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
       <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
     </div>`;
@@ -4531,6 +4644,65 @@ function showFullLogModal(room) {
   if (closeBtn) closeBtn.onclick = () => { root.innerHTML = ''; };
 }
 
+function renderRentCinematic(room, txn) {
+  const sp = BOARD_CONFIG[txn.tileIdx];
+  const payer = room.players.find(p => p.id === txn.payerId);
+  const owner = room.players.find(p => p.id === txn.ownerId);
+  if (!payer || !owner) return '';
+  const b = txn.breakdown;
+  const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
+  const intensity = getRentIntensity(txn);
+  const showFlow = rentCinematicStage !== 'appear';
+  const showResult = rentCinematicStage === 'received' || rentCinematicStage === 'done';
+  const isCorp = b.level >= 4;
+
+  const breakdownRows = [];
+  breakdownRows.push({ label: '\u0421\u0443\u0443\u0440\u044c \u0442\u04af\u0440\u044d\u044d\u0441', value: b.baseRent, plain: true });
+  if (b.buildingBonus > 0) breakdownRows.push({ label: isCorp ? '\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438\u0439\u043d \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043b' : `${b.level} \u0431\u0430\u0439\u0448\u0438\u043d\u0433\u0438\u0439\u043d \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043b`, value: b.buildingBonus, plain: false });
+  if (b.sectorBonus > 0) breakdownRows.push({ label: `\u0421\u0430\u043b\u0431\u0430\u0440\u044b\u043d \u0431\u043e\u043d\u0443\u0441 +${b.sectorBonusPct}%`, value: b.sectorBonus, plain: false });
+  if (b.marketBonus !== 0) breakdownRows.push({ label: `\u0417\u0430\u0445 \u0437\u044d\u044d\u043b\u0438\u0439\u043d \u043d\u04e9\u043b\u04e9\u04e9 \u00d7${b.marketMultiplier.toFixed(2)}`, value: b.marketBonus, plain: false });
+
+  return `<div class="rent-cinematic rent-${intensity.key}">
+    <div class="results-backdrop"></div>
+    <div class="rent-cinematic-inner">
+      <div class="rent-side rent-side-payer ${rentCinematicStage==='flying'?'rent-shake':''}">
+        <span class="rent-avatar rent-avatar-payer" style="--ring-color:${payer.color}">${payer.token}</span>
+        <div class="rent-pname">${payer.name}</div>
+        <div class="rent-balance rent-balance-payer">${showResult ? `<span class="count-value" data-count-from="${txn.payerBalanceBefore}" data-count-to="${txn.payerBalanceAfter}">\u20ae${fmt(txn.payerBalanceBefore)}</span>` : `\u20ae${fmt(txn.payerBalanceBefore)}`}</div>
+        ${showFlow ? `<div class="rent-delta rent-delta-neg">\u2212\u20ae${fmt(b.total)}</div>` : ''}
+      </div>
+
+      <div class="rent-center">
+        ${isCorp ? `<div class="rent-corp-badge">\ud83c\udfe6 \u041a\u041e\u0420\u041f\u041e\u0420\u0410\u0426\u0418\u0419\u041d \u0422\u04ae\u0420\u042d\u042d\u0421</div>` : ''}
+        <div class="rent-title">\u0422\u04ae\u0420\u042d\u042d\u0421 \u0422\u04e8\u041b\u04e8\u0425</div>
+        <div class="rent-company-icon"><img src="${fileName}.png" onerror="this.style.display='none'"></div>
+        <div class="rent-company-name">${sp.name}</div>
+        <div class="rent-breakdown">
+          ${breakdownRows.map(r => `<div class="rent-breakdown-row"><span>${r.label}</span><span>${r.plain ? '' : '+'}\u20ae${fmt(r.value)}</span></div>`).join('')}
+          <div class="rent-breakdown-total"><span>\u041d\u0418\u0419\u0422 \u0422\u04ae\u0420\u042d\u042d\u0421</span><span>\u20ae${fmt(b.total)}</span></div>
+        </div>
+        ${intensity.label ? `<div class="rent-intensity-label">${intensity.label}</div>` : ''}
+        ${rentCinematicStage === 'flying' && !reducedMotion ? `<div class="rent-coin-fly">${Array.from({length: Math.min(14, Math.max(8, Math.round(b.total/40)))}, (_, i) => `<span style="--delay:${(i*0.05).toFixed(2)}s;">\ud83e\ude99</span>`).join('')}</div>` : ''}
+      </div>
+
+      <div class="rent-side rent-side-owner ${rentCinematicStage==='received'?'rent-bounce':''}">
+        <span class="rent-avatar rent-avatar-owner" style="--ring-color:${owner.color}">${owner.token}</span>
+        <div class="rent-pname">${owner.name}</div>
+        <div class="rent-balance rent-balance-owner">${showResult ? `<span class="count-value" data-count-from="${txn.ownerBalanceBefore}" data-count-to="${txn.ownerBalanceAfter}">\u20ae${fmt(txn.ownerBalanceBefore)}</span>` : `\u20ae${fmt(txn.ownerBalanceBefore)}`}</div>
+        ${showResult ? `<div class="rent-delta rent-delta-pos">+\u20ae${fmt(b.total)}</div><span class="rent-owner-crown">\ud83d\udc51</span>` : ''}
+        ${showResult && !reducedMotion ? `<div class="rent-owner-particles">${Array.from({length: 8}, (_, i) => `<i style="--dx:${(Math.random()-0.5)*60}px; --dy:${-20-Math.random()*40}px; --delay:${(Math.random()*0.3).toFixed(2)}s;"></i>`).join('')}</div>` : ''}
+      </div>
+    </div>
+    ${showResult ? `<div class="rent-income-toast">+\u20ae${fmt(b.total)} \u0422\u04ae\u0420\u042d\u042d\u0421\u0418\u0419\u041d \u041e\u0420\u041b\u041e\u0413\u041e</div>` : ''}
+    ${txn.payerBalanceAfter < 0 ? `<div class="rent-debt-notice">
+      <div class="rent-debt-title">\u0422\u04e8\u041b\u0411\u04e8\u0420 \u0425\u04ae\u0420\u042d\u041b\u0426\u042d\u0425\u0413\u04ae\u0419</div>
+      <div class="rent-debt-row"><span>\u0422\u04e9\u043b\u04e9\u0445 \u0434\u04af\u043d:</span><span>\u20ae${fmt(b.total)}</span></div>
+      <div class="rent-debt-row"><span>\u0411\u044d\u043b\u044d\u043d \u043c\u04e9\u043d\u0433\u04e9:</span><span>\u20ae${fmt(txn.payerBalanceBefore)}</span></div>
+      <div class="rent-debt-row rent-debt-short"><span>\u0414\u0443\u0442\u0443\u0443:</span><span>\u20ae${fmt(b.total - txn.payerBalanceBefore)}</span></div>
+    </div>` : ''}
+  </div>`;
+}
+
 function renderGameResultsCinematic(room) {
   const stage = gameResults.stage;
   const rankings = gameResults.rankings;
@@ -4590,6 +4762,9 @@ function renderGameResultsCinematic(room) {
         <div class="results-achieve-card"><span class="ra-icon">\ud83c\udfd7\ufe0f</span><span class="ra-value">${ach.housesBuilt}</span><span class="ra-label">\u041d\u0438\u0439\u0442 \u0431\u0430\u0440\u0438\u0441\u0430\u043d \u0431\u0430\u0439\u0448\u0438\u043d</span></div>
         <div class="results-achieve-card"><span class="ra-icon">\ud83c\udfe6</span><span class="ra-value">${ach.corpsFounded}</span><span class="ra-label">\u0411\u0430\u0439\u0433\u0443\u0443\u043b\u0441\u0430\u043d \u043a\u043e\u0440\u043f\u043e\u0440\u0430\u0446</span></div>
         ${ach.mostCompanies ? `<div class="results-achieve-card"><span class="ra-icon">\ud83c\udfe2</span><span class="ra-value">${ach.mostCompanies.count}</span><span class="ra-label">\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u043e\u043b\u043e\u043d \u043a\u043e\u043c\u043f\u0430\u043d\u0438 (${ach.mostCompanies.name})</span></div>` : ''}
+        ${ach.bestRentIncome ? `<div class="results-achieve-card"><span class="ra-icon">\ud83d\udcb0</span><span class="ra-value">\u20ae${fmt(ach.bestRentIncome.amount)}</span><span class="ra-label">\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u0438\u0445 \u0442\u04af\u0440\u044d\u044d\u0441\u0438\u0439\u043d \u043e\u0440\u043b\u043e\u0433\u043e (${ach.bestRentIncome.name})</span></div>` : ''}
+        ${ach.highestSingleRent ? `<div class="results-achieve-card"><span class="ra-icon">\u26a1</span><span class="ra-value">\u20ae${fmt(ach.highestSingleRent.amount)}</span><span class="ra-label">\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u04e9\u043d\u0434\u04e9\u0440 \u043d\u044d\u0433 \u0443\u0434\u0430\u0430\u0433\u0438\u0439\u043d \u0442\u04af\u0440\u044d\u044d\u0441 (${ach.highestSingleRent.name})</span></div>` : ''}
+        ${ach.totalRentPaid > 0 ? `<div class="results-achieve-card"><span class="ra-icon">\ud83d\udcca</span><span class="ra-value">\u20ae${fmt(ach.totalRentPaid)}</span><span class="ra-label">\u041d\u0438\u0439\u0442 \u0442\u04e9\u043b\u0441\u04e9\u043d \u0442\u04af\u0440\u044d\u044d\u0441</span></div>` : ''}
       </div>`;
   } else if (stage === 'podium' || stage === 'celebration' || stage === 'completed') {
     const top3 = rankings.slice(0, Math.min(3, rankings.length));
@@ -4640,6 +4815,23 @@ function attachResultsEvents() {
   const replayBtn = document.getElementById('resultsReplayBtn'); if (replayBtn) replayBtn.onclick = confirmReplay;
   const menuBtn = document.getElementById('resultsMenuBtn'); if (menuBtn) menuBtn.onclick = () => { gameResults.isOpen = false; view = 'landing'; render(); };
   const detailsBtn = document.getElementById('resultsDetailsBtn'); if (detailsBtn) detailsBtn.onclick = () => showFullLogModal(currentRoom);
+}
+function animateRentCounters() {
+  const els = document.querySelectorAll('.rent-cinematic .count-value[data-count-from]');
+  if (els.length === 0) return;
+  const dur = reducedMotion ? 250 : 900;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    els.forEach(el => {
+      const from = parseFloat(el.dataset.countFrom) || 0;
+      const to = parseFloat(el.dataset.countTo) || 0;
+      el.textContent = '\u20ae' + fmt(Math.round(from + (to - from) * eased));
+    });
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 function animateResultsCounters() {
   const els = document.querySelectorAll('.count-value[data-target]');
@@ -4790,6 +4982,7 @@ function renderGame() {
         ${renderActivityTimeline(room)}
       </div>
     </div>
+    ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
   </div>`;
 }
 
@@ -5018,6 +5211,58 @@ function handleDetailEscape(e) {
   if (e.key === 'Escape') closeCellDetail();
 }
 /* ===== GAME RESULTS CINEMATIC ===== */
+/* ===== RENT PAYMENT CINEMATIC ===== */
+let rentCinematicActive = false;
+let rentCinematicStage = 'appear'; // appear | flying | received | done
+let rentCinematicTxn = null;
+let lastRentTxnId = null;
+
+function maybeTriggerRentCinematic(room) {
+  const txn = room && room.lastRentTransaction;
+  if (!txn || txn.id === lastRentTxnId) return;
+  if (isAnimatingMovement || buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive) return;
+  lastRentTxnId = txn.id;
+  runRentCinematic(room, txn);
+}
+async function runRentCinematic(room, txn) {
+  if (rentCinematicActive) return;
+  rentCinematicActive = true;
+  rentCinematicTxn = txn;
+  rentCinematicStage = 'appear';
+  const t = reducedMotion ? 0.35 : 1;
+  const sp = BOARD_CONFIG[txn.tileIdx];
+  try {
+    focusCameraOnTile(txn.tileIdx, { mode: 'landing', scale: reducedMotion ? 1.1 : 1.22 });
+    audioManager.playSfx('rentStart');
+    render();
+    await new Promise(r => setTimeout(r, 500 * t));
+    rentCinematicStage = 'flying'; render();
+    audioManager.playSfx('moneyTransfer');
+    vibrate(20);
+    await new Promise(r => setTimeout(r, 900 * t));
+    rentCinematicStage = 'received'; render();
+    const ratio = txn.breakdown.total / Math.max(txn.payerBalanceBefore, 1);
+    if (ratio >= 0.25) audioManager.playSfx('bigRent'); else audioManager.playSfx('rentReceived');
+    vibrate(30);
+    await new Promise(r => setTimeout(r, 900 * t));
+    rentCinematicStage = 'done'; render();
+    await new Promise(r => setTimeout(r, 350 * t));
+  } finally {
+    rentCinematicActive = false;
+    rentCinematicStage = 'appear';
+    rentCinematicTxn = null;
+    render();
+    if (cameraState.mode === 'landing') returnCameraToOverview();
+  }
+}
+function getRentIntensity(txn) {
+  const ratio = txn.breakdown.total / Math.max(txn.payerBalanceBefore, 1);
+  if (ratio >= 0.5) return { key: 'massive', label: '\u0410\u0421\u0410\u0420 \u0418\u0425 \u0422\u04ae\u0420\u042d\u042d\u0421!' };
+  if (ratio >= 0.25) return { key: 'big', label: '\u0418\u0425 \u0422\u04ae\u0420\u042d\u042d\u0421!' };
+  if (ratio >= 0.10) return { key: 'valuable', label: '\u0421\u0410\u0419\u041d \u041e\u0420\u041b\u041e\u0413\u041e' };
+  return { key: 'normal', label: '' };
+}
+
 let gameResults = { isOpen: false, stage: 'counting', rankings: [], winnerId: null };
 let resultsTriggered = false;
 
@@ -5073,31 +5318,39 @@ async function runResultsSequence() {
 
 function computeAchievements(room) {
   let housesBuilt = 0, corpsFounded = 0, mostCompanies = null;
+  let bestRentIncome = null, highestSingleRent = null, totalRentPaid = 0;
   room.players.forEach(p => {
     const w = computePlayerWealth(room, p);
     housesBuilt += w.houseCount;
     corpsFounded += w.corpCount;
     if (!mostCompanies || w.companyCount > mostCompanies.count) mostCompanies = { name: p.name, count: w.companyCount };
+    const s = p.statistics;
+    if (s) {
+      if (s.rentReceived > 0 && (!bestRentIncome || s.rentReceived > bestRentIncome.amount)) bestRentIncome = { name: p.name, amount: s.rentReceived };
+      if (s.highestRentPaid > 0 && (!highestSingleRent || s.highestRentPaid > highestSingleRent.amount)) highestSingleRent = { name: p.name, amount: s.highestRentPaid };
+      totalRentPaid += s.rentPaid;
+    }
   });
-  return { housesBuilt, corpsFounded, mostCompanies };
+  return { housesBuilt, corpsFounded, mostCompanies, bestRentIncome, highestSingleRent, totalRentPaid };
 }
 
 async function confirmReplay() {
   if (!confirm('\u0428\u0438\u043d\u044d\u044d\u0440 \u0442\u043e\u0433\u043b\u043e\u0445 \u0443\u0443? \u041e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u044b\u043d \u04af\u0440 \u0434\u04af\u043d \u0430\u043b\u0433\u0430\u0433\u0434\u0430\u043d\u0430.')) return;
   const room = await getRoom(currentRoom.roomCode);
   if (!room) return;
-  room.players.forEach(p => { p.money = 1500; p.position = 0; p.jailTurns = 0; p.bankrupt = false; });
-  room.propOwner = {}; room.houses = {}; room.activeMarketEffects = [];
+  room.players.forEach(p => { p.money = 1500; p.position = 0; p.jailTurns = 0; p.bankrupt = false; p.statistics = { rentPaid: 0, rentReceived: 0, highestRentPaid: 0, highestRentReceived: 0, rentTransactions: 0 }; });
+  room.propOwner = {}; room.houses = {}; room.activeMarketEffects = []; room.mortgaged = {};
   room.decks = null; ensureDecks(room);
   room.currentPlayerIndex = 0; room.hasRolled = false; room.lastDice = null;
   room.diceRollId = null; room.animPath = null; room.cardDraw = null; room.winnerId = null; room.turnCount = 0;
-  room.pendingAction = null; room.log = [];
+  room.pendingAction = null; room.log = []; room.lastRentTransaction = null;
   pushLog(room, '\u0428\u0438\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043b\u0442 \u044d\u0445\u044d\u043b\u043b\u044d\u044d!');
   await saveRoom(room); currentRoom = room;
   gameResults = { isOpen: false, stage: 'counting', rankings: [], winnerId: null };
   resultsTriggered = false;
   cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
   buildingAnim = null; buildingAnimationActive = false;
+  rentCinematicActive = false; rentCinematicTxn = null; rentCinematicStage = 'appear'; lastRentTxnId = null;
   knownLevels = {}; levelsInitialized = false; seenBuildings = new Set(); seenUpgrades = new Set();
   render();
 }
@@ -5224,12 +5477,12 @@ function attachGameEvents() {
   const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
   document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => { if (buyModalOpen || buildingAnimationActive || cardModalOpen) return; showCellDetail(idx); };
+    el.onclick = () => { if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive) return; showCellDetail(idx); };
   });
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive || cardModalOpen;
+    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive;
     const selectTile = () => {
       if (tileInteractionDisabled) return;
       selectedTileId = idx;
@@ -5261,11 +5514,11 @@ function attachGameEvents() {
   });
   document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive) return; showCellDetail(idx); };
   });
   document.querySelectorAll('.upgrade-icon[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive) return; showCellDetail(idx); };
   });
 }
 
