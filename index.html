@@ -353,7 +353,7 @@
   .tile-hit-area { fill: transparent; stroke: none; cursor: pointer; pointer-events: all; }
   .tile-surface { fill: transparent; stroke: transparent; stroke-width: 2; pointer-events: none; transition: fill 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease; }
   .tile { transform-box: fill-box; transform-origin: center; transition: filter 0.2s ease; }
-  .tile:focus-visible .tile-surface { stroke: #ffe08a; stroke-width: 3.5; }
+  .tile:focus-visible .tile-surface { fill: transparent; stroke: transparent; }
   .tile:focus-visible { outline: none; }
 
   /* 1. available */
@@ -363,23 +363,19 @@
   .tile--owned .tile-surface { fill: transparent; }
 
   /* 3. hovered */
-  .tile--hovered { filter: drop-shadow(0 0 7px rgba(255,218,92,0.85)) drop-shadow(0 5px 5px rgba(0,0,0,0.35)); transform: translateY(-2px); transition: transform 0.18s ease-out, filter 0.18s ease-out; }
-  .tile--hovered .tile-surface { fill: rgba(255,223,112,0.18); stroke: #ffe08a; stroke-width: 3; }
+  .tile--hovered { transform: none; }
+  .tile--hovered .tile-surface { fill: transparent; stroke: transparent; }
 
   /* 4. buildable */
-  .tile--buildable .tile-surface { stroke: #25c98e; stroke-width: 2.5; animation: buildablePulse 1.6s ease-in-out infinite; }
-  @keyframes buildablePulse {
-    0%,100% { stroke-opacity: 0.45; filter: drop-shadow(0 0 3px rgba(37,201,142,0.35)); }
-    50% { stroke-opacity: 1; filter: drop-shadow(0 0 10px rgba(37,201,142,0.9)); }
-  }
+  .tile--buildable .tile-surface { fill: transparent; stroke: transparent; animation: none; }
 
   /* 5. current (player standing here) */
-  .tile--current .tile-surface { stroke: var(--gold-light, #ffe69a); stroke-width: 2.5; }
+  .tile--current .tile-surface { fill: transparent; stroke: transparent; }
   .tile--current::before { content: ''; }
 
   /* 6. selected (strongest, drawn last visually via filter+transform) */
-  .tile--selected { transform: translateY(-5px) scale(1.025); filter: drop-shadow(0 10px 14px rgba(0,0,0,0.45)) drop-shadow(0 0 10px rgba(245,202,85,0.7)); transition: transform 0.2s ease-out, filter 0.2s ease-out; }
-  .tile--selected .tile-surface { fill: rgba(245,202,85,0.14); stroke: var(--gold, #f5ca55); stroke-width: 3.5; }
+  .tile--selected { transform: none; filter: none; }
+  .tile--selected .tile-surface { fill: transparent; stroke: transparent; }
 
   /* 7. mortgaged (strongest precedence, dampens everything else) */
   .tile--mortgaged .tile-surface { fill: rgba(20,25,30,0.55); stroke: #6b7688; stroke-width: 2; }
@@ -730,6 +726,80 @@
     .buy-modal { flex-direction: column; }
     .buy-modal-visual { flex: 0 0 auto; padding: 20px 20px 6px; }
     .buy-modal-visual img { max-width: 150px; }
+  }
+
+  /* ===== EVENT CARD (\u0411\u041e\u041b\u041e\u041c\u0416 / \u0417\u0410\u0425 \u0417\u042d\u042d\u041b) ===== */
+  .card-modal-backdrop { position: fixed; inset: 0; z-index: 2600; background: rgba(2,10,8,0.7); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 18px; animation: popIn 0.25s ease; }
+  .event-card-scene { perspective: 1200px; width: min(90vw, 440px); aspect-ratio: 3/4; }
+  .event-card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transform: scale(0.75) rotateY(0deg); transition: transform 0.8s cubic-bezier(.2,.8,.3,1.15); }
+  .event-card.is-flipped { transform: scale(1) rotateY(180deg); }
+  .event-card-front, .event-card-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 20px; overflow: hidden; }
+  .event-card-back {
+    background: linear-gradient(155deg, var(--emerald-dark) 0%, var(--sidebar-bg) 100%);
+    border: 3px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  }
+  .event-card-back-emblem { font-size: 64px; color: var(--gold); opacity: 0.7; }
+  .event-card-front {
+    transform: rotateY(180deg);
+    background: linear-gradient(165deg, #fff8e6 0%, #f2e2b8 100%);
+    border: 3px solid var(--gold);
+    padding: 26px 22px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  }
+  .event-card-scene.rarity-uncommon .event-card-front { background: linear-gradient(165deg, #e9f9ef 0%, #cdeedb 100%); border-color: var(--emerald-light); }
+  .event-card-scene.rarity-rare .event-card-front { background: linear-gradient(165deg, #e8f1ff 0%, #cfe0fb 100%); border-color: var(--sb-blue); }
+  .event-card-scene.rarity-legendary .event-card-front { background: linear-gradient(165deg, #f3e9ff 0%, #ddc4f7 100%); border-color: #a855f7; }
+  .event-card-badge {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 10.5px; letter-spacing: 1.5px;
+    background: var(--gold); color: #241a0d; border-radius: 20px; padding: 4px 14px;
+  }
+  .event-card-rarity-glow {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    box-shadow: inset 0 0 60px rgba(245,202,85,0.25);
+  }
+  .rarity-legendary .event-card-rarity-glow { box-shadow: inset 0 0 70px rgba(168,85,247,0.35); animation: legendaryPulse 1.6s ease-in-out infinite; }
+  @keyframes legendaryPulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; } }
+  .event-card-icon { font-size: 46px; margin-top: 28px; margin-bottom: 6px; position: relative; z-index: 1; }
+  .event-card-title { font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 19px; color: #241a0d; margin-bottom: 10px; position: relative; z-index: 1; }
+  .event-card-desc { font-size: 13.5px; color: #4a3f2a; line-height: 1.5; margin-bottom: 16px; position: relative; z-index: 1; }
+  .event-card-front .buy-modal-buy-btn { position: relative; z-index: 1; margin-top: auto; }
+  .event-card-particles { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .event-mote {
+    position: absolute; left: 50%; bottom: 20%; width: 6px; height: 6px; border-radius: 50%;
+    animation: eventMoteFly 1.1s ease-out both; animation-delay: var(--delay, 0ms);
+  }
+  .event-mote.mote-gold { background: radial-gradient(circle, var(--gold-light) 0%, var(--gold-dark) 100%); box-shadow: 0 0 6px 1px rgba(245,202,85,0.6); }
+  .event-mote.mote-neg { background: radial-gradient(circle, #e85d5d 0%, #7a2020 100%); box-shadow: 0 0 6px 1px rgba(232,93,93,0.5); }
+  @keyframes eventMoteFly { 0% { opacity: 1; transform: translate(-50%,0) scale(0.6); } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), var(--dy)) scale(1.1); } }
+
+  .card-select-list { display: flex; flex-direction: column; gap: 8px; width: 100%; max-height: 200px; overflow-y: auto; margin-bottom: 12px; position: relative; z-index: 1; }
+  .card-select-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255,255,255,0.55); border: 1.5px solid var(--gold-dark); border-radius: 10px;
+    padding: 10px 14px; font-weight: 700; font-size: 13px; color: #241a0d; cursor: pointer;
+  }
+  .card-select-item span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-dark); }
+  .card-select-item:hover { background: rgba(255,255,255,0.85); border-color: var(--gold); }
+
+  .market-effect-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,0,0,0.22); border: 1px solid rgba(245,202,85,0.35); border-radius: 10px;
+    padding: 7px 10px; margin-bottom: 6px; font-size: 11.5px;
+  }
+  .market-effect-badge:last-child { margin-bottom: 0; }
+  .me-icon { font-size: 14px; flex-shrink: 0; }
+  .me-text { flex: 1; color: var(--sb-text); font-weight: 700; }
+  .me-rounds { font-family: 'JetBrains Mono', monospace; color: var(--gold-light); font-size: 10.5px; flex-shrink: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .event-card { transition: opacity 0.3s ease; transform: scale(1) rotateY(0deg) !important; }
+    .event-card-front { transform: none; opacity: 0; }
+    .event-card.is-flipped .event-card-front { opacity: 1; }
+    .event-card.is-flipped .event-card-back { opacity: 0; }
   }
   .card-popup { width: min(90vw, 380px); background: linear-gradient(155deg, #1c1c1c 0%, #0c0c0c 100%); border: 2px solid var(--steppe-gold); border-radius: 16px; padding: 28px 22px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,175,55,0.15); animation: cardFlip 0.4s cubic-bezier(.2,1.4,.4,1); }
   .card-popup-eyebrow { font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; letter-spacing: 1.5px; color: var(--steppe-gold); margin-bottom: 10px; }
@@ -1269,7 +1339,7 @@ const BOARD_CONFIG = [
   {
     "id": 6,
     "type": "chance",
-    "name": "Азын карт",
+    "name": "Боломж",
     "colorGroup": null,
     "price": null,
     "rent": null,
@@ -2310,7 +2380,7 @@ const BOARD_CONFIG = [
   {
     "id": 22,
     "type": "chest",
-    "name": "Шүүхийн тогтоол",
+    "name": "Зах зээл",
     "colorGroup": null,
     "price": null,
     "rent": null,
@@ -2939,27 +3009,72 @@ const BOARD_CONFIG = [
 
 
 const CHANCE_CARDS = [
-  { text: 'Наймаа амжилттай боллоо!', money: 50 },
-  { text: 'Замын татвар т\u04e9л\u04e9\u0432', money: -40 },
-  { text: '\u042d\u0425\u041b\u042d\u041b \u0440\u04af\u04af \u0431\u0443\u0446\u0430\u0436 \u20ae200 \u0446\u0443\u0433\u043b\u0443\u0443\u043b\u0430\u0432', moveTo: 0, collect: 200 },
-  { text: '3 \u043d\u04af\u0434 \u0443\u0440\u0430\u0433\u0448\u0438\u043b\u0430\u0432', moveRel: 3 },
-  { text: '\u0428\u043e\u0440\u043e\u043d\u0434 \u043e\u0440\u043b\u043e\u043e', gotoJail: true },
-  { text: '\u0422\u044d\u043c\u0446\u044d\u044d\u043d\u0434 \u0442\u04af\u0440\u04af\u04af\u043b\u0436 \u0448\u0430\u0433\u043d\u0430\u043b \u0430\u0432\u0430\u0432', money: 30 },
-  { text: '\u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u043e\u0440\u0443\u0443\u043b\u0430\u0433\u0447 \u0442\u0430\u0442\u0430\u043d \u043e\u0440\u043e\u043b\u0446\u043e\u0432', money: 80 },
-  { text: '\u0413\u044d\u043d\u044d\u0442\u0447 \u0437\u0430\u0440\u0434\u0430\u043b \u0433\u0430\u0440\u0430\u0432', money: -60 },
-  { text: '\u041d\u043e\u0433\u0434\u043e\u043b \u0430\u0448\u0438\u0433 \u0445\u04af\u043b\u044d\u044d\u043d \u0430\u0432\u0430\u0432', money: 100 },
-  { text: '2 \u043d\u04af\u0434 \u0445\u043e\u0439\u0448\u043e\u043e \u0448\u0438\u043b\u0436\u0438\u0432', moveRel: -2 },
+  { id: 'tax-refund', deck: 'chance', title: '\u0422\u0430\u0442\u0432\u0430\u0440\u044b\u043d \u0431\u0443\u0446\u0430\u0430\u043d \u043e\u043b\u0433\u043e\u043b\u0442', description: '\u0422\u0430\u043d\u0434 \u0442\u0430\u0442\u0432\u0430\u0440\u044b\u043d \u0431\u0443\u0446\u0430\u0430\u043d \u043e\u043b\u0433\u043e\u043b\u0442 \u20ae200 \u043e\u0440\u0436 \u0438\u0440\u043b\u044d\u044d.', effectType: 'cash', value: 200, target: 'currentPlayer', duration: 0, icon: 'coins', rarity: 'common', color: 'gold' },
+  { id: 'road-tax', deck: 'chance', title: '\u0417\u0430\u043c\u044b\u043d \u0442\u0430\u0442\u0432\u0430\u0440', description: '\u0422\u0430 \u0437\u0430\u043c\u044b\u043d \u0442\u0430\u0442\u0432\u0430\u0440 \u20ae40 \u0442\u04e9\u043b\u04e9\u0432.', effectType: 'cash', value: -40, target: 'currentPlayer', duration: 0, icon: 'coins', rarity: 'common', color: 'gray' },
+  { id: 'good-deal', deck: 'chance', title: '\u041d\u0430\u0439\u043c\u0430\u0430 \u0430\u043c\u0436\u0438\u043b\u0442\u0442\u0430\u0439 \u0431\u043e\u043b\u043b\u043e\u043e', description: '\u0422\u0430\u043d\u0434 \u04e9\u0433\u04e9\u0436\u0442\u04e9\u0439 \u0430\u0448\u0438\u0433 \u20ae50 \u043e\u0440\u043b\u043e\u0432.', effectType: 'cash', value: 50, target: 'currentPlayer', duration: 0, icon: 'coins', rarity: 'common', color: 'gold' },
+  { id: 'fine-paid', deck: 'chance', title: '\u0413\u044d\u043d\u044d\u0442\u0447 \u0437\u0430\u0440\u0434\u0430\u043b', description: '\u0413\u044d\u043d\u044d\u0442\u0447 \u0437\u0430\u0440\u0434\u0430\u043b \u20ae60 \u0433\u0430\u0440\u0430\u0432.', effectType: 'cash', value: -60, target: 'currentPlayer', duration: 0, icon: 'coins', rarity: 'common', color: 'gray' },
+  { id: 'grant-won', deck: 'chance', title: '\u041d\u043e\u0433\u0434\u043e\u043b \u0430\u0448\u0438\u0433', description: '\u041d\u043e\u0433\u0434\u043e\u043b \u0430\u0448\u0438\u0433 \u20ae100 \u0445\u04af\u043b\u044d\u044d\u043d \u0430\u0432\u0430\u0432.', effectType: 'cash', value: 100, target: 'currentPlayer', duration: 0, icon: 'coins', rarity: 'uncommon', color: 'gold' },
+  { id: 'free-house', deck: 'chance', title: '\u0428\u0438\u043d\u044d \u0441\u0430\u043b\u0431\u0430\u0440 \u043d\u044d\u044d\u043b\u044d\u044d', description: '\u04e8\u04e9\u0440\u0438\u0439\u043d \u043d\u044d\u0433 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0434 \u043d\u044d\u0433 \u0431\u0430\u0439\u0448\u0438\u043d \u04af\u043d\u044d\u0433\u04af\u0439 \u0431\u0430\u0440\u0438\u043d\u0430.', effectType: 'freeHouse', target: 'currentPlayer', upgradeAmount: 1, selectionRequired: true, duration: 0, icon: 'house', rarity: 'rare', color: 'green' },
+  { id: 'traffic-jam', deck: 'chance', title: '\u0417\u0430\u043c\u044b\u043d \u0442\u04af\u0433\u0436\u0440\u044d\u043b', description: '\u0422\u0430 \u0434\u0430\u0440\u0430\u0430\u0433\u0438\u0439\u043d \u043d\u044d\u0433 \u044d\u044d\u043b\u0436\u044d\u044d \u04e9\u043d\u0436\u0438\u043d\u04e9.', effectType: 'skipTurn', target: 'currentPlayer', skipTurns: 1, duration: 0, icon: 'traffic', rarity: 'uncommon', color: 'gray' },
+  { id: 'investor-arrived', deck: 'chance', title: '\u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u043e\u0440\u0443\u0443\u043b\u0430\u0433\u0447 \u0438\u0440\u043b\u044d\u044d', description: '\u04e8\u04e9\u0440\u0438\u0439\u043d \u043d\u044d\u0433 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0439\u0433 \u04af\u043d\u044d\u0433\u04af\u0439 \u043d\u044d\u0433 \u0442\u04af\u0432\u0448\u0438\u043d \u0441\u0430\u0439\u0436\u0440\u0443\u0443\u043b\u043d\u0430.', effectType: 'freeUpgrade', target: 'currentPlayer', upgradeAmount: 1, selectionRequired: true, duration: 0, icon: 'invest', rarity: 'legendary', color: 'purple' },
+  { id: 'go-bonus', deck: 'chance', title: '\u042d\u0425\u041b\u042d\u041b \u0440\u04af\u04af \u0431\u0443\u0446\u0430\u0436', description: '\u042d\u0425\u041b\u042d\u041b \u0440\u04af\u04af \u0431\u0443\u0446\u0430\u0436 \u20ae200 \u0446\u0443\u0433\u043b\u0443\u0443\u043b\u0430\u0432.', effectType: 'cash', value: 200, target: 'currentPlayer', duration: 0, icon: 'coins', rarity: 'common', color: 'gold' },
+  { id: 'insurance-payout', deck: 'chance', title: '\u0414\u0430\u0430\u0442\u0433\u0430\u043b\u044b\u043d \u0442\u04e9\u043b\u0431\u04e9\u0440', description: '\u0414\u0430\u0430\u0442\u0433\u0430\u043b\u044b\u043d \u0442\u04e9\u043b\u0431\u04e9\u0440 \u20ae80 \u0430\u0432\u0430\u0432.', effectType: 'cash', value: 80, target: 'currentPlayer', duration: 0, icon: 'coins', rarity: 'common', color: 'gold' },
 ];
-const CHEST_CARDS = [
-  { text: '\u0428\u04af\u04af\u0445 \u0442\u0430\u043d\u0434 \u0442\u04e9\u043b\u0431\u04e9\u0440 \u043d\u043e\u0433\u0434\u0443\u0443\u043b\u043b\u0430\u0430', money: -100 },
-  { text: '\u0413\u044d\u0440\u044d\u044d \u0437\u04e9\u0440\u0447\u0441\u04e9\u043d\u0438\u0439 \u0442\u043e\u0440\u0433\u0443\u0443\u043b\u044c \u0442\u04e9\u043b\u04e9\u0432', money: -75 },
-  { text: '\u0428\u04af\u04af\u0445\u0438\u0439\u043d \u043c\u0430\u0440\u0433\u0430\u0430\u043d\u0434 \u044f\u043b\u0436 \u043d\u04e9\u0445\u04e9\u043d \u0442\u04e9\u043b\u0431\u04e9\u0440 \u0430\u0432\u0430\u0432', money: 150 },
-  { text: '\u0422\u0430\u0442\u0432\u0430\u0440\u044b\u043d \u0448\u0430\u043b\u0433\u0430\u043b\u0442\u044b\u043d \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043b \u0442\u04e9\u043b\u04e9\u0432', money: -50 },
-  { text: '\u04e8\u0432 \u0437\u0430\u043b\u0433\u0430\u043c\u0436\u043b\u0430\u043b\u044b\u043d \u0448\u0438\u0439\u0434\u0432\u044d\u0440\u044d\u044d\u0440 \u0445\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0445\u04af\u043b\u044d\u044d\u043d \u0430\u0432\u0430\u0432', money: 120 },
-  { text: '\u0425\u044d\u0440\u044d\u0433 \u0445\u044f\u043d\u0430\u043d \u0448\u0438\u0439\u0434\u0432\u044d\u0440\u043b\u044d\u0445 \u0437\u0430\u0440\u0434\u0430\u043b \u0442\u04e9\u043b\u04e9\u0432', money: -40 },
-  { text: '\u0411\u0430\u0440\u0430\u0430\u043d\u044b \u0442\u044d\u043c\u0434\u044d\u0433\u0438\u0439\u043d \u043c\u0430\u0440\u0433\u0430\u0430\u043d\u0434 \u044f\u043b\u0430\u0432', money: 90 },
-  { text: '\u0417\u0430\u0445\u0438\u0440\u0433\u0430\u0430\u043d\u044b \u0442\u043e\u0440\u0433\u0443\u0443\u043b\u044c \u0442\u04e9\u043b\u04e9\u0432', money: -30 },
+const MARKET_CARDS = [
+  { id: 'mining-boom', deck: 'market', title: '\u0423\u0443\u043b \u0443\u0443\u0440\u0445\u0430\u0439\u043d \u04af\u043d\u044d \u04e9\u0441\u04e9\u0432', description: '\u0423\u0443\u043b \u0443\u0443\u0440\u0445\u0430\u0439\u043d \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0443\u0434\u044b\u043d \u043e\u0440\u043b\u043e\u0433\u043e 30% \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043d\u044d.', effectType: 'industryIncomeMultiplier', industry: 'mining', multiplier: 1.3, target: 'allPlayers', duration: 3, icon: 'mining', rarity: 'rare', color: 'orange' },
+  { id: 'economic-crisis', deck: 'market', title: '\u042d\u0434\u0438\u0439\u043d \u0437\u0430\u0441\u0433\u0438\u0439\u043d \u0445\u044f\u043c\u0440\u0430\u043b', description: '\u0411\u04af\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0439\u043d \u043e\u0440\u043b\u043e\u0433\u043e 20% \u0431\u0443\u0443\u0440\u043d\u0430.', effectType: 'globalIncomeMultiplier', multiplier: 0.8, target: 'allPlayers', duration: 2, icon: 'crisis', rarity: 'legendary', color: 'red' },
+  { id: 'exchange-rate-rise', deck: 'market', title: '\u0412\u0430\u043b\u044e\u0442\u044b\u043d \u0445\u0430\u043d\u0448 \u04e9\u0441\u04e9\u0432', description: '\u0411\u0430\u0440\u0438\u043b\u0433\u0430 \u0431\u043e\u043b\u043e\u043d \u043a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438\u0439\u043d \u04af\u043d\u044d 20% \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043d\u044d.', effectType: 'buildingCostMultiplier', multiplier: 1.2, target: 'allPlayers', duration: 3, icon: 'exchange', rarity: 'uncommon', color: 'blue' },
+  { id: 'bank-rally', deck: 'market', title: '\u0411\u0430\u043d\u043a\u043d\u044b \u0441\u0430\u043b\u0431\u0430\u0440 \u04e9\u0441\u04e9\u0432', description: '\u0411\u0430\u043d\u043a\u043d\u044b \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0443\u0434\u044b\u043d \u043e\u0440\u043b\u043e\u0433\u043e 25% \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043d\u044d.', effectType: 'industryIncomeMultiplier', industry: 'bank', multiplier: 1.25, target: 'allPlayers', duration: 3, icon: 'bank', rarity: 'rare', color: 'gold' },
+  { id: 'telecom-slump', deck: 'market', title: '\u0425\u043e\u043b\u0431\u043e\u043e\u043d\u044b \u0441\u0430\u043b\u0431\u0430\u0440 \u0431\u0443\u0443\u0440\u0430\u0432', description: '\u0425\u043e\u043b\u0431\u043e\u043e\u043d\u044b \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0443\u0434\u044b\u043d \u043e\u0440\u043b\u043e\u0433\u043e 15% \u0431\u0443\u0443\u0440\u043d\u0430.', effectType: 'industryIncomeMultiplier', industry: 'telecom', multiplier: 0.85, target: 'allPlayers', duration: 2, icon: 'telecom', rarity: 'uncommon', color: 'gray' },
+  { id: 'global-boom', deck: 'market', title: '\u0414\u044d\u043b\u0445\u0438\u0439\u0433\u0438\u0439\u043d \u04e9\u0441\u04e9\u043b\u0442', description: '\u0411\u04af\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0439\u043d \u043e\u0440\u043b\u043e\u0433\u043e 15% \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043d\u044d.', effectType: 'globalIncomeMultiplier', multiplier: 1.15, target: 'allPlayers', duration: 2, icon: 'boom', rarity: 'rare', color: 'green' },
 ];
+
+let cardDecks = null;
+function shuffleArr(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(deckRandom() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function deckRandom() { return Math.random(); }
+function ensureDecks(room) {
+  if (!room.decks) {
+    room.decks = {
+      chance: { draw: shuffleArr(CHANCE_CARDS.map(c => c.id)), discard: [] },
+      market: { draw: shuffleArr(MARKET_CARDS.map(c => c.id)), discard: [] },
+    };
+  }
+  cardDecks = room.decks;
+}
+function drawCardFromDeck(room, deckType) {
+  ensureDecks(room);
+  const deck = room.decks[deckType];
+  if (deck.draw.length === 0) {
+    if (deck.discard.length === 0) return null;
+    deck.draw = shuffleArr(deck.discard);
+    deck.discard = [];
+  }
+  const id = deck.draw.shift();
+  deck.discard.push(id);
+  const pool = deckType === 'chance' ? CHANCE_CARDS : MARKET_CARDS;
+  return pool.find(c => c.id === id) || null;
+}
+
+function getActiveMultiplier(room, sp, kind) {
+  if (!room.activeMarketEffects) return 1;
+  let mult = 1;
+  for (const eff of room.activeMarketEffects) {
+    if (kind === 'income') {
+      if (eff.effectType === 'industryIncomeMultiplier' && eff.industry === sp.buildingType) mult *= eff.multiplier;
+      if (eff.effectType === 'globalIncomeMultiplier') mult *= eff.multiplier;
+    } else if (kind === 'buildingCost') {
+      if (eff.effectType === 'buildingCostMultiplier') mult *= eff.multiplier;
+    }
+  }
+  return mult;
+}
 
 const DIE_PIPS = { 1:[5], 2:[3,7], 3:[1,5,9], 4:[1,3,7,9], 5:[1,3,5,7,9], 6:[1,3,4,6,7,9] };
 
@@ -3065,7 +3180,12 @@ function ownsFullGroup(room, ownerId, idx) {
 }
 function houseLevel(room, idx) { return (room.houses && room.houses[idx]) || 0; }
 function buildLevelLabel(level) { return level >= 4 ? '\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : level + ' \u0431\u0430\u0439\u0448\u0438\u043d'; }
-function buildCost(sp) { return Math.round(sp.price * 0.5 / 10) * 10; }
+function buildCost(sp, room) {
+  const base = Math.round(sp.price * 0.5 / 10) * 10;
+  if (!room) return base;
+  const mult = getActiveMultiplier(room, sp, 'buildingCost');
+  return Math.round(base * mult / 10) * 10;
+}
 
 function resolvePropertyOrTax(room, player, idx) {
   const sp = BOARD_CONFIG[idx];
@@ -3079,9 +3199,12 @@ function resolvePropertyOrTax(room, player, idx) {
     } else {
       const ownerPlayer = room.players.find(p => p.id === owner);
       const level = houseLevel(room, idx);
-      let rent, note;
-      if (level > 0) { rent = sp.rent * [1,2,4,6,10][level]; note = ` (${buildLevelLabel(level)})`; }
-      else { const fullGroup = ownsFullGroup(room, owner, idx); rent = fullGroup ? sp.rent * 2 : sp.rent; note = fullGroup ? ' (\u0431\u04af\u043b\u044d\u0433 \u0431\u04af\u0440\u044d\u043d \u2014 2x)' : ''; }
+      let baseRent, note;
+      if (level > 0) { baseRent = sp.rent * [1,2,4,6,10][level]; note = ` (${buildLevelLabel(level)})`; }
+      else { const fullGroup = ownsFullGroup(room, owner, idx); baseRent = fullGroup ? sp.rent * 2 : sp.rent; note = fullGroup ? ' (\u0431\u04af\u043b\u044d\u0433 \u0431\u04af\u0440\u044d\u043d \u2014 2x)' : ''; }
+      const incomeMultiplier = getActiveMultiplier(room, sp, 'income');
+      const rent = Math.round(baseRent * incomeMultiplier);
+      if (incomeMultiplier !== 1) note += ` [\u0437\u0430\u0445 \u0437\u044d\u044d\u043b \u00d7${incomeMultiplier.toFixed(2)}]`;
       player.money -= rent; ownerPlayer.money += rent;
       pushLog(room, `${player.name} ${ownerPlayer.name}-\u0434 \u0442\u04af\u0440\u044d\u044d\u0441 \u20ae${rent} \u0442\u04e9\u043b\u04e9\u0432${note}.`);
       if (player.money < 0) bankrupt(room, player);
@@ -3098,22 +3221,89 @@ function resolveSpace(room, player, idx) {
   if (sp.type === 'property' || sp.type === 'tax') {
     resolvePropertyOrTax(room, player, idx);
   } else if (sp.type === 'chance' || sp.type === 'chest') {
-    const pool = sp.type === 'chance' ? CHANCE_CARDS : CHEST_CARDS;
-    const card = pool[Math.floor(Math.random() * pool.length)];
-    pushLog(room, `${player.name}: "${card.text}"`);
-    room.cardDraw = { type: sp.type, playerName: player.name, text: card.text, money: typeof card.money === 'number' ? card.money : null, id: Date.now() + Math.random() };
-    if (typeof card.money === 'number') player.money += card.money;
-    if (typeof card.moveTo === 'number') { player.position = card.moveTo; if (card.collect) player.money += card.collect; resolvePropertyOrTax(room, player, player.position); }
-    if (typeof card.moveRel === 'number') { player.position = ((player.position + card.moveRel) % BOARD_CONFIG.length + BOARD_CONFIG.length) % BOARD_CONFIG.length; resolvePropertyOrTax(room, player, player.position); }
-    if (card.gotoJail) { player.jailTurns = 2; }
-    if (player.money < 0) bankrupt(room, player);
+    const deckType = sp.type === 'chance' ? 'chance' : 'market';
+    const card = drawCardFromDeck(room, deckType);
+    if (!card) { pushLog(room, `${player.name}: (\u043a\u0430\u0440\u0442\u044b\u043d \u0441\u0430\u0432 \u0445\u043e\u043e\u0441\u043e\u043d)`); return; }
+    room.cardDraw = { deckType, cardId: card.id, playerId: player.id, playerName: player.name, id: Date.now() + Math.random(), resolved: false };
   }
   // type 'go' / 'corner' (\u042d\u0425\u041b\u042d\u041b, \u0410\u041c\u0420\u0410\u041b\u0422, \u0417\u0410\u0425 \u0417\u042d\u042d\u041b, \u0414\u0423\u0423\u0414\u041b\u0410\u0413\u0410 \u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0410): \u043e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u043c\u044d\u0434\u044d\u044d\u043b\u043b\u044d\u043b \u0442\u0430\u0439\u043b\u0431\u0430\u0440, \u0442\u0443\u0441\u0433\u0430\u0439 \u043c\u0435\u0445\u0430\u043d\u0438\u043a (\u0430\u0443\u043a\u0446\u0438\u043e\u043d/\u0437\u0430\u0445 \u0437\u044d\u044d\u043b) \u0434\u0430\u0440\u0430\u0430\u0433\u0438\u0439\u043d \u0448\u0430\u0442\u0430\u043d\u0434 \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043d\u044d
 }
 
+function findCardById(deckType, cardId) {
+  const pool = deckType === 'chance' ? CHANCE_CARDS : MARKET_CARDS;
+  return pool.find(c => c.id === cardId) || null;
+}
+
+function applyCardEffect(room, card, player, chosenTileIdx) {
+  switch (card.effectType) {
+    case 'cash': {
+      player.money += card.value;
+      pushLog(room, `${player.name}: "${card.title}" \u2014 ${card.value >= 0 ? '+' : ''}\u20ae${card.value}.`);
+      if (player.money < 0) bankrupt(room, player);
+      break;
+    }
+    case 'skipTurn': {
+      player.jailTurns = (player.jailTurns || 0) + (card.skipTurns || 1);
+      pushLog(room, `${player.name}: "${card.title}" \u2014 ${card.skipTurns || 1} \u044d\u044d\u043b\u0436 \u04e9\u043d\u0436\u0438\u043d\u04e9.`);
+      break;
+    }
+    case 'freeHouse': {
+      if (chosenTileIdx !== undefined && chosenTileIdx !== null) {
+        if (!room.houses) room.houses = {};
+        const lvl = houseLevel(room, chosenTileIdx) + (card.upgradeAmount || 1);
+        room.houses[chosenTileIdx] = Math.min(lvl, 4);
+        pushLog(room, `${player.name}: "${card.title}" \u2014 "${BOARD_CONFIG[chosenTileIdx].name}"-\u0434 \u04af\u043d\u044d\u0433\u04af\u0439 \u0431\u0430\u0439\u0448\u0438\u043d \u0431\u0430\u0440\u0438\u0432.`);
+      } else {
+        pushLog(room, `${player.name}: "${card.title}" \u2014 \u0431\u0430\u0440\u0438\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u043b\u0434\u0441\u043e\u043d\u0433\u04af\u0439.`);
+      }
+      break;
+    }
+    case 'freeUpgrade': {
+      if (chosenTileIdx !== undefined && chosenTileIdx !== null) {
+        if (!room.houses) room.houses = {};
+        const lvl = houseLevel(room, chosenTileIdx) + (card.upgradeAmount || 1);
+        room.houses[chosenTileIdx] = Math.min(lvl, 4);
+        pushLog(room, `${player.name}: "${card.title}" \u2014 "${BOARD_CONFIG[chosenTileIdx].name}" \u04af\u043d\u044d\u0433\u04af\u0439 \u0441\u0430\u0439\u0436\u0440\u0430\u0432.`);
+      } else {
+        pushLog(room, `${player.name}: "${card.title}" \u2014 \u0441\u0430\u0439\u0436\u0440\u0443\u0443\u043b\u0430\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u043b\u0434\u0441\u043e\u043d\u0433\u04af\u0439.`);
+      }
+      break;
+    }
+    case 'industryIncomeMultiplier':
+    case 'globalIncomeMultiplier':
+    case 'buildingCostMultiplier': {
+      if (!room.activeMarketEffects) room.activeMarketEffects = [];
+      room.activeMarketEffects.push({
+        id: card.id + '-' + Date.now(), sourceCardId: card.id, effectType: card.effectType,
+        industry: card.industry || null, multiplier: card.multiplier, remainingRounds: card.duration || 1,
+      });
+      pushLog(room, `\u0417\u0430\u0445 \u0437\u044d\u044d\u043b: "${card.title}" \u0438\u0434\u044d\u0432\u0445\u0436\u043b\u044d\u044d (${card.duration || 1} \u04af\u0435 \u0448\u0430\u0442).`);
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+function tickMarketEffects(room) {
+  if (!room.activeMarketEffects || room.activeMarketEffects.length === 0) return;
+  const stillActive = [];
+  for (const eff of room.activeMarketEffects) {
+    eff.remainingRounds -= 1;
+    if (eff.remainingRounds > 0) {
+      stillActive.push(eff);
+    } else {
+      const src = findCardById('market', eff.sourceCardId);
+      pushLog(room, `\u0417\u0430\u0445 \u0437\u044d\u044d\u043b\u0438\u0439\u043d \u043d\u04e9\u043b\u04e9\u04e9${src ? ` "${src.title}"` : ''} \u0434\u0443\u0443\u0441\u043b\u0430\u0430.`);
+    }
+  }
+  room.activeMarketEffects = stillActive;
+}
+
+
 async function rollDice() {
   const room = await getRoom(currentRoom.roomCode);
-  if (!room || !isMyTurn(room) || room.hasRolled || room.pendingAction) return;
+  if (!room || !isMyTurn(room) || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved)) return;
   const player = room.players[room.currentPlayerIndex];
 
   if (player.jailTurns > 0) {
@@ -3167,7 +3357,7 @@ async function buildProperty() {
   const idx = room.pendingAction.spaceIndex;
   const player = room.players.find(p => p.id === myId);
   const sp = BOARD_CONFIG[idx];
-  const cost = buildCost(sp);
+  const cost = buildCost(sp, room);
   if (player.money < cost) { room.pendingAction = null; await saveRoom(room); currentRoom = room; render(); return; }
   if (!room.houses) room.houses = {};
   const level = houseLevel(room, idx) + 1;
@@ -3183,13 +3373,14 @@ async function skipBuild() {
 }
 async function endTurn() {
   const room = await getRoom(currentRoom.roomCode);
-  if (!room || !isMyTurn(room) || room.pendingAction) return;
+  if (!room || !isMyTurn(room) || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved)) return;
   const active = room.players.filter(p => !p.bankrupt);
   if (active.length <= 1) return;
   let next = room.currentPlayerIndex;
   do { next = (next + 1) % room.players.length; } while (room.players[next].bankrupt);
   room.currentPlayerIndex = next; room.hasRolled = false; room.lastDice = null;
   room.turnCount = (room.turnCount || 0) + 1;
+  if (room.turnCount % room.players.length === 0) tickMarketEffects(room);
   pushLog(room, `\u2014 ${room.players[next].name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u2014`);
   await saveRoom(room); currentRoom = room; render();
 }
@@ -3538,27 +3729,6 @@ function animateDiceRoll() {
   }
   tick();
 }
-function maybeShowCardPopup(room) {
-  const cd = room.cardDraw;
-  if (cd && cd.id !== lastCardId) { lastCardId = cd.id; showCardPopup(cd); }
-}
-function showCardPopup(draw) {
-  const root = document.getElementById('card-popup-root');
-  if (!root) return;
-  const isChance = draw.type === 'chance';
-  const hasMoney = typeof draw.money === 'number';
-  const moneyHtml = hasMoney ? `<div class="card-popup-money ${draw.money >= 0 ? 'positive' : 'negative'}">${draw.money >= 0 ? '+' : '\u2212'}\u20ae${fmt(Math.abs(draw.money))}</div>` : '';
-  root.innerHTML = `<div class="card-popup-backdrop" id="cardPopupBackdrop"><div class="card-popup ${isChance?'chance':'court'}">
-    <div class="card-popup-eyebrow">${isChance ? '\ud83c\udccf \u0410\u0437\u044b\u043d \u043a\u0430\u0440\u0442' : '\u2696\ufe0f \u0428\u04af\u04af\u0445\u0438\u0439\u043d \u0442\u043e\u0433\u0442\u043e\u043e\u043b'}</div>
-    <div class="card-popup-player">${draw.playerName}</div>
-    <div class="card-popup-text">"${draw.text}"</div>
-    ${moneyHtml}
-  </div></div>`;
-  const backdrop = document.getElementById('cardPopupBackdrop');
-  if (backdrop) backdrop.onclick = () => { root.innerHTML = ''; };
-  clearTimeout(cardPopupTimer);
-  cardPopupTimer = setTimeout(() => { root.innerHTML = ''; }, 4500);
-}
 function maybeFlashMoney(room) {
   if (!room) return;
   const me = room.players.find(p => p.id === myId);
@@ -3582,7 +3752,7 @@ function netWorth(room, player) {
     if (room.propOwner[idx] === player.id) {
       const sp = BOARD_CONFIG[idx]; worth += sp.price;
       const level = houseLevel(room, idx);
-      if (level > 0) worth += buildCost(sp) * level;
+      if (level > 0) worth += buildCost(sp, room) * level;
     }
   });
   return worth;
@@ -3812,7 +3982,7 @@ function renderBuildings(level) {
 /* ---------- RENDER ---------- */
 function render() {
   const app = document.getElementById('app');
-  if (currentRoom) maybeShowCardPopup(currentRoom);
+  if (currentRoom) { /* card popup now handled by maybeShowCardModal in the render() dispatcher */ }
   if (view === 'landing') { app.innerHTML = renderLanding(); attachLandingEvents(); return; }
   if (view === 'waiting') { app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
   if (view === 'game') {
@@ -3820,7 +3990,7 @@ function render() {
     app.innerHTML = renderGame();
     attachGameEvents();
     maybeFlashMoney(currentRoom);
-    if (currentRoom) maybeShowBuyModal(currentRoom);
+    if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); }
     return;
   }
 }
@@ -3935,6 +4105,13 @@ function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling
       <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
     </div>`;
   }
+  if (room.cardDraw && !room.cardDraw.resolved) {
+    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
+      <div class="sb-waiting">\ud83c\udccf \u041a\u0430\u0440\u0442 \u0448\u0438\u0439\u0434\u0432\u044d\u0440\u043b\u044d\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+      <button class="sb-dice-btn" disabled>\ud83d\udd12 \u0428\u041e\u041e \u0425\u0410\u042f\u0425</button>
+      <button class="sb-endturn-btn" disabled>\u042d\u042d\u041b\u0416\u0418\u0419\u0413 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>
+    </div>`;
+  }
   if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy') {
     return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0410\u041d\u042b \u0417\u04e9\u0412\u0428\u04e8\u04e8\u0420\u0415\u041b \u25c8</div>
       <div class="sb-waiting">\ud83d\udcc4 \u0421\u0430\u043d\u0430\u043b\u044b\u0433 \u0445\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
@@ -3945,7 +4122,7 @@ function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling
   if (room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'build') {
     const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
     const level = houseLevel(room, room.pendingAction.spaceIndex);
-    const cost = buildCost(sp);
+    const cost = buildCost(sp, room);
     const nextLabel = level + 1 >= 4 ? '\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : `${level + 1}-\u0440 \u0431\u0430\u0439\u0448\u0438\u043d`;
     return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0411\u0410\u0420\u0418\u041b\u0413\u042b\u041d \u0417\u04e9\u0412\u0428\u04e8\u04e8\u0420\u0415\u041b \u25c8</div>
       <div class="buy-prompt">
@@ -4004,6 +4181,23 @@ function renderWealthRankingPanel(room) {
     <span class="sb-rank-worth">\u20ae${fmt(netWorth(room, p))}</span>
   </div>`).join('');
   return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u0425\u04e8\u0420\u04e8\u041d\u0413\u0418\u0419\u041d \u0428\u0410\u0422\u041b\u0410\u041b \u25c8</div><div class="sb-rank-grid">${cards}</div></div>`;
+}
+
+function renderMarketEffectsPanel(room) {
+  const effects = room.activeMarketEffects || [];
+  if (effects.length === 0) return '';
+  const badges = effects.map(eff => {
+    const card = findCardById('market', eff.sourceCardId);
+    const pct = Math.round((eff.multiplier - 1) * 100);
+    const sign = pct >= 0 ? '+' : '';
+    const label = card ? card.title : eff.effectType;
+    return `<div class="market-effect-badge" data-tip="${label}">
+      <span class="me-icon">\ud83d\udcc8</span>
+      <span class="me-text">${label} ${sign}${pct}%</span>
+      <span class="me-rounds">${eff.remainingRounds} \u04af\u0435</span>
+    </div>`;
+  }).join('');
+  return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u0417\u0410\u0425 \u0417\u042d\u042d\u041b\u0418\u0419\u041d \u041d\u04e8\u041b\u04e8\u04e8 \u25c8</div>${badges}</div>`;
 }
 
 function renderActivityTimeline(room) {
@@ -4175,6 +4369,7 @@ function renderGame() {
         ${renderTurnStatusHeader(room, currentPlayer)}
         ${renderPlayersPanel(room, currentPlayer)}
         ${renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow)}
+        ${renderMarketEffectsPanel(room)}
         ${renderOwnedCompaniesPanel(room)}
         ${renderWealthRankingPanel(room)}
         ${renderActivityTimeline(room)}
@@ -4184,6 +4379,139 @@ function renderGame() {
 }
 
 let buyModalOpen = false;
+let cardModalOpen = false;
+let cardModalKey = null;
+let cardModalStage = 'revealing'; // revealing | reading | selecting | completed
+
+function playCardSound(kind) {
+  try {
+    if (!playCardSound._ctx) playCardSound._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = playCardSound._ctx;
+    const freqMap = { draw: 300, flip: 420, positive: 660, negative: 220, legendary: 880 };
+    const freq = freqMap[kind] || 400;
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = kind === 'negative' ? 'sawtooth' : 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.3);
+    if (kind === 'legendary') {
+      [880, 1108, 1318].forEach((f, i) => {
+        const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+        o2.type = 'sine'; o2.frequency.value = f;
+        const t0 = ctx.currentTime + 0.1 + i * 0.08;
+        g2.gain.setValueAtTime(0.001, t0);
+        g2.gain.linearRampToValueAtTime(0.06, t0 + 0.02);
+        g2.gain.exponentialRampToValueAtTime(0.001, t0 + 0.3);
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.start(t0); o2.stop(t0 + 0.3);
+      });
+    }
+  } catch (e) {}
+}
+
+function maybeShowCardModal(room) {
+  const root = document.getElementById('buy-modal-root');
+  if (!root) return;
+  const cd = room && room.cardDraw;
+  const shouldShow = cd && !cd.resolved && cd.playerId === myId && !isAnimatingMovement && !buildingAnimationActive;
+  if (!shouldShow) {
+    if (cardModalOpen && (!cd || cd.resolved)) { cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing'; }
+    return;
+  }
+  const key = cd.id;
+  if (cardModalOpen && cardModalKey === key) return;
+  cardModalOpen = true; cardModalKey = key; cardModalStage = 'revealing';
+  const card = findCardById(cd.deckType, cd.cardId);
+  if (!reducedMotion) playCardSound('draw');
+  renderCardModal(room, card);
+  setTimeout(() => {
+    if (!cardModalOpen || cardModalKey !== key) return;
+    cardModalStage = 'reading';
+    if (!reducedMotion) playCardSound('flip');
+    if (card) playCardSound(card.rarity === 'legendary' ? 'legendary' : (card.effectType === 'cash' && card.value < 0 ? 'negative' : card.effectType === 'cash' ? 'positive' : 'flip'));
+    renderCardModal(room, card);
+  }, reducedMotion ? 150 : 750);
+}
+
+function renderCardModal(room, card) {
+  const root = document.getElementById('buy-modal-root');
+  if (!root || !card) return;
+  const deckLabel = card.deck === 'chance' ? '\u0411\u041e\u041b\u041e\u041c\u0416' : '\u0417\u0410\u0425 \u0417\u042d\u042d\u041b';
+  const flipped = cardModalStage !== 'revealing' || reducedMotion;
+  const rarityClass = 'rarity-' + card.rarity;
+
+  let bodyHtml = '';
+  if (cardModalStage === 'selecting') {
+    const room2 = currentRoom;
+    const me = room2.players.find(p => p.id === myId);
+    const eligible = BOARD_CONFIG.filter(t => t.type === 'property' && canBuildOnTile(t, room2, me));
+    if (eligible.length === 0) {
+      bodyHtml = `<div class="event-card-desc">\u0422\u0430\u043d\u0434 \u044d\u043d\u044d \u043a\u0430\u0440\u0442\u044b\u0433 \u0430\u0448\u0438\u0433\u043b\u0430\u0445 \u0431\u043e\u043b\u043e\u043c\u0436\u0442\u043e\u0439 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u0431\u0430\u0439\u0445\u0433\u04af\u0439.</div>
+        <button class="buy-modal-buy-btn" id="cardContinueBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
+    } else {
+      bodyHtml = `<div class="event-card-desc">\u041a\u043e\u043c\u043f\u0430\u043d\u0438\u0430\u0433\u0430\u0430 \u0441\u043e\u043d\u0433\u043e\u043d\u043e \u0443\u0443:</div>
+        <div class="card-select-list">${eligible.map(t => `<button class="card-select-item" data-tile="${t.id}">${t.name} <span>LV.${houseLevel(room2, t.id)}</span></button>`).join('')}</div>`;
+    }
+  } else {
+    bodyHtml = `<div class="event-card-desc">${card.description}</div>
+      <button class="buy-modal-buy-btn" id="cardContinueBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
+  }
+
+  root.innerHTML = `<div class="buy-modal-backdrop card-modal-backdrop">
+    <div class="event-card-scene ${rarityClass}">
+      <div class="event-card ${flipped ? 'is-flipped' : ''}" role="dialog" aria-modal="true" aria-labelledby="cardTitleId">
+        <div class="event-card-back"><div class="event-card-back-emblem">\u2726</div></div>
+        <div class="event-card-front">
+          <div class="event-card-badge">${deckLabel}</div>
+          <div class="event-card-rarity-glow"></div>
+          <div class="event-card-icon">${card.deck === 'chance' ? '\ud83c\udf40' : '\ud83d\udcc8'}</div>
+          <div class="event-card-title" id="cardTitleId">${card.title}</div>
+          ${bodyHtml}
+          <div class="event-card-particles">${(card.rarity === 'legendary' || (card.effectType==='cash')) ? renderCardParticles(card) : ''}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  const contBtn = document.getElementById('cardContinueBtn');
+  if (contBtn) contBtn.onclick = () => onCardContinueClick(card);
+  document.querySelectorAll('.card-select-item').forEach(btn => {
+    btn.onclick = () => resolveCardFinal(card, parseInt(btn.dataset.tile, 10));
+  });
+}
+
+function renderCardParticles(card) {
+  const positive = card.effectType !== 'cash' || card.value >= 0;
+  const seed = Array.from({length: 8}, () => ({ dx: (Math.random()-0.5)*90, dy: -30-Math.random()*60, delay: Math.random()*200 }));
+  return seed.map(p => `<span class="event-mote ${positive ? 'mote-gold' : 'mote-neg'}" style="--dx:${p.dx}px; --dy:${p.dy}px; --delay:${p.delay}ms;"></span>`).join('');
+}
+
+function onCardContinueClick(card) {
+  if (card.selectionRequired) {
+    cardModalStage = 'selecting';
+    renderCardModal(currentRoom, card);
+    return;
+  }
+  resolveCardFinal(card, null);
+}
+
+async function resolveCardFinal(card, chosenTileIdx) {
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room || !room.cardDraw || room.cardDraw.resolved || room.cardDraw.playerId !== myId) return;
+  const player = room.players.find(p => p.id === myId);
+  try {
+    applyCardEffect(room, card, player, chosenTileIdx);
+  } finally {
+    room.cardDraw.resolved = true;
+    room.cardDraw = null;
+    await saveRoom(room); currentRoom = room;
+    cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing';
+    render();
+  }
+}
+
 let buyModalKey = null;
 
 function maybeShowBuyModal(room) {
@@ -4212,8 +4540,8 @@ function renderBuyModal(room) {
   const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
   const me = room.players.find(p => p.id === myId);
   const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
-  const houseCost = buildCost(sp);
-  const corpCost = buildCost(sp);
+  const houseCost = buildCost(sp, room);
+  const corpCost = buildCost(sp, room);
   const groupColor = GROUP_COLORS[sp.colorGroup] || 'var(--gold)';
   const canAfford = me.money >= sp.price;
   const remaining = me.money - sp.price;
@@ -4312,12 +4640,12 @@ function attachGameEvents() {
   const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
   document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => { if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
+    el.onclick = () => { if (buyModalOpen || buildingAnimationActive || cardModalOpen) return; showCellDetail(idx); };
   });
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive;
+    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive || cardModalOpen;
     const selectTile = () => {
       if (tileInteractionDisabled) return;
       selectedTileId = idx;
@@ -4349,11 +4677,11 @@ function attachGameEvents() {
   });
   document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen) return; showCellDetail(idx); };
   });
   document.querySelectorAll('.upgrade-icon[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen) return; showCellDetail(idx); };
   });
 }
 
