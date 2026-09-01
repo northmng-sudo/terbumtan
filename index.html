@@ -336,7 +336,40 @@
   }
   .board-image { object-fit: contain; pointer-events: none; border-radius: 14px; }
   .board-overlay { overflow: visible; }
-  .camera-dim-overlay {
+  .env-lighting { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .env-night-overlay {
+    position: absolute; inset: 0; opacity: 0; border-radius: 14px;
+    background: linear-gradient(160deg, rgba(20,15,60,0.42) 0%, rgba(10,10,40,0.5) 60%, rgba(5,5,25,0.55) 100%);
+    transition: opacity 2s ease;
+  }
+  .env-moonlight {
+    position: absolute; inset: 0; opacity: 0; border-radius: 14px;
+    background: radial-gradient(circle at 78% 12%, rgba(180,200,255,0.28) 0%, transparent 45%);
+    transition: opacity 2s ease;
+  }
+  .env-streetlights {
+    position: absolute; inset: 0; opacity: 0; border-radius: 14px;
+    background:
+      radial-gradient(circle at 15% 30%, rgba(255,214,140,0.18) 0%, transparent 6%),
+      radial-gradient(circle at 85% 30%, rgba(255,214,140,0.18) 0%, transparent 6%),
+      radial-gradient(circle at 15% 70%, rgba(255,214,140,0.18) 0%, transparent 6%),
+      radial-gradient(circle at 85% 70%, rgba(255,214,140,0.18) 0%, transparent 6%);
+    transition: opacity 2s ease;
+  }
+  .env-night .env-night-overlay,
+  .env-night .env-moonlight,
+  .env-night .env-streetlights { opacity: 1; }
+  .env-night ~ .board-overlay .tile text { fill: #eaf5ef; stroke: rgba(10,10,30,0.9); }
+  .env-night ~ .tile-building-badge .badge-ring { box-shadow: 0 0 10px 2px rgba(120,200,255,0.5); border-color: #9fd8ff; }
+  .env-night ~ .upgrade-icon .upgrade-glow-ring { filter: brightness(1.4); }
+  .board-viewport { position: relative; }
+  .board-viewport::after {
+    content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none; z-index: 5;
+    transition: box-shadow 2s ease;
+  }
+  .env-night-active.board-viewport::after { box-shadow: inset 0 0 0 2px rgba(212,175,55,0.55), inset 0 0 24px rgba(120,160,255,0.25); }
+
+
     position: absolute; inset: 0; z-index: 30; pointer-events: none;
     background: rgba(2,10,8,0.4);
     animation: dimFadeIn 0.4s ease forwards;
@@ -813,6 +846,11 @@
   .detail-thumb { width: 52px; height: 52px; border-radius: 12px; background: rgba(255,255,255,0.92); border: 1px solid color-mix(in srgb, var(--grp) 60%, transparent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .detail-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 5px; }
   .detail-group-chip { flex: 1; height: 6px; border-radius: 4px; align-self: center; }
+  .settings-popup { max-width: 380px; }
+  .settings-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+  .settings-toggle { border: 1.5px solid var(--steppe-gold); border-radius: 20px; padding: 5px 14px; font-size: 11px; font-weight: 800; cursor: pointer; background: transparent; color: var(--steppe-gold); }
+  .settings-toggle.on { background: var(--steppe-gold); color: #241a0d; }
+  .settings-slider { width: 130px; accent-color: var(--steppe-gold); }
   .detail-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13.5px; }
   .detail-row:last-of-type { border-bottom: none; }
   .detail-row span:first-child { color: #9AA6BE; }
@@ -854,6 +892,92 @@
   .waiting-note { text-align: center; color: #8b96b0; font-size: 13px; padding: 22px 0; }
   .waiting-note .pulse-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--steppe-gold); margin-right: 6px; animation: pulse 1.4s infinite; }
   .log-box { max-height: 170px; overflow-y: auto; font-size: 12px; color: #b8c2d9; display: flex; flex-direction: column-reverse; gap: 5px; }
+
+  /* ===== GAME RESULTS CINEMATIC ===== */
+  .results-cinematic { position: fixed; inset: 0; z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
+  .results-backdrop { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 50% 30%, var(--emerald-dark) 0%, var(--sidebar-bg) 70%); }
+  .results-progress { display: flex; gap: 8px; margin-bottom: 18px; }
+  .results-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: background 0.3s ease; }
+  .results-dot.active { background: var(--gold); }
+  .results-content { width: min(94vw, 640px); max-height: 74vh; overflow-y: auto; position: relative; }
+  .results-stage-title { text-align: center; font-family: 'Cinzel', serif; font-size: 16px; letter-spacing: 2px; color: var(--gold-light); margin-bottom: 18px; }
+
+  .results-count-list { display: flex; flex-direction: column; gap: 12px; }
+  .results-count-row { background: var(--card-bg); border: 1px solid rgba(245,202,85,0.35); border-radius: 14px; padding: 12px 16px; }
+  .results-avatar { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ring-color, var(--gold)); font-size: 16px; margin-right: 8px; background: rgba(255,255,255,0.06); }
+  .results-pname { font-weight: 800; color: var(--sb-text); font-size: 14px; }
+  .results-count-nums { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; }
+  .cnt-item { display: flex; flex-direction: column; }
+  .cnt-item .count-value { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 14px; color: var(--gold-light); }
+  .cnt-item em { font-size: 9.5px; color: var(--sb-muted); font-style: normal; text-transform: uppercase; letter-spacing: 0.5px; }
+  .cnt-total .count-value { color: var(--emerald-light); font-size: 16px; }
+
+  .results-players-tabs { display: flex; flex-direction: column; gap: 18px; }
+  .results-player-block-head { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--sb-text); margin-bottom: 8px; }
+  .results-player-block-head .results-avatar { border-color: var(--ring-color, var(--gold)); }
+  .results-company-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+  .results-company-card { background: var(--card-bg); border: 1px solid rgba(245,202,85,0.3); border-radius: 10px; padding: 8px; text-align: center; }
+  .results-company-icon { width: 32px; height: 32px; margin: 0 auto 4px; background: rgba(255,255,255,0.9); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .results-company-icon img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+  .results-company-name { font-size: 9.5px; font-weight: 700; color: var(--sb-text); line-height: 1.2; }
+  .results-company-level { font-size: 9px; color: var(--gold-light); margin-top: 2px; }
+  .results-empty { color: var(--sb-muted); font-size: 12px; }
+
+  .results-achieve-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .results-achieve-card { background: var(--card-bg); border: 1px solid rgba(245,202,85,0.35); border-radius: 14px; padding: 16px; text-align: center; }
+  .ra-icon { display: block; font-size: 26px; margin-bottom: 6px; }
+  .ra-value { display: block; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 20px; color: var(--gold-light); }
+  .ra-label { display: block; font-size: 10.5px; color: var(--sb-muted); margin-top: 4px; }
+
+  .results-podium { display: flex; align-items: flex-end; justify-content: center; gap: 10px; margin-bottom: 10px; }
+  .podium-block { display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0; transform: translateY(20px); animation: podiumRise 0.6s ease forwards; }
+  .podium-block.podium-rank-1 { animation-delay: 0.3s; }
+  .podium-block.podium-rank-2 { animation-delay: 0.1s; }
+  .podium-block.podium-rank-3 { animation-delay: 0.5s; }
+  @keyframes podiumRise { to { opacity: 1; transform: translateY(0); } }
+  .podium-medal { font-size: 22px; }
+  .podium-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2.5px solid var(--ring-color, var(--gold)); display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(255,255,255,0.08); }
+  .podium-name { font-weight: 800; font-size: 12.5px; color: var(--sb-text); }
+  .podium-total { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-light); }
+  .podium-stand { width: 84px; border-radius: 8px 8px 0 0; background: linear-gradient(160deg, var(--gold-light), var(--gold-dark)); box-shadow: inset 0 2px 0 rgba(255,255,255,0.3); }
+  .podium-rank-1 .podium-stand { height: 84px; background: linear-gradient(160deg, #ffe69a, #b8860b); }
+  .podium-rank-2 .podium-stand { height: 58px; background: linear-gradient(160deg, #e2e6ee, #9aa3b5); }
+  .podium-rank-3 .podium-stand { height: 40px; background: linear-gradient(160deg, #d8a87a, #8a5a34); }
+  .results-podium-lit .podium-rank-1 .podium-stand { box-shadow: inset 0 2px 0 rgba(255,255,255,0.4), 0 0 24px rgba(245,202,85,0.6); }
+
+  .winner-spotlight-beam {
+    position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 220px; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,229,138,0.35) 0%, transparent 80%);
+    clip-path: polygon(45% 0%, 55% 0%, 90% 100%, 10% 100%);
+    animation: spotlightFlicker 1.3s ease-in-out infinite;
+  }
+  .winner-crown { text-align: center; font-size: 30px; margin-top: 6px; animation: crownBounce 0.6s ease; }
+  @keyframes crownBounce { 0% { transform: translateY(-14px); opacity: 0; } 60% { transform: translateY(3px); opacity: 1; } 100% { transform: translateY(0); } }
+  .winner-title-big { text-align: center; font-family: 'Cinzel', serif; font-weight: 800; font-size: 26px; letter-spacing: 3px; color: var(--gold); margin-top: 4px; }
+  .winner-name-big { text-align: center; font-size: 19px; font-weight: 800; color: var(--sb-text); margin-top: 6px; }
+  .winner-total-big { text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--gold-light); font-size: 14px; margin-top: 4px; }
+  .winner-flag { position: relative; width: 3px; height: 30px; background: #8a6d1f; margin: 14px auto 0; }
+  .winner-flag::after { content: ''; position: absolute; top: 0; left: 3px; width: 20px; height: 13px; background: var(--flag-color, var(--gold)); clip-path: polygon(0 0, 100% 20%, 0 100%); animation: flagWaveSmall 1.4s ease-in-out infinite; }
+
+  .confetti-field { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: -1; }
+  .confetti-field i {
+    position: absolute; top: -10px; left: var(--x); width: 6px; height: 10px;
+    background: hsl(var(--hue), 85%, 62%);
+    animation: confettiDrop var(--dur) linear var(--delay) forwards;
+  }
+  @keyframes confettiDrop { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(360px) rotate(540deg); opacity: 0; } }
+  .coin-field { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: -1; }
+  .coin-field span { position: absolute; top: -10px; left: var(--x); font-size: 18px; animation: coinDrop 1.4s ease-in var(--delay) forwards; }
+  @keyframes coinDrop { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(280px) rotate(360deg); opacity: 0; } }
+
+  .results-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px; }
+  .results-actions .btn { min-width: 150px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .confetti-field, .coin-field, .winner-spotlight-beam { display: none; }
+    .podium-block { animation: none; opacity: 1; transform: none; }
+  }
 
   .victory-box { text-align: center; padding: 40px 10px; }
   .victory-seal { width: 130px; height: 130px; margin: 18px auto; border-radius: 50%; border: 3px solid var(--steppe-gold); display: flex; align-items: center; justify-content: center; font-size: 56px; position: relative; animation: sealSpin 1.1s cubic-bezier(.2,1.4,.4,1); box-shadow: 0 0 0 6px rgba(212,162,78,0.08), 0 0 40px rgba(212,162,78,0.25); }
@@ -3100,6 +3224,155 @@ let errorMsg = '';
 let justRolled = false;
 let debugMode = false;
 
+/* ===== SETTINGS (audio/vibration/environment) ===== */
+const DEFAULT_SETTINGS = { sfxEnabled: true, musicEnabled: true, vibrationEnabled: true, environmentEnabled: true, sfxVolume: 0.75, musicVolume: 0.35 };
+let gameSettings = loadSettings();
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem('ikhKhorongoSettings');
+    if (raw) return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw));
+  } catch (e) {}
+  return Object.assign({}, DEFAULT_SETTINGS);
+}
+function saveSettings() {
+  try { localStorage.setItem('ikhKhorongoSettings', JSON.stringify(gameSettings)); } catch (e) {}
+}
+
+/* ===== DAY / NIGHT ENVIRONMENT ===== */
+function getTimeOfDay(roundNumber) {
+  return Math.floor((Math.max(roundNumber, 1) - 1) / 3) % 2 === 0 ? 'day' : 'night';
+}
+let environment = { timeOfDay: 'day', previousTimeOfDay: 'day', isTransitioning: false };
+let lastEnvRound = null;
+function updateEnvironment(roundNumber) {
+  if (!gameSettings.environmentEnabled) { environment.timeOfDay = 'day'; return; }
+  if (lastEnvRound === roundNumber) return;
+  const prevRound = lastEnvRound;
+  lastEnvRound = roundNumber;
+  const newTod = getTimeOfDay(roundNumber);
+  if (prevRound === null) { environment.timeOfDay = newTod; environment.previousTimeOfDay = newTod; return; }
+  if (newTod !== environment.timeOfDay) {
+    environment.previousTimeOfDay = environment.timeOfDay;
+    environment.timeOfDay = newTod;
+    environment.isTransitioning = true;
+    showEnvToast(newTod);
+    if (gameSettings.musicEnabled) audioManager.playMusic(newTod === 'day' ? 'dayTheme' : 'nightTheme');
+    setTimeout(() => { environment.isTransitioning = false; render(); }, 2000);
+  }
+}
+function showEnvToast(tod) {
+  const root = document.getElementById('card-popup-root');
+  if (!root) return;
+  const el = document.createElement('div');
+  el.className = 'passgo-toast env-toast';
+  el.textContent = tod === 'night' ? '\ud83c\udf19 \u0428\u04e8\u041d\u04e8 \u0411\u041e\u041b\u041b\u041e\u041e \u2014 \u0425\u043e\u0442\u044b\u043d \u0433\u044d\u0440\u043b\u04af\u04af\u0434 \u0430\u0441\u043b\u0430\u0430' : '\u2600\ufe0f \u0428\u0418\u041d\u042d \u04e8\u0414\u04e8\u0420 \u042d\u0425\u042d\u041b\u041b\u042d\u042d \u2014 \u0425\u043e\u0442 \u0434\u0430\u0445\u0438\u043d \u0441\u044d\u0440\u043b\u044d\u044d';
+  root.appendChild(el);
+  setTimeout(() => { el.remove(); }, 2600);
+}
+
+/* ===== AUDIO MANAGER ===== */
+const SOUND_ASSETS = {
+  diceRoll: 'dice-roll.mp3', tokenStep: 'token-step.mp3', coinReward: 'coin-reward.mp3',
+  companyPurchase: 'company-purchase.mp3', buildingRise: 'building-rise.mp3',
+  corporationVictory: 'corporation-victory.mp3', auctionTick: 'auction-tick.mp3',
+  buttonClick: 'button-click.mp3', cardFlip: 'card-flip.mp3', bonusUnlocked: 'bonus-unlocked.mp3',
+  dayTheme: 'day-theme.mp3', nightTheme: 'night-theme.mp3', victoryTheme: 'victory-theme.mp3',
+};
+const AudioManager = (function () {
+  const sfxCache = {};
+  const failedAssets = new Set();
+  let musicEl = null;
+  let musicKey = null;
+  let unlocked = false;
+  const pendingMusic = { key: null };
+
+  function getSfxAudio(key) {
+    if (failedAssets.has(key)) return null;
+    if (!sfxCache[key]) {
+      const a = new Audio(SOUND_ASSETS[key]);
+      a.addEventListener('error', () => { failedAssets.add(key); }, { once: true });
+      sfxCache[key] = a;
+    }
+    return sfxCache[key];
+  }
+
+  function playSfx(key) {
+    if (!gameSettings.sfxEnabled) return;
+    if (!SOUND_ASSETS[key]) return;
+    try {
+      const a = getSfxAudio(key);
+      if (!a) return;
+      const clone = a.cloneNode();
+      clone.volume = gameSettings.sfxVolume;
+      const p = clone.play();
+      if (p && p.catch) p.catch(() => { failedAssets.add(key); });
+    } catch (e) {}
+  }
+
+  function playMusic(key) {
+    if (!SOUND_ASSETS[key]) return;
+    if (!gameSettings.musicEnabled) { musicKey = key; return; }
+    if (!unlocked) { pendingMusic.key = key; musicKey = key; return; }
+    if (musicKey === key && musicEl && !musicEl.paused) return;
+    const newEl = new Audio(SOUND_ASSETS[key]);
+    newEl.loop = true;
+    newEl.volume = 0;
+    newEl.addEventListener('error', () => {}, { once: true });
+    const oldEl = musicEl;
+    musicEl = newEl; musicKey = key;
+    const p = newEl.play();
+    if (p && p.catch) p.catch(() => {});
+    const steps = 24, dur = 1000, stepMs = dur / steps;
+    let i = 0;
+    const fade = setInterval(() => {
+      i++;
+      const t = i / steps;
+      newEl.volume = Math.min(gameSettings.musicVolume, gameSettings.musicVolume * t);
+      if (oldEl) oldEl.volume = Math.max(0, gameSettings.musicVolume * (1 - t));
+      if (i >= steps) {
+        clearInterval(fade);
+        if (oldEl) { oldEl.pause(); }
+      }
+    }, stepMs);
+  }
+
+  function stopMusic() {
+    if (musicEl) { musicEl.pause(); musicEl = null; }
+    musicKey = null;
+  }
+
+  function setSfxVolume(v) { gameSettings.sfxVolume = v; saveSettings(); }
+  function setMusicVolume(v) {
+    gameSettings.musicVolume = v; saveSettings();
+    if (musicEl) musicEl.volume = v;
+  }
+  function setMuted(type, muted) {
+    if (type === 'sfx') gameSettings.sfxEnabled = !muted;
+    if (type === 'music') {
+      gameSettings.musicEnabled = !muted;
+      if (muted) { stopMusic(); } else if (musicKey) { playMusic(musicKey); }
+    }
+    saveSettings();
+  }
+
+  function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    if (pendingMusic.key) { const k = pendingMusic.key; pendingMusic.key = null; playMusic(k); }
+  }
+  ['click', 'touchstart', 'keydown'].forEach(evt => document.addEventListener(evt, unlock, { once: true }));
+
+  return { playSfx, playMusic, stopMusic, setSfxVolume, setMusicVolume, setMuted };
+})();
+const audioManager = AudioManager;
+
+function vibrate(pattern) {
+  if (!gameSettings.vibrationEnabled) return;
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+}
+
+
+
 async function getRoom(code) {
   try {
     const { data, error } = await supabaseClient.from('rooms').select('state').eq('room_code', code).single();
@@ -3239,6 +3512,7 @@ function applyCardEffect(room, card, player, chosenTileIdx) {
     case 'cash': {
       player.money += card.value;
       pushLog(room, `${player.name}: "${card.title}" \u2014 ${card.value >= 0 ? '+' : ''}\u20ae${card.value}.`);
+      if (card.value >= 0) audioManager.playSfx('coinReward');
       if (player.money < 0) bankrupt(room, player);
       break;
     }
@@ -3304,6 +3578,7 @@ function tickMarketEffects(room) {
 async function rollDice() {
   const room = await getRoom(currentRoom.roomCode);
   if (!room || !isMyTurn(room) || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved)) return;
+  audioManager.playSfx('diceRoll'); vibrate(25);
   const player = room.players[room.currentPlayerIndex];
 
   if (player.jailTurns > 0) {
@@ -3343,6 +3618,7 @@ async function buyProperty() {
   pushLog(room, `${player.name} "${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432.`);
   room.pendingAction = null;
   await saveRoom(room); currentRoom = room; render();
+  audioManager.playSfx('companyPurchase'); vibrate([30, 40, 30]);
   focusCameraOnBuilding(idx, { mode: 'purchase', scale: reducedMotion ? 1.1 : 1.34 });
   setTimeout(() => { if (cameraState.mode === 'purchase') returnCameraToOverview(); }, reducedMotion ? 300 : 900);
 }
@@ -3611,9 +3887,10 @@ async function runBuildingAnimation(tileId, playerId, type) {
     if (type === 'corp') focusCameraOnBuilding(tileId, { mode: 'corporation', scale: reducedMotion ? 1.15 : 1.46 });
     await new Promise(r => setTimeout(r, (type === 'corp' ? 400 : 200) * t));
     buildingAnim.stage = 'rising'; render();
+    if (type === 'house') { audioManager.playSfx('buildingRise'); vibrate([25, 30, 40]); }
     await new Promise(r => setTimeout(r, (type === 'corp' ? 500 : 600) * t));
     buildingAnim.stage = 'celebration'; render();
-    if (type === 'corp') { playFanfareSound(); showCorpNotice(); }
+    if (type === 'corp') { playFanfareSound(); showCorpNotice(); audioManager.playSfx('corporationVictory'); vibrate([50, 40, 80]); }
     await new Promise(r => setTimeout(r, (type === 'corp' ? 500 : 500) * t));
     buildingAnim.stage = 'completed'; render();
   } finally {
@@ -3700,6 +3977,9 @@ async function animateTokenMove(playerId, from, steps) {
       followPlayerStep(playerId, nextPos);
       await new Promise(res => setTimeout(res, stepDur));
       playStepSound();
+      audioManager.playSfx('tokenStep');
+      const isLastStep = (i === steps);
+      vibrate(isLastStep ? 35 : 25);
       if (nextPos === 0) showPassGoToast();
     }
   } finally {
@@ -3986,11 +4266,21 @@ function render() {
   if (view === 'landing') { app.innerHTML = renderLanding(); attachLandingEvents(); return; }
   if (view === 'waiting') { app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
   if (view === 'game') {
-    if (currentRoom) { maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); maybeTriggerBuildAnimation(currentRoom); }
+    if (currentRoom) {
+      maybeTriggerGameResults(currentRoom);
+      if (!gameResults.isOpen) {
+        maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); maybeTriggerBuildAnimation(currentRoom);
+        updateEnvironment(Math.floor((currentRoom.turnCount || 0) / currentRoom.players.length) + 1);
+      }
+    }
     app.innerHTML = renderGame();
-    attachGameEvents();
-    maybeFlashMoney(currentRoom);
-    if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); }
+    if (currentRoom && currentRoom.winnerId && gameResults.isOpen) {
+      attachResultsEvents();
+    } else {
+      attachGameEvents();
+      maybeFlashMoney(currentRoom);
+      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); }
+    }
     return;
   }
 }
@@ -4056,6 +4346,7 @@ function timeAgoLabel(logIndexFromEnd) {
 
 function renderTurnStatusHeader(room, currentPlayer) {
   const roundN = Math.floor((room.turnCount || 0) / room.players.length) + 1;
+  const muted = !gameSettings.sfxEnabled && !gameSettings.musicEnabled;
   return `<div class="sb-header">
     <div class="sb-round-badge">\u04ae\u0415 ${roundN}</div>
     <div class="sb-header-mid">
@@ -4063,8 +4354,8 @@ function renderTurnStatusHeader(room, currentPlayer) {
       <span class="sb-header-name">${currentPlayer.name}-\u0418\u0419\u041d \u042d\u042d\u041b\u0416</span>
     </div>
     <div class="sb-header-icons">
-      <button class="sb-icon-btn" title="\u0414\u0443\u0443">\ud83d\udd0a</button>
-      <button class="sb-icon-btn" id="debugToggle" title="Debug">\u2699\ufe0f</button>
+      <button class="sb-icon-btn" id="quickMuteToggle" title="\u0414\u0443\u0443">${muted ? '\ud83d\udd07' : '\ud83d\udd0a'}</button>
+      <button class="sb-icon-btn" id="openSettingsBtn" title="\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e">\u2699\ufe0f</button>
     </div>
   </div>`;
 }
@@ -4240,17 +4531,136 @@ function showFullLogModal(room) {
   if (closeBtn) closeBtn.onclick = () => { root.innerHTML = ''; };
 }
 
+function renderGameResultsCinematic(room) {
+  const stage = gameResults.stage;
+  const rankings = gameResults.rankings;
+  const winner = room.players.find(p => p.id === gameResults.winnerId);
+  const medalIcons = ['\ud83e\udd47', '\ud83e\udd48', '\ud83e\udd49'];
+
+  const stageOrder = ['counting', 'companies', 'achievements', 'podium', 'celebration', 'completed'];
+  const stageIdx = stageOrder.indexOf(stage);
+
+  let bodyHtml = '';
+
+  if (stage === 'counting') {
+    bodyHtml = `<div class="results-stage-title">\u25c8 \u0425\u04e8\u0420\u04e8\u041d\u0413\u0418\u0419\u0413 \u0422\u041e\u041e\u041b\u041e\u0425 \u25c8</div>
+      <div class="results-count-list">
+        ${rankings.map(r => {
+          const p = room.players.find(pp => pp.id === r.playerId);
+          return `<div class="results-count-row">
+            <span class="results-avatar" style="--ring-color:${p.color}">${p.token}</span>
+            <span class="results-pname">${p.name}</span>
+            <div class="results-count-nums">
+              <span class="cnt-item"><span class="count-value" data-target="${r.cash}">0</span><em>\u0431\u044d\u043b\u044d\u043d</em></span>
+              <span class="cnt-item"><span class="count-value" data-target="${r.companyValue}">0</span><em>\u043a\u043e\u043c\u043f\u0430\u043d\u0438</em></span>
+              <span class="cnt-item"><span class="count-value" data-target="${r.houseValue}">0</span><em>\u0431\u0430\u0439\u0448\u0438\u043d</em></span>
+              <span class="cnt-item"><span class="count-value" data-target="${r.corporationValue}">0</span><em>\u043a\u043e\u0440\u043f\u043e\u0440\u0430\u0446</em></span>
+              <span class="cnt-item cnt-total"><span class="count-value" data-target="${r.total}">0</span><em>\u041d\u0418\u0419\u0422</em></span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  } else if (stage === 'companies') {
+    bodyHtml = `<div class="results-stage-title">\u25c8 \u041a\u041e\u041c\u041f\u0410\u041d\u0418\u0423\u0414 \u25c8</div>
+      <div class="results-players-tabs">
+        ${rankings.map((r, i) => {
+          const p = room.players.find(pp => pp.id === r.playerId);
+          const myProps = Object.keys(room.propOwner).filter(idx => room.propOwner[idx] === p.id).map(Number);
+          return `<div class="results-player-block">
+            <div class="results-player-block-head" style="--ring-color:${p.color}"><span class="results-avatar">${p.token}</span> ${p.name}</div>
+            <div class="results-company-grid">
+              ${myProps.length === 0 ? `<div class="results-empty">\u041a\u043e\u043c\u043f\u0430\u043d\u0438 \u044d\u0437\u044d\u043c\u0448\u0438\u0433\u04af\u0439</div>` : myProps.map(idx => {
+                const sp = BOARD_CONFIG[idx];
+                const level = houseLevel(room, idx);
+                const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
+                return `<div class="results-company-card">
+                  <div class="results-company-icon"><img src="${fileName}.png" onerror="this.style.display='none'"></div>
+                  <div class="results-company-name">${sp.name}</div>
+                  <div class="results-company-level">${level >= 4 ? '\ud83c\udfe6 \u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : level > 0 ? `LV.${level}` : '\u2014'}</div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  } else if (stage === 'achievements') {
+    const ach = computeAchievements(room);
+    bodyHtml = `<div class="results-stage-title">\u25c8 \u0410\u041c\u0416\u0418\u041b\u0422\u0423\u0423\u0414 \u25c8</div>
+      <div class="results-achieve-grid">
+        <div class="results-achieve-card"><span class="ra-icon">\ud83c\udfd7\ufe0f</span><span class="ra-value">${ach.housesBuilt}</span><span class="ra-label">\u041d\u0438\u0439\u0442 \u0431\u0430\u0440\u0438\u0441\u0430\u043d \u0431\u0430\u0439\u0448\u0438\u043d</span></div>
+        <div class="results-achieve-card"><span class="ra-icon">\ud83c\udfe6</span><span class="ra-value">${ach.corpsFounded}</span><span class="ra-label">\u0411\u0430\u0439\u0433\u0443\u0443\u043b\u0441\u0430\u043d \u043a\u043e\u0440\u043f\u043e\u0440\u0430\u0446</span></div>
+        ${ach.mostCompanies ? `<div class="results-achieve-card"><span class="ra-icon">\ud83c\udfe2</span><span class="ra-value">${ach.mostCompanies.count}</span><span class="ra-label">\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u043e\u043b\u043e\u043d \u043a\u043e\u043c\u043f\u0430\u043d\u0438 (${ach.mostCompanies.name})</span></div>` : ''}
+      </div>`;
+  } else if (stage === 'podium' || stage === 'celebration' || stage === 'completed') {
+    const top3 = rankings.slice(0, Math.min(3, rankings.length));
+    const podiumOrder = top3.length === 3 ? [1, 0, 2] : [0, 1];
+    bodyHtml = `<div class="results-stage-title">\u25c8 \u0428\u0410\u0422\u041b\u0410\u041b \u25c8</div>
+      <div class="results-podium ${stage === 'celebration' || stage === 'completed' ? 'results-podium-lit' : ''}">
+        ${podiumOrder.map(i => {
+          if (!top3[i]) return '';
+          const r = top3[i]; const p = room.players.find(pp => pp.id === r.playerId);
+          const rank = i + 1;
+          return `<div class="podium-block podium-rank-${rank}">
+            <span class="podium-medal">${medalIcons[i]}</span>
+            <span class="podium-avatar" style="--ring-color:${p.color}">${p.token}</span>
+            <span class="podium-name">${p.name}</span>
+            <span class="podium-total">\u20ae${fmt(r.total)}</span>
+            <div class="podium-stand"></div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${stage === 'celebration' || stage === 'completed' ? `
+        <div class="winner-spotlight-beam"></div>
+        <div class="winner-crown">\ud83d\udc51</div>
+        <div class="winner-title-big">\u042f\u041b\u0410\u0413\u0427</div>
+        <div class="winner-name-big">${winner.name}</div>
+        <div class="winner-total-big">\u041d\u0438\u0439\u0442 \u0445\u04e9\u0440\u04e9\u043d\u0433\u04e9: \u20ae${fmt(rankings[0].total)}</div>
+        <div class="winner-flag" style="--flag-color:${winner.color};"></div>
+        <div class="confetti-field">${Array.from({length: 26}, (_, i) => `<i style="--x:${Math.random()*100}%; --hue:${(i*37)%360}deg; --delay:${(Math.random()*1.2).toFixed(2)}s; --dur:${(1.6+Math.random()*1.2).toFixed(2)}s;"></i>`).join('')}</div>
+        <div class="coin-field">${Array.from({length: 10}, (_, i) => `<span style="--x:${10+Math.random()*80}%; --delay:${(Math.random()*0.8).toFixed(2)}s;">\ud83e\ude99</span>`).join('')}</div>
+      ` : ''}`;
+  }
+
+  const showButtons = stage === 'completed';
+
+  return `<div class="results-cinematic">
+    <div class="results-backdrop"></div>
+    <div class="results-progress">${stageOrder.slice(0, 5).map((s, i) => `<span class="results-dot ${i <= stageIdx ? 'active' : ''}"></span>`).join('')}</div>
+    <div class="results-content">${bodyHtml}</div>
+    ${showButtons ? `<div class="results-actions">
+      <button class="btn btn-primary" id="resultsReplayBtn">\u0414\u0410\u0425\u0418\u041d \u0422\u041e\u0413\u041b\u041e\u0425</button>
+      <button class="btn btn-secondary" id="resultsMenuBtn">\u04ae\u041d\u0414\u0421\u042d\u041d \u0426\u0415\u0421</button>
+      <button class="btn btn-secondary" id="resultsDetailsBtn">\u0422\u041e\u0413\u041b\u041e\u041b\u0422\u042b\u041d \u0414\u042d\u041b\u0413\u042d\u0420\u042d\u041d\u0413\u04ae\u0419</button>
+    </div>` : ''}
+  </div>`;
+}
+
+function attachResultsEvents() {
+  if (gameResults.stage === 'counting') animateResultsCounters();
+  const replayBtn = document.getElementById('resultsReplayBtn'); if (replayBtn) replayBtn.onclick = confirmReplay;
+  const menuBtn = document.getElementById('resultsMenuBtn'); if (menuBtn) menuBtn.onclick = () => { gameResults.isOpen = false; view = 'landing'; render(); };
+  const detailsBtn = document.getElementById('resultsDetailsBtn'); if (detailsBtn) detailsBtn.onclick = () => showFullLogModal(currentRoom);
+}
+function animateResultsCounters() {
+  const els = document.querySelectorAll('.count-value[data-target]');
+  const dur = reducedMotion ? 300 : 1400;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    els.forEach(el => {
+      const target = parseFloat(el.dataset.target) || 0;
+      el.textContent = '\u20ae' + fmt(Math.round(target * eased));
+    });
+    if (t < 1) requestAnimationFrame(tick); else els.forEach(el => { el.textContent = '\u20ae' + fmt(parseFloat(el.dataset.target) || 0); });
+  }
+  requestAnimationFrame(tick);
+}
+
 function renderGame() {
   const room = currentRoom;
-  if (room.winnerId) {
-    const winner = room.players.find(p => p.id === room.winnerId);
-    return `<div class="screen victory-box">
-      <div class="eyebrow">\u0422\u044d\u043c\u0446\u044d\u044d\u043d \u0434\u0443\u0443\u0441\u0430\u0432</div>
-      <div class="victory-seal">${winner.token}</div>
-      <div class="seal-title" style="font-size:22px;">\u042f\u043b\u0430\u0433\u0447</div>
-      <div class="victory-name">${winner.name}</div>
-      <div class="victory-sub">\u20ae${fmt(winner.money)}</div>
-    </div>`;
+  if (room.winnerId && gameResults.isOpen) {
+    return renderGameResultsCinematic(room);
   }
   const me = room.players.find(p => p.id === myId);
   const myTurn = isMyTurn(room);
@@ -4349,9 +4759,14 @@ function renderGame() {
   return `<div class="game-wrap">
     <div class="game-layout">
       <div class="board-outer">
-        <div class="board-viewport ${debugMode?'debug':''}" id="boardViewport">
+        <div class="board-viewport ${debugMode?'debug':''} ${environment.timeOfDay==='night'?'env-night-active':''}" id="boardViewport">
           <div class="board-camera" id="boardCamera" style="${camTransform}">
             <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
+            <div class="env-lighting env-${environment.timeOfDay} ${environment.isTransitioning ? 'env-transitioning' : ''}">
+              <div class="env-night-overlay"></div>
+              <div class="env-moonlight"></div>
+              <div class="env-streetlights"></div>
+            </div>
             <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
               ${tilesHtml}
               ${debugMode ? debugZonesHtml : ''}
@@ -4390,6 +4805,8 @@ let currentCardModalCard = null;
   root.addEventListener('click', (e) => {
     const contBtn = e.target.closest('#cardContinueBtn');
     if (contBtn && currentCardModalCard) { onCardContinueClick(currentCardModalCard); return; }
+    const noOptBtn = e.target.closest('#cardNoOptionBtn');
+    if (noOptBtn && currentCardModalCard) { resolveCardFinal(currentCardModalCard, null); return; }
     const selItem = e.target.closest('.card-select-item');
     if (selItem && currentCardModalCard) { resolveCardFinal(currentCardModalCard, parseInt(selItem.dataset.tile, 10)); return; }
   });
@@ -4444,7 +4861,7 @@ function maybeShowCardModal(room) {
   setTimeout(() => {
     if (!cardModalOpen || cardModalKey !== key) return;
     cardModalStage = 'reading';
-    if (!reducedMotion) playCardSound('flip');
+    if (!reducedMotion) { playCardSound('flip'); audioManager.playSfx('cardFlip'); }
     if (card) playCardSound(card.rarity === 'legendary' ? 'legendary' : (card.effectType === 'cash' && card.value < 0 ? 'negative' : card.effectType === 'cash' ? 'positive' : 'flip'));
     renderCardModal(room, card);
   }, reducedMotion ? 150 : 750);
@@ -4464,7 +4881,7 @@ function renderCardModal(room, card) {
     const eligible = BOARD_CONFIG.filter(t => t.type === 'property' && canBuildOnTile(t, room2, me));
     if (eligible.length === 0) {
       bodyHtml = `<div class="event-card-desc">\u0422\u0430\u043d\u0434 \u044d\u043d\u044d \u043a\u0430\u0440\u0442\u044b\u0433 \u0430\u0448\u0438\u0433\u043b\u0430\u0445 \u0431\u043e\u043b\u043e\u043c\u0436\u0442\u043e\u0439 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u0431\u0430\u0439\u0445\u0433\u04af\u0439.</div>
-        <button class="buy-modal-buy-btn" id="cardContinueBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
+        <button class="buy-modal-buy-btn" id="cardNoOptionBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
     } else {
       bodyHtml = `<div class="event-card-desc">\u041a\u043e\u043c\u043f\u0430\u043d\u0438\u0430\u0433\u0430\u0430 \u0441\u043e\u043d\u0433\u043e\u043d\u043e \u0443\u0443:</div>
         <div class="card-select-list">${eligible.map(t => `<button class="card-select-item" data-tile="${t.id}">${t.name} <span>LV.${houseLevel(room2, t.id)}</span></button>`).join('')}</div>`;
@@ -4600,6 +5017,151 @@ function closeCellDetail() {
 function handleDetailEscape(e) {
   if (e.key === 'Escape') closeCellDetail();
 }
+/* ===== GAME RESULTS CINEMATIC ===== */
+let gameResults = { isOpen: false, stage: 'counting', rankings: [], winnerId: null };
+let resultsTriggered = false;
+
+function computePlayerWealth(room, player) {
+  let companyValue = 0, houseValue = 0, corporationValue = 0, companyCount = 0, corpCount = 0, houseCount = 0;
+  Object.keys(room.propOwner).forEach(idx => {
+    if (room.propOwner[idx] !== player.id) return;
+    const sp = BOARD_CONFIG[idx];
+    companyValue += sp.price; companyCount++;
+    const level = houseLevel(room, idx);
+    if (level >= 4) { corporationValue += buildCost(sp, room) * 4; corpCount++; }
+    else if (level > 0) { houseValue += buildCost(sp, room) * level; houseCount += level; }
+  });
+  const total = player.money + companyValue + houseValue + corporationValue;
+  return { playerId: player.id, cash: player.money, companyValue, houseValue, corporationValue, total, companyCount, corpCount, houseCount };
+}
+
+function computeRankings(room) {
+  const rows = room.players.map(p => computePlayerWealth(room, p));
+  rows.sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    if (b.cash !== a.cash) return b.cash - a.cash;
+    if (b.companyCount !== a.companyCount) return b.companyCount - a.companyCount;
+    return b.corpCount - a.corpCount;
+  });
+  return rows;
+}
+
+function maybeTriggerGameResults(room) {
+  if (!room || !room.winnerId) return;
+  if (resultsTriggered) return;
+  resultsTriggered = true;
+  const rankings = computeRankings(room);
+  gameResults = { isOpen: true, stage: 'counting', rankings, winnerId: room.winnerId };
+  if (gameSettings.musicEnabled) audioManager.playMusic('victoryTheme');
+  runResultsSequence();
+}
+
+async function runResultsSequence() {
+  const t = reducedMotion ? 0.4 : 1;
+  await new Promise(r => setTimeout(r, 1800 * t));
+  gameResults.stage = 'companies'; render();
+  await new Promise(r => setTimeout(r, 2200 * t));
+  gameResults.stage = 'achievements'; render();
+  await new Promise(r => setTimeout(r, 2200 * t));
+  gameResults.stage = 'podium'; render();
+  await new Promise(r => setTimeout(r, 1200 * t));
+  gameResults.stage = 'celebration'; render();
+  audioManager.playSfx('corporationVictory'); vibrate([60, 40, 60, 40, 120]);
+  await new Promise(r => setTimeout(r, (reducedMotion ? 800 : 2800) * t));
+  gameResults.stage = 'completed'; render();
+}
+
+function computeAchievements(room) {
+  let housesBuilt = 0, corpsFounded = 0, mostCompanies = null;
+  room.players.forEach(p => {
+    const w = computePlayerWealth(room, p);
+    housesBuilt += w.houseCount;
+    corpsFounded += w.corpCount;
+    if (!mostCompanies || w.companyCount > mostCompanies.count) mostCompanies = { name: p.name, count: w.companyCount };
+  });
+  return { housesBuilt, corpsFounded, mostCompanies };
+}
+
+async function confirmReplay() {
+  if (!confirm('\u0428\u0438\u043d\u044d\u044d\u0440 \u0442\u043e\u0433\u043b\u043e\u0445 \u0443\u0443? \u041e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u044b\u043d \u04af\u0440 \u0434\u04af\u043d \u0430\u043b\u0433\u0430\u0433\u0434\u0430\u043d\u0430.')) return;
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room) return;
+  room.players.forEach(p => { p.money = 1500; p.position = 0; p.jailTurns = 0; p.bankrupt = false; });
+  room.propOwner = {}; room.houses = {}; room.activeMarketEffects = [];
+  room.decks = null; ensureDecks(room);
+  room.currentPlayerIndex = 0; room.hasRolled = false; room.lastDice = null;
+  room.diceRollId = null; room.animPath = null; room.cardDraw = null; room.winnerId = null; room.turnCount = 0;
+  room.pendingAction = null; room.log = [];
+  pushLog(room, '\u0428\u0438\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043b\u0442 \u044d\u0445\u044d\u043b\u043b\u044d\u044d!');
+  await saveRoom(room); currentRoom = room;
+  gameResults = { isOpen: false, stage: 'counting', rankings: [], winnerId: null };
+  resultsTriggered = false;
+  cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
+  buildingAnim = null; buildingAnimationActive = false;
+  knownLevels = {}; levelsInitialized = false; seenBuildings = new Set(); seenUpgrades = new Set();
+  render();
+}
+
+let settingsModalOpen = false;
+function toggleSettingsModal(open) {
+  settingsModalOpen = open;
+  const root = document.getElementById('card-popup-root');
+  if (!root) return;
+  if (!open) { renderSettingsModal(); return; }
+  renderSettingsModal();
+}
+function renderSettingsModal() {
+  const root = document.getElementById('card-popup-root');
+  if (!root) return;
+  if (!settingsModalOpen) { const el = document.getElementById('settingsBackdrop'); if (el) el.remove(); return; }
+  const s = gameSettings;
+  const toggleRow = (label, key) => `<div class="settings-row">
+    <span>${label}</span>
+    <button class="settings-toggle ${s[key] ? 'on' : 'off'}" data-setting="${key}">${s[key] ? '\u0418\u0414\u042d\u0412\u0425\u0422\u042d\u0419' : '\u0423\u041d\u0422\u0410\u0420\u0410\u0410'}</button>
+  </div>`;
+  const sliderRow = (label, key) => `<div class="settings-row">
+    <span>${label}</span>
+    <input type="range" min="0" max="1" step="0.05" value="${s[key]}" class="settings-slider" data-volume="${key}">
+  </div>`;
+  const div = document.createElement('div');
+  div.id = 'settingsBackdrop';
+  div.className = 'card-popup-backdrop';
+  div.innerHTML = `<div class="card-popup detail-popup settings-popup" role="dialog" aria-modal="true">
+    <div class="card-popup-eyebrow">\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e</div>
+    ${toggleRow('\u0414\u0443\u0443\u043d\u044b \u044d\u0444\u0444\u0435\u043a\u0442', 'sfxEnabled')}
+    ${toggleRow('\u0425\u04e9\u0433\u0436\u0438\u043c', 'musicEnabled')}
+    ${toggleRow('Vibration', 'vibrationEnabled')}
+    ${toggleRow('\u041e\u0440\u0447\u043d\u044b \u04e9\u04e9\u0440\u0447\u043b\u04e9\u043b\u0442 (\u04e9\u0434\u04e9\u0440/\u0448\u04e9\u043d\u04e9)', 'environmentEnabled')}
+    ${sliderRow('\u0414\u0443\u0443\u043d\u044b \u044d\u0444\u0444\u0435\u043a\u0442\u0438\u0439\u043d \u0442\u0430\u0432', 'sfxVolume')}
+    ${sliderRow('\u0425\u04e9\u0433\u0436\u043c\u0438\u0439\u043d \u0442\u0430\u0432', 'musicVolume')}
+    <div class="settings-row"><span>Debug \u0433\u043e\u0440\u0438\u043c</span><button class="settings-toggle ${debugMode?'on':'off'}" id="settingsDebugToggle">${debugMode?'\u0418\u0414\u042d\u0412\u0425\u0422\u042d\u0419':'\u0423\u041d\u0422\u0410\u0420\u0410\u0410'}</button></div>
+    <button class="btn btn-secondary" id="closeSettingsBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
+  </div>`;
+  root.appendChild(div);
+  div.onclick = (e) => { if (e.target === div) toggleSettingsModal(false); };
+  div.querySelector('#closeSettingsBtn').onclick = () => toggleSettingsModal(false);
+  div.querySelectorAll('.settings-toggle[data-setting]').forEach(btn => {
+    btn.onclick = () => {
+      const key = btn.dataset.setting;
+      gameSettings[key] = !gameSettings[key];
+      if (key === 'sfxEnabled') audioManager.setMuted('sfx', !gameSettings.sfxEnabled);
+      if (key === 'musicEnabled') audioManager.setMuted('music', !gameSettings.musicEnabled);
+      saveSettings();
+      renderSettingsModal();
+      render();
+    };
+  });
+  const debugBtn = div.querySelector('#settingsDebugToggle');
+  if (debugBtn) debugBtn.onclick = () => { debugMode = !debugMode; renderSettingsModal(); render(); };
+  div.querySelectorAll('.settings-slider[data-volume]').forEach(sl => {
+    sl.oninput = () => {
+      const key = sl.dataset.volume;
+      const v = parseFloat(sl.value);
+      if (key === 'sfxVolume') audioManager.setSfxVolume(v); else audioManager.setMusicVolume(v);
+    };
+  });
+}
+
 function showCellDetail(idx) {
   const room = currentRoom;
   const sp = BOARD_CONFIG[idx];
@@ -4643,13 +5205,22 @@ function showCellDetail(idx) {
 }
 
 function attachGameEvents() {
-  const roll = document.getElementById('rollBtn'); if (roll) roll.onclick = rollDice;
-  const end = document.getElementById('endTurnBtn'); if (end) end.onclick = endTurn;
-  const buy = document.getElementById('buyBtn'); if (buy) buy.onclick = buyProperty;
-  const skip = document.getElementById('skipBtn'); if (skip) skip.onclick = skipBuy;
-  const build = document.getElementById('buildBtn'); if (build) build.onclick = buildProperty;
-  const skipBuild2 = document.getElementById('skipBuildBtn'); if (skipBuild2) skipBuild2.onclick = skipBuild;
+  const withClickFx = (fn) => (...args) => { audioManager.playSfx('buttonClick'); vibrate(15); return fn(...args); };
+  const roll = document.getElementById('rollBtn'); if (roll) roll.onclick = withClickFx(rollDice);
+  const end = document.getElementById('endTurnBtn'); if (end) end.onclick = withClickFx(endTurn);
+  const buy = document.getElementById('buyBtn'); if (buy) buy.onclick = withClickFx(buyProperty);
+  const skip = document.getElementById('skipBtn'); if (skip) skip.onclick = withClickFx(skipBuy);
+  const build = document.getElementById('buildBtn'); if (build) build.onclick = withClickFx(buildProperty);
+  const skipBuild2 = document.getElementById('skipBuildBtn'); if (skipBuild2) skipBuild2.onclick = withClickFx(skipBuild);
   const dbg = document.getElementById('debugToggle'); if (dbg) dbg.onclick = () => { debugMode = !debugMode; render(); };
+  const quickMute = document.getElementById('quickMuteToggle');
+  if (quickMute) quickMute.onclick = () => {
+    const nowMuted = gameSettings.sfxEnabled || gameSettings.musicEnabled;
+    gameSettings.sfxEnabled = !nowMuted; gameSettings.musicEnabled = !nowMuted;
+    audioManager.setMuted('sfx', nowMuted); audioManager.setMuted('music', nowMuted);
+    saveSettings(); render();
+  };
+  const openSettings = document.getElementById('openSettingsBtn'); if (openSettings) openSettings.onclick = () => toggleSettingsModal(true);
   const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
   document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
