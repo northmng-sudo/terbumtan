@@ -340,12 +340,71 @@
     overflow: hidden;
     border-radius: 14px;
   }
+
+  /* ===== MOBILE BOARD MODE ===== */
+  @media (max-width: 768px) {
+    .game-wrap { padding: 0; }
+    .game-layout { display: block; gap: 0; }
+    .board-outer { padding: 0; }
+    .board-viewport {
+      width: 100vw;
+      height: calc(100dvh - 120px);
+      max-width: 100vw;
+      aspect-ratio: unset;
+      touch-action: none;
+      border-radius: 0;
+      margin: 0;
+      padding-top: env(safe-area-inset-top);
+    }
+    .board-camera { touch-action: none; }
+    .game-sidebar { display: none; }
+    .mobile-board-controls { display: flex; }
+    .mobile-sticky-bar { display: flex; }
+  }
+  .mobile-board-controls {
+    display: none; position: absolute; right: 10px; bottom: 10px; z-index: 25;
+    flex-direction: column; gap: 8px; align-items: flex-end;
+  }
+  .mbc-btn {
+    background: rgba(4,26,22,0.88); border: 1.5px solid var(--gold); color: var(--gold-light);
+    border-radius: 10px; width: 40px; height: 40px; font-size: 18px; font-weight: 800; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  }
+  .mbc-wide { width: auto; padding: 0 12px; font-size: 11px; white-space: nowrap; }
+
+  .mobile-sticky-bar {
+    display: none; position: sticky; bottom: 0; z-index: 40;
+    align-items: center; gap: 10px; padding: 10px 14px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(0deg, var(--sidebar-bg) 70%, transparent);
+    border-top: 1.5px solid rgba(245,202,85,0.4);
+  }
+  .msb-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; border: 2px solid var(--ring-color, var(--gold)); background: rgba(255,255,255,0.08); flex-shrink: 0; }
+  .msb-name { font-weight: 800; color: var(--sb-text); font-size: 12.5px; flex-shrink: 0; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .msb-dice { display: flex; gap: 4px; transform: scale(0.62); transform-origin: left center; flex-shrink: 0; }
+  .msb-btn { flex: 1; height: 44px; border-radius: 12px; border: none; font-size: 20px; font-weight: 800; cursor: pointer; }
+  .msb-roll { background: linear-gradient(180deg, #ffcf6e, #d9840d); color: #241a0d; box-shadow: 0 3px 0 var(--gold-dark); }
+  .msb-roll:disabled { opacity: 0.4; }
+  .msb-end { background: var(--emerald); color: var(--cream); max-width: 52px; flex: 0 0 52px; }
+  .msb-end:disabled { opacity: 0.4; }
+
+  .bottom-sheet-backdrop { align-items: flex-end; padding: 0; }
+  .bottom-sheet {
+    width: 100%; max-height: 78vh; overflow-y: auto;
+    background: var(--sidebar-bg-2); border-radius: 20px 20px 0 0;
+    border-top: 2px solid var(--gold); padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+    animation: bottomSheetUp 0.28s ease;
+  }
+  .bottom-sheet-handle { width: 40px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.25); margin: 0 auto 12px; }
+  @keyframes bottomSheetUp { from { transform: translateY(30px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+
   .board-camera {
     position: absolute; inset: 0;
     transform-origin: 0 0;
     will-change: transform;
     transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
   }
+  .board-camera.gesture-live { transition: none; }
   .board-image, .board-overlay {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
@@ -3811,6 +3870,16 @@ let cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, 
 let cameraSeq = 0;
 const CAMERA_PRIORITY = { corporation: 5, purchase: 4, landing: 3, following: 2, returning: 1, overview: 0 };
 
+let isMobileView = false;
+let mobileCamInitialized = false;
+try { isMobileView = window.matchMedia('(max-width: 768px)').matches; } catch (e) {}
+const MOBILE_ZOOM = { min: 1.2, max: 3.0, default: 1.7 };
+window.addEventListener('resize', () => {
+  const was = isMobileView;
+  try { isMobileView = window.matchMedia('(max-width: 768px)').matches; } catch (e) {}
+  if (isMobileView !== was) render();
+});
+
 function isCinematicCamera() { return cameraState.mode === 'purchase' || cameraState.mode === 'corporation'; }
 
 function computeCameraTransform(targetXvb, targetYvb, scale) {
@@ -3842,6 +3911,150 @@ function applyCameraDirect(targetXvb, targetYvb, scale, mode, tileId) {
   const viewport = document.getElementById('boardViewport');
   if (viewport) { viewport.classList.toggle('debug', debugMode); if (debugMode) render(); }
 }
+
+/* ===== MOBILE PAN / PINCH-ZOOM GESTURES ===== */
+function clampMobilePan(tx, ty, scale) {
+  const viewport = document.getElementById('boardViewport');
+  if (!viewport) return { tx, ty };
+  const rect = viewport.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  const minX = Math.min(0, w - scale * w);
+  const minY = Math.min(0, h - scale * h);
+  return { tx: Math.min(0, Math.max(minX, tx)), ty: Math.min(0, Math.max(minY, ty)) };
+}
+function setCameraRaw(tx, ty, scale, tileId) {
+  const c = clampMobilePan(tx, ty, scale);
+  cameraState = { mode: 'manual', x: c.tx, y: c.ty, scale, targetTileId: tileId != null ? tileId : cameraState.targetTileId, isMoving: false };
+  const cam = document.getElementById('boardCamera');
+  if (cam) { cam.classList.add('gesture-live'); cam.style.transform = `translate(${c.tx}px, ${c.ty}px) scale(${scale})`; }
+}
+
+(function setupMobileGestures() {
+  let activePointers = new Map();
+  let panStart = null;
+  let pinchStart = null;
+  let moveDist = 0;
+  let lastTapTime = 0;
+  let lastTapTile = null;
+  let suppressNextClick = false;
+
+  function getViewport() { return document.getElementById('boardViewport'); }
+
+  document.addEventListener('pointerdown', (e) => {
+    const vp = getViewport();
+    if (!vp || !isMobileView) return;
+    if (!vp.contains(e.target)) return;
+    if (buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive || isAnimatingMovement) return;
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    moveDist = 0;
+    if (activePointers.size === 1) {
+      panStart = { x: e.clientX, y: e.clientY, camX: cameraState.x, camY: cameraState.y };
+    } else if (activePointers.size === 2) {
+      const pts = Array.from(activePointers.values());
+      const dx = pts[0].x - pts[1].x, dy = pts[0].y - pts[1].y;
+      pinchStart = {
+        dist: Math.hypot(dx, dy),
+        scale: cameraState.scale,
+        midX: (pts[0].x + pts[1].x) / 2, midY: (pts[0].y + pts[1].y) / 2,
+        camX: cameraState.x, camY: cameraState.y,
+      };
+      panStart = null;
+    }
+  }, { passive: true });
+
+  document.addEventListener('pointermove', (e) => {
+    if (!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointers.size === 2 && pinchStart) {
+      const pts = Array.from(activePointers.values());
+      const dx = pts[0].x - pts[1].x, dy = pts[0].y - pts[1].y;
+      const dist = Math.hypot(dx, dy);
+      const midX = (pts[0].x + pts[1].x) / 2, midY = (pts[0].y + pts[1].y) / 2;
+      let newScale = pinchStart.scale * (dist / Math.max(pinchStart.dist, 1));
+      newScale = Math.min(MOBILE_ZOOM.max, Math.max(MOBILE_ZOOM.min, newScale));
+      const vp = getViewport();
+      if (vp) {
+        const rect = vp.getBoundingClientRect();
+        const anchorX = pinchStart.midX - rect.left, anchorY = pinchStart.midY - rect.top;
+        const worldX = (anchorX - pinchStart.camX) / pinchStart.scale;
+        const worldY = (anchorY - pinchStart.camY) / pinchStart.scale;
+        const newCamX = anchorX - worldX * newScale + (midX - pinchStart.midX);
+        const newCamY = anchorY - worldY * newScale + (midY - pinchStart.midY);
+        setCameraRaw(newCamX, newCamY, newScale);
+      }
+      moveDist = 999;
+      return;
+    }
+
+    if (activePointers.size === 1 && panStart) {
+      const dx = e.clientX - panStart.x, dy = e.clientY - panStart.y;
+      moveDist = Math.max(moveDist, Math.hypot(dx, dy));
+      setCameraRaw(panStart.camX + dx, panStart.camY + dy, cameraState.scale);
+    }
+  }, { passive: true });
+
+  function endPointer(e) {
+    activePointers.delete(e.pointerId);
+    if (activePointers.size < 2) pinchStart = null;
+    if (activePointers.size === 0) {
+      const cam = document.getElementById('boardCamera');
+      if (cam) cam.classList.remove('gesture-live');
+      if (moveDist > 8) {
+        suppressNextClick = true;
+        setTimeout(() => { suppressNextClick = false; }, 50);
+      } else if (isMobileView && panStart) {
+        const now = Date.now();
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const tileEl = el && el.closest ? el.closest('.tile[data-idx]') : null;
+        if (tileEl) {
+          const idx = parseInt(tileEl.dataset.idx, 10);
+          if (lastTapTile === idx && now - lastTapTime < 320) {
+            if (cameraState.scale > 1.9) mobileFullBoard(); else mobileFocusTile(idx, 2.0);
+            lastTapTile = null;
+          } else {
+            lastTapTime = now; lastTapTile = idx;
+          }
+        }
+      }
+      panStart = null;
+    }
+  }
+  document.addEventListener('pointerup', endPointer, { passive: true });
+  document.addEventListener('pointercancel', endPointer, { passive: true });
+
+  document.addEventListener('click', (e) => {
+    if (suppressNextClick && isMobileView) { e.stopPropagation(); e.preventDefault(); suppressNextClick = false; }
+  }, true);
+})();
+
+function mobileFocusTile(tileId, scale) {
+  const tile = BOARD_CONFIG[tileId];
+  if (!tile) return;
+  const s = scale || 2.0;
+  const t = computeCameraTransform(tile.tokenX, tile.tokenY, s);
+  setCameraRaw(t.tx, t.ty, s, tileId);
+}
+function mobileFullBoard() {
+  setCameraRaw(0, 0, 1, null);
+}
+function mobileFocusCurrentPlayer() {
+  if (!currentRoom) return;
+  const p = currentRoom.players[currentRoom.currentPlayerIndex];
+  mobileFocusTile(displayPos(currentRoom, p), MOBILE_ZOOM.default);
+}
+function mobileZoomBy(delta) {
+  const newScale = Math.min(MOBILE_ZOOM.max, Math.max(MOBILE_ZOOM.min, cameraState.scale + delta));
+  const vp = document.getElementById('boardViewport');
+  if (!vp) return;
+  const rect = vp.getBoundingClientRect();
+  const cx = rect.width / 2, cy = rect.height / 2;
+  const worldX = (cx - cameraState.x) / cameraState.scale;
+  const worldY = (cy - cameraState.y) / cameraState.scale;
+  const newX = cx - worldX * newScale, newY = cy - worldY * newScale;
+  setCameraRaw(newX, newY, newScale);
+}
+
 
 function focusCameraOnTile(tileId, options = {}) {
   try {
@@ -3877,6 +4090,15 @@ function focusCameraOnBuilding(tileId, options = {}) {
 function returnCameraToOverview() {
   try {
     cameraSeq++;
+    if (isMobileView && currentRoom) {
+      const p = currentRoom.players[currentRoom.currentPlayerIndex];
+      const tile = BOARD_CONFIG[displayPos(currentRoom, p)];
+      const t = computeCameraTransform(tile.tokenX, tile.tokenY, MOBILE_ZOOM.default);
+      cameraState = { mode: 'overview', x: t.tx, y: t.ty, scale: MOBILE_ZOOM.default, targetTileId: tile.id, isMoving: false };
+      const cam = document.getElementById('boardCamera');
+      if (cam) cam.style.transform = `translate(${t.tx}px, ${t.ty}px) scale(${MOBILE_ZOOM.default})`;
+      return;
+    }
     cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
     const cam = document.getElementById('boardCamera');
     if (cam) cam.style.transform = `translate(0px, 0px) scale(1)`;
@@ -4107,7 +4329,7 @@ async function animateTokenMove(playerId, from, steps) {
     isAnimatingMovement = false;
     movingPlayerId = null;
     render();
-    focusCameraOnTile(finalPos, { mode: 'landing', scale: reducedMotion ? 1.05 : 1.2 });
+    focusCameraOnTile(finalPos, { mode: 'landing', scale: reducedMotion ? 1.05 : (isMobileView ? 1.95 : 1.2) });
     setTimeout(() => {
       if (cameraState.mode === 'landing') returnCameraToOverview();
     }, reducedMotion ? 250 : 650);
@@ -4392,6 +4614,10 @@ function render() {
         maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); maybeTriggerBuildAnimation(currentRoom);
         maybeTriggerRentCinematic(currentRoom);
         updateEnvironment(Math.floor((currentRoom.turnCount || 0) / currentRoom.players.length) + 1);
+      }
+      if (isMobileView && !mobileCamInitialized && cameraState.mode === 'overview') {
+        mobileCamInitialized = true;
+        setTimeout(() => { if (isMobileView) returnCameraToOverview(); }, 0);
       }
     }
     app.innerHTML = renderGame();
@@ -4986,6 +5212,12 @@ function renderGame() {
           </div>
           ${cameraState.mode === 'corporation' ? '<div class="camera-dim-overlay"></div>' : ''}
           ${debugMode ? renderCameraDebugPanel() : ''}
+          <div class="mobile-board-controls">
+            <button class="mbc-btn" id="mbcZoomIn" aria-label="Zoom in">+</button>
+            <button class="mbc-btn" id="mbcZoomOut" aria-label="Zoom out">\u2212</button>
+            <button class="mbc-btn mbc-wide" id="mbcFullBoard">\ud83c\udfde\ufe0f \u0411\u04af\u0442\u044d\u043d \u0445\u04e9\u043b\u04e9\u0433</button>
+            <button class="mbc-btn mbc-wide" id="mbcFocusPlayer">\ud83c\udfaf \u0422\u043e\u0433\u043b\u043e\u0433\u0447 \u0434\u044d\u044d\u0440</button>
+          </div>
         </div>
       </div>
       <div class="game-sidebar">
@@ -4997,6 +5229,13 @@ function renderGame() {
         ${renderWealthRankingPanel(room)}
         ${renderActivityTimeline(room)}
       </div>
+    </div>
+    <div class="mobile-sticky-bar">
+      <span class="msb-avatar" style="--ring-color:${currentPlayer.color}">${currentPlayer.token}</span>
+      <span class="msb-name">${currentPlayer.name}</span>
+      <div class="msb-dice">${renderDie(d1, diceRollingNow)}${renderDie(d2, diceRollingNow)}</div>
+      <button class="msb-btn msb-roll" id="mobileRollBtn" ${(!myTurn || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || isAnimatingMovement || buildingAnimationActive || rentCinematicActive) ? 'disabled' : ''}>\ud83c\udfb2</button>
+      <button class="msb-btn msb-end" id="mobileEndTurnBtn" ${(!myTurn || !room.hasRolled || room.pendingAction) ? 'disabled' : ''}>\u2713</button>
     </div>
     ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
   </div>`;
@@ -5248,7 +5487,7 @@ async function runRentCinematic(room, txn) {
   const t = reducedMotion ? 0.35 : 1;
   const sp = BOARD_CONFIG[txn.tileIdx];
   try {
-    focusCameraOnTile(txn.tileIdx, { mode: 'landing', scale: reducedMotion ? 1.1 : 1.22 });
+    focusCameraOnTile(txn.tileIdx, { mode: 'landing', scale: reducedMotion ? 1.1 : (isMobileView ? 1.95 : 1.22) });
     audioManager.playSfx('rentStart');
     render();
     await new Promise(r => setTimeout(r, 500 * t));
@@ -5462,10 +5701,20 @@ function showCellDetail(idx) {
   } else {
     bodyHtml = `<div class="detail-row-single">\u0422\u0443\u0441\u0433\u0430\u0439 \u043d\u04af\u0434 \u2014 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0445 \u0431\u043e\u043b\u043e\u043c\u0436\u0433\u04af\u0439</div>`;
   }
-  root.innerHTML = `<div class="card-popup-backdrop" id="detailBackdrop"><div class="card-popup detail-popup">
-    <div class="card-popup-eyebrow">${sp.name}</div>${bodyHtml}
-    <button class="btn btn-secondary" id="closeDetailBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
-  </div></div>`;
+  if (isMobileView) {
+    root.innerHTML = `<div class="card-popup-backdrop bottom-sheet-backdrop" id="detailBackdrop">
+      <div class="bottom-sheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="card-popup-eyebrow">${sp.name}</div>${bodyHtml}
+        <button class="btn btn-secondary" id="closeDetailBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
+      </div>
+    </div>`;
+  } else {
+    root.innerHTML = `<div class="card-popup-backdrop" id="detailBackdrop"><div class="card-popup detail-popup">
+      <div class="card-popup-eyebrow">${sp.name}</div>${bodyHtml}
+      <button class="btn btn-secondary" id="closeDetailBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
+    </div></div>`;
+  }
   const backdrop = document.getElementById('detailBackdrop');
   if (backdrop) backdrop.onclick = closeCellDetail;
   const closeBtn = document.getElementById('closeDetailBtn');
@@ -5482,6 +5731,12 @@ function attachGameEvents() {
   const build = document.getElementById('buildBtn'); if (build) build.onclick = withClickFx(buildProperty);
   const skipBuild2 = document.getElementById('skipBuildBtn'); if (skipBuild2) skipBuild2.onclick = withClickFx(skipBuild);
   const dbg = document.getElementById('debugToggle'); if (dbg) dbg.onclick = () => { debugMode = !debugMode; render(); };
+  const mbcZoomIn = document.getElementById('mbcZoomIn'); if (mbcZoomIn) mbcZoomIn.onclick = () => mobileZoomBy(0.3);
+  const mbcZoomOut = document.getElementById('mbcZoomOut'); if (mbcZoomOut) mbcZoomOut.onclick = () => mobileZoomBy(-0.3);
+  const mbcFull = document.getElementById('mbcFullBoard'); if (mbcFull) mbcFull.onclick = () => mobileFullBoard();
+  const mbcFocus = document.getElementById('mbcFocusPlayer'); if (mbcFocus) mbcFocus.onclick = () => mobileFocusCurrentPlayer();
+  const mobileRoll = document.getElementById('mobileRollBtn'); if (mobileRoll) mobileRoll.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); rollDice(); };
+  const mobileEnd = document.getElementById('mobileEndTurnBtn'); if (mobileEnd) mobileEnd.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); endTurn(); };
   const quickMute = document.getElementById('quickMuteToggle');
   if (quickMute) quickMute.onclick = () => {
     const nowMuted = gameSettings.sfxEnabled || gameSettings.musicEnabled;
