@@ -4429,7 +4429,10 @@ function maybeShowCardModal(room) {
   const cd = room && room.cardDraw;
   const shouldShow = cd && !cd.resolved && cd.playerId === myId && !isAnimatingMovement && !buildingAnimationActive;
   if (!shouldShow) {
-    if (cardModalOpen && (!cd || cd.resolved)) { cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing'; }
+    if (cardModalOpen && (!cd || cd.resolved)) {
+      cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing'; currentCardModalCard = null;
+      root.innerHTML = '';
+    }
     return;
   }
   const key = cd.id;
@@ -4515,7 +4518,9 @@ async function resolveCardFinal(card, chosenTileIdx) {
     room.cardDraw.resolved = true;
     room.cardDraw = null;
     await saveRoom(room); currentRoom = room;
-    cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing';
+    cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing'; currentCardModalCard = null;
+    const root = document.getElementById('buy-modal-root');
+    if (root) root.innerHTML = '';
     render();
   }
 }
