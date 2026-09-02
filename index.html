@@ -512,7 +512,7 @@
   /* ===== MOBILE BOARD MODE (reference-matched) ===== */
   :root { --mobile-dock-height: 186px; }
   @media (max-width: 768px) {
-    html, body { height: 100%; overflow: hidden; }
+    body.view-game { height: 100%; overflow: hidden; }
     .game-wrap {
       padding: 0; background: radial-gradient(ellipse at 50% 0%, var(--bg-emerald) 0%, var(--bg-deep) 70%), var(--bg-deep);
       height: 100vh; height: 100dvh;
@@ -538,7 +538,7 @@
       overflow: hidden;
       display: flex; align-items: center; justify-content: center;
     }
-    .board-frame { aspect-ratio: 1672 / 941; height: 100%; width: auto; max-width: 100%; }
+    .board-frame { aspect-ratio: 1672 / 941; height: 100%; width: auto; max-width: 100%; margin: 0 auto; }
     .board-camera { touch-action: none; }
     .game-sidebar { display: none; }
     .mobile-board-controls { display: flex; }
@@ -4396,6 +4396,20 @@ window.addEventListener('resize', () => {
 
 function isCinematicCamera() { return cameraState.mode === 'purchase' || cameraState.mode === 'corporation'; }
 
+function syncBoardFrameSize() {
+  const viewport = document.getElementById('boardViewport');
+  const frame = document.getElementById('boardFrame');
+  if (!viewport || !frame) return;
+  const rect = viewport.getBoundingClientRect();
+  const vw = rect.width, vh = rect.height;
+  if (!vw || !vh) return;
+  const ratio = 1672 / 941;
+  let fw = vw, fh = vw / ratio;
+  if (fh > vh) { fh = vh; fw = vh * ratio; }
+  frame.style.width = Math.round(fw) + 'px';
+  frame.style.height = Math.round(fh) + 'px';
+}
+
 function computeCameraTransform(targetXvb, targetYvb, scale) {
   const viewport = document.getElementById('boardFrame') || document.getElementById('boardViewport');
   if (!viewport) return { tx: 0, ty: 0, scale: 1 };
@@ -5123,6 +5137,7 @@ function renderBuildings(level) {
 /* ---------- RENDER ---------- */
 function render() {
   const app = document.getElementById('app');
+  document.body.classList.toggle('view-game', view === 'game');
   if (currentRoom) { /* card popup now handled by maybeShowCardModal in the render() dispatcher */ }
   if (authState.isLoading) { app.innerHTML = renderAuthLoading(); return; }
   if (view === 'auth') { app.innerHTML = renderAuthGate(); attachAuthGateEvents(); return; }
@@ -5146,6 +5161,7 @@ function render() {
       }
     }
     app.innerHTML = renderGame();
+    if (isMobileView) syncBoardFrameSize();
     if (currentRoom && currentRoom.winnerId && gameResults.isOpen) {
       attachResultsEvents();
     } else {
@@ -6868,12 +6884,19 @@ function attachGameEvents() {
 }
 
 window.addEventListener('resize', () => {
+  if (isMobileView) syncBoardFrameSize();
   if (cameraState.mode !== 'overview' && cameraState.targetTileId !== null) {
     const tile = BOARD_CONFIG[cameraState.targetTileId];
     if (tile) applyCameraDirect(tile.tokenX, tile.tokenY, cameraState.scale, cameraState.mode, cameraState.targetTileId);
   } else if (isMobileView && cameraState.mode === 'overview') {
     requestAnimationFrame(() => returnCameraToOverview());
   }
+});
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    if (isMobileView) syncBoardFrameSize();
+    returnCameraToOverview();
+  }, 100);
 });
 
 render();
