@@ -509,40 +509,132 @@
     border-radius: 14px;
   }
 
-  /* ===== MOBILE BOARD MODE ===== */
+  /* ===== MOBILE BOARD MODE (reference-matched) ===== */
   @media (max-width: 768px) {
-    .game-wrap { padding: 0; background: radial-gradient(ellipse at 50% 0%, var(--bg-emerald) 0%, var(--bg-deep) 70%), var(--bg-deep); min-height: 100vh; }
-    .game-layout { display: block; gap: 0; background: transparent; }
-    .board-outer { padding: 0; padding-top: env(safe-area-inset-top); background: var(--bg-deep); display: flex; justify-content: center; align-items: flex-start; }
+    .game-wrap { padding: 0; background: radial-gradient(ellipse at 50% 0%, var(--bg-emerald) 0%, var(--bg-deep) 70%), var(--bg-deep); min-height: 100vh; display: flex; flex-direction: column; }
+    .game-layout { display: block; gap: 0; background: transparent; flex: 1; min-height: 0; }
+    .board-outer { padding: 0; background: var(--bg-deep); display: flex; justify-content: center; align-items: flex-start; }
     .board-viewport {
       width: 100vw;
       max-width: 100vw;
-      aspect-ratio: 1672 / 941;
-      height: auto;
+      height: 62vh;
+      aspect-ratio: unset;
       touch-action: none;
       border-radius: 0;
       margin: 0;
       background: var(--bg-deep);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
     }
+    .board-frame { aspect-ratio: 1672 / 941; height: 100%; width: auto; max-width: 100%; }
     .board-camera { touch-action: none; }
-    .game-sidebar {
-      display: flex; max-height: none; width: 100%;
-      border-radius: 0; padding: 14px 12px calc(90px + env(safe-area-inset-bottom));
-      background: var(--bg-deep);
-    }
+    .game-sidebar { display: none; }
     .mobile-board-controls { display: flex; }
-    .mobile-sticky-bar { display: flex; }
+    .mobile-sticky-bar { display: none; }
   }
   .mobile-board-controls {
-    display: none; position: absolute; right: 10px; bottom: 10px; z-index: 25;
-    flex-direction: column; gap: 8px; align-items: flex-end;
+    display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 25;
+    flex-direction: column; gap: 10px; align-items: center;
   }
   .mbc-btn {
-    background: rgba(4,26,22,0.88); border: 1.5px solid var(--gold); color: var(--gold-light);
-    border-radius: 10px; width: 40px; height: 40px; font-size: 18px; font-weight: 800; cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    background: linear-gradient(160deg, var(--emerald-light), var(--emerald)); border: 2px solid var(--gold);
+    color: var(--cream); border-radius: 50%; width: 42px; height: 42px; font-size: 19px; font-weight: 800; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
   }
-  .mbc-wide { width: auto; padding: 0 12px; font-size: 11px; white-space: nowrap; }
+  .mbc-wide { width: 42px; padding: 0; font-size: 16px; white-space: nowrap; }
+
+  /* ===== MOBILE HUD (top bar) ===== */
+  .mobile-hud {
+    display: none; position: relative; z-index: 30;
+    background: linear-gradient(180deg, #0a2b22 0%, #072019 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+  }
+  .mhud-title { text-align: center; font-family: 'Cinzel', serif; font-weight: 800; font-size: 18px; letter-spacing: 2px; color: var(--gold-light); margin-bottom: 8px; text-shadow: 0 0 10px rgba(245,202,85,0.4); }
+  .mhud-row { display: flex; align-items: center; gap: 8px; }
+  .mhud-round { flex-shrink: 0; background: rgba(0,0,0,0.3); border: 1.5px solid var(--gold-dark); border-radius: 10px; padding: 8px 10px; font-weight: 800; font-size: 12px; color: var(--gold-light); }
+  .mhud-players { flex: 1; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .mhud-players::-webkit-scrollbar { display: none; }
+  .mhud-player-card {
+    flex-shrink: 0; display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px;
+    padding: 5px 10px 5px 5px; transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .mhud-player-card.mhud-current { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 0 14px rgba(245,202,85,0.55); background: rgba(245,202,85,0.08); }
+  .mhud-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; border: 2px solid var(--ring-color, var(--gold)); background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.15), transparent 70%), var(--bg-deep); flex-shrink: 0; }
+  .mhud-pname { font-size: 11px; font-weight: 800; color: var(--cream); line-height: 1.2; white-space: nowrap; }
+  .mhud-pmoney { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--gold-light); line-height: 1.2; }
+  .mhud-settings { flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(245,202,85,0.4); background: rgba(0,0,0,0.25); color: var(--gold-light); font-size: 17px; cursor: pointer; }
+
+  /* ===== MOBILE BOTTOM SHEET ===== */
+  .mobile-sheet {
+    display: none; position: relative; z-index: 28;
+    background: linear-gradient(180deg, #0a2b22 0%, #072019 100%);
+    border-top: 2px solid var(--gold);
+    max-height: 44px; overflow: hidden;
+    transition: max-height 0.32s cubic-bezier(.2,.8,.3,1);
+    flex-shrink: 0;
+  }
+  .mobile-sheet.expanded { max-height: 62vh; overflow-y: auto; }
+  .mobile-sheet-handle {
+    position: sticky; top: 0; z-index: 2; width: 100%; height: 44px;
+    background: linear-gradient(180deg, #0e3a2c 0%, #0a2b22 100%);
+    border: none; color: var(--gold-light); font-weight: 800; font-size: 12px; letter-spacing: 1.5px;
+    display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+  }
+  .msh-chevron { display: inline-block; transition: transform 0.3s ease; }
+  .mobile-sheet.expanded .msh-chevron { transform: rotate(180deg); }
+  .mobile-sheet-content { padding: 4px 12px 14px; }
+
+  /* ===== MOBILE FIXED ACTION DOCK ===== */
+  .mobile-action-dock {
+    display: none; position: relative; z-index: 30;
+    background: linear-gradient(180deg, #0a2b22 0%, #051a14 100%);
+    border-top: 2px solid var(--gold);
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    flex-shrink: 0;
+  }
+  .mad-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .mad-side-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.05); border: 1.5px solid rgba(245,202,85,0.3); border-radius: 14px;
+    padding: 10px 12px; color: var(--gold-light); font-size: 9.5px; font-weight: 800; letter-spacing: 0.5px; cursor: pointer;
+    min-width: 64px;
+  }
+  .mad-side-icon { font-size: 22px; }
+  .mad-roll-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    width: 108px; height: 108px; border-radius: 50%; flex-shrink: 0;
+    background: radial-gradient(circle at 35% 28%, #ffe89a, #f5a623 55%, #c97a10 100%);
+    border: 4px solid var(--gold-light);
+    box-shadow: 0 8px 0 var(--gold-dark), 0 16px 28px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.4);
+    color: #2a1a05; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; cursor: pointer;
+    justify-content: center;
+  }
+  .mad-roll-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--gold-dark), 0 6px 14px rgba(0,0,0,0.4); }
+  .mad-roll-btn:disabled { opacity: 0.5; }
+  .mad-dice-pair { display: flex; gap: 3px; transform: scale(0.55); margin-bottom: -6px; }
+  .mad-roll-label { font-size: 13px; }
+  .mad-alt-btn { background: radial-gradient(circle at 35% 28%, #b8f0d4, var(--emerald-light) 55%, var(--emerald) 100%); border-color: var(--emerald-light); box-shadow: 0 8px 0 var(--emerald), 0 16px 28px rgba(0,0,0,0.5); color: #063c2d; }
+  .mad-alt-icon { font-size: 26px; }
+  .mad-status { text-align: center; font-weight: 800; font-size: 12px; letter-spacing: 1.5px; color: var(--sb-muted); margin: 10px 0 8px; }
+  .mad-status-active { color: var(--emerald-light); animation: sbPulseText 1.6s ease-in-out infinite; }
+  @keyframes sbPulseText { 0%,100% { opacity: 0.75; } 50% { opacity: 1; } }
+  .mad-endturn-btn {
+    display: block; width: 100%; height: 44px; border-radius: 22px;
+    background: transparent; border: 1.5px solid var(--gold-dark); color: var(--gold-light);
+    font-weight: 800; font-size: 12.5px; letter-spacing: 1px; cursor: pointer;
+  }
+  .mad-endturn-btn:not(:disabled) { border-color: var(--gold); background: rgba(245,202,85,0.08); }
+  .mad-endturn-btn:disabled { opacity: 0.4; }
+  .mad-skip-btn { border-color: var(--sb-danger, #e85d5d); color: #ff9a9a; background: rgba(232,93,93,0.08); }
+
+  @media (max-width: 768px) {
+    .mobile-hud { display: block; }
+    .mobile-sheet { display: block; }
+    .mobile-action-dock { display: block; }
+  }
 
   .mobile-sticky-bar {
     display: none; position: sticky; bottom: 0; z-index: 40;
@@ -571,6 +663,7 @@
   .bottom-sheet-handle { width: 40px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.25); margin: 0 auto 12px; }
   @keyframes bottomSheetUp { from { transform: translateY(30px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
 
+  .board-frame { position: relative; overflow: hidden; width: 100%; height: 100%; }
   .board-camera {
     position: absolute; inset: 0;
     transform-origin: 0 0;
@@ -4276,7 +4369,7 @@ window.addEventListener('resize', () => {
 function isCinematicCamera() { return cameraState.mode === 'purchase' || cameraState.mode === 'corporation'; }
 
 function computeCameraTransform(targetXvb, targetYvb, scale) {
-  const viewport = document.getElementById('boardViewport');
+  const viewport = document.getElementById('boardFrame') || document.getElementById('boardViewport');
   if (!viewport) return { tx: 0, ty: 0, scale: 1 };
   const rect = viewport.getBoundingClientRect();
   const w = rect.width, h = rect.height;
@@ -4307,7 +4400,7 @@ function applyCameraDirect(targetXvb, targetYvb, scale, mode, tileId) {
 
 /* ===== MOBILE PAN / PINCH-ZOOM GESTURES ===== */
 function clampMobilePan(tx, ty, scale) {
-  const viewport = document.getElementById('boardViewport');
+  const viewport = document.getElementById('boardFrame') || document.getElementById('boardViewport');
   if (!viewport) return { tx, ty };
   const rect = viewport.getBoundingClientRect();
   const w = rect.width, h = rect.height;
@@ -4332,6 +4425,7 @@ function setCameraRaw(tx, ty, scale, tileId) {
   let suppressNextClick = false;
 
   function getViewport() { return document.getElementById('boardViewport'); }
+  function getFrame() { return document.getElementById('boardFrame') || getViewport(); }
 
   document.addEventListener('pointerdown', (e) => {
     const vp = getViewport();
@@ -4366,7 +4460,7 @@ function setCameraRaw(tx, ty, scale, tileId) {
       const midX = (pts[0].x + pts[1].x) / 2, midY = (pts[0].y + pts[1].y) / 2;
       let newScale = pinchStart.scale * (dist / Math.max(pinchStart.dist, 1));
       newScale = Math.min(MOBILE_ZOOM.max, Math.max(MOBILE_ZOOM.min, newScale));
-      const vp = getViewport();
+      const vp = getFrame();
       if (vp) {
         const rect = vp.getBoundingClientRect();
         const anchorX = pinchStart.midX - rect.left, anchorY = pinchStart.midY - rect.top;
@@ -4441,7 +4535,7 @@ function mobileFocusCurrentPlayer() {
 }
 function mobileZoomBy(delta) {
   const newScale = Math.min(MOBILE_ZOOM.max, Math.max(MOBILE_ZOOM.min, cameraState.scale + delta));
-  const vp = document.getElementById('boardViewport');
+  const vp = document.getElementById('boardFrame') || document.getElementById('boardViewport');
   if (!vp) return;
   const rect = vp.getBoundingClientRect();
   const cx = rect.width / 2, cy = rect.height / 2;
@@ -5356,6 +5450,84 @@ function timeAgoLabel(logIndexFromEnd) {
   return '\u04e8\u043c\u043d\u04e9';
 }
 
+let mobileSheetExpanded = false;
+
+function renderMobileHUD(room, currentPlayer) {
+  const roundN = currentRoundNumber(room);
+  return `<div class="mobile-hud">
+    <div class="mhud-title">\u2756 \u0418\u0425 \u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8 \u2756</div>
+    <div class="mhud-row">
+      <div class="mhud-round">\u04ae\u0415 ${roundN}</div>
+      <div class="mhud-players">
+        ${room.players.map(p => {
+          const isCurrent = p.id === currentPlayer.id;
+          return `<div class="mhud-player-card ${isCurrent ? 'mhud-current' : ''}" style="--ring-color:${p.color}">
+            <span class="mhud-avatar">${p.token}</span>
+            <div class="mhud-pinfo"><div class="mhud-pname">${p.name}</div><div class="mhud-pmoney">\u20ae${fmt(p.money)}</div></div>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="mhud-settings" id="mobileSettingsBtn" aria-label="\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e">\u2699\ufe0f</button>
+    </div>
+  </div>`;
+}
+
+function renderMobileBottomSheet(room, currentPlayer, me) {
+  return `<div class="mobile-sheet ${mobileSheetExpanded ? 'expanded' : ''}" id="mobileSheet">
+    <button class="mobile-sheet-handle" id="mobileSheetToggle" aria-expanded="${mobileSheetExpanded}">
+      <span class="msh-chevron">\u25b2</span> \u041c\u042d\u0414\u042d\u042d\u041b\u042d\u041b
+    </button>
+    <div class="mobile-sheet-content">
+      ${renderPlayersPanel(room, currentPlayer)}
+      ${me ? renderMiniWealthChart(room, me) : ''}
+      ${renderMarketEffectsPanel(room)}
+      ${renderOwnedCompaniesPanel(room)}
+      ${renderWealthRankingPanel(room)}
+      ${renderActivityTimeline(room)}
+    </div>
+  </div>`;
+}
+
+function renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, rolling) {
+  const locked = isAnimatingMovement || buildingAnimationActive || rentCinematicActive || wealthModalOpen || (room.cardDraw && !room.cardDraw.resolved);
+  const pending = room.pendingAction && room.pendingAction.playerId === myId;
+  const rollDisabled = !myTurn || room.hasRolled || room.pendingAction || locked;
+  const endDisabled = !myTurn || !room.hasRolled || room.pendingAction || locked;
+
+  let centerHtml;
+  if (pending && room.pendingAction.type === 'buy') {
+    centerHtml = `<button class="mad-roll-btn mad-alt-btn" id="mobileBuyBtn"><span class="mad-alt-icon">\ud83d\udcb0</span><span>\u0410\u0412\u0410\u0425</span></button>`;
+  } else if (pending && room.pendingAction.type === 'build') {
+    centerHtml = `<button class="mad-roll-btn mad-alt-btn" id="mobileBuildBtn"><span class="mad-alt-icon">\ud83c\udfd7\ufe0f</span><span>\u0411\u0410\u0420\u0418\u0425</span></button>`;
+  } else {
+    centerHtml = `<button class="mad-roll-btn" id="mobileRollBtn" ${rollDisabled ? 'disabled' : ''}>
+      <span class="mad-dice-pair">${renderDie(d1, rolling)}${renderDie(d2, rolling)}</span>
+      <span class="mad-roll-label">\u0428\u041e\u041e \u0425\u0410\u042f\u0425</span>
+    </button>`;
+  }
+
+  const statusText = pending && room.pendingAction.type === 'buy' ? '\u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0416 \u0410\u0412\u0410\u0425 \u0423\u0423?'
+    : pending && room.pendingAction.type === 'build' ? '\u0411\u0410\u0420\u0418\u0425 \u0423\u0423?'
+    : (room.cardDraw && !room.cardDraw.resolved) ? '\u041a\u0410\u0420\u0422 \u0428\u0418\u0419\u0414\u0412\u042d\u0420\u041b\u042d\u0416 \u0411\u0410\u0419\u041d\u0410'
+    : myTurn ? '\u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416' : `${currentPlayer.name}-\u0418\u0419\u041d \u042d\u042d\u041b\u0416`;
+
+  const endBtnHtml = pending && room.pendingAction.type === 'buy'
+    ? `<button class="mad-endturn-btn mad-skip-btn" id="mobileSkipBuyBtn">\u25c6 \u0410\u041b\u0413\u0410\u0421\u0410\u0425</button>`
+    : pending && room.pendingAction.type === 'build'
+    ? `<button class="mad-endturn-btn mad-skip-btn" id="mobileSkipBuildBtn">\u25c6 \u0410\u041b\u0413\u0410\u0421\u0410\u0425</button>`
+    : `<button class="mad-endturn-btn" id="mobileEndTurnBtn" ${endDisabled ? 'disabled' : ''}>\u25c6 \u042d\u042d\u041b\u0416 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>`;
+
+  return `<div class="mobile-action-dock">
+    <div class="mad-row">
+      <button class="mad-side-btn" id="madCompanyBtn"><span class="mad-side-icon">\ud83c\udfe2</span><span>\u041a\u041e\u041c\u041f\u0410\u041d\u0418</span></button>
+      ${centerHtml}
+      <button class="mad-side-btn" id="madWealthBtn"><span class="mad-side-icon">\ud83d\udcb0</span><span>\u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8</span></button>
+    </div>
+    <div class="mad-status ${myTurn && !pending ? 'mad-status-active' : ''}">\u2756 ${statusText} \u2756</div>
+    ${endBtnHtml}
+  </div>`;
+}
+
 function renderTurnStatusHeader(room, currentPlayer) {
   const roundN = Math.floor((room.turnCount || 0) / room.players.length) + 1;
   const muted = !gameSettings.sfxEnabled && !gameSettings.musicEnabled;
@@ -5959,27 +6131,30 @@ function renderGame() {
   const camTransform = renderCameraTransformStyle();
 
   return `<div class="game-wrap">
+    ${isMobileView ? renderMobileHUD(room, currentPlayer) : ''}
     <div class="game-layout">
       <div class="board-outer">
         <div class="board-viewport ${debugMode?'debug':''} ${environment.timeOfDay==='night'?'env-night-active':''}" id="boardViewport">
-          <div class="board-camera" id="boardCamera" style="${camTransform}">
-            <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
-            <div class="env-lighting env-${environment.timeOfDay} ${environment.isTransitioning ? 'env-transitioning' : ''}">
-              <div class="env-night-overlay"></div>
-              <div class="env-moonlight"></div>
-              <div class="env-streetlights"></div>
+          <div class="board-frame" id="boardFrame">
+            <div class="board-camera" id="boardCamera" style="${camTransform}">
+              <img class="board-image" src="board.png" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
+              <div class="env-lighting env-${environment.timeOfDay} ${environment.isTransitioning ? 'env-transitioning' : ''}">
+                <div class="env-night-overlay"></div>
+                <div class="env-moonlight"></div>
+                <div class="env-streetlights"></div>
+              </div>
+              <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                ${tilesHtml}
+                ${debugMode ? debugZonesHtml : ''}
+              </svg>
+              ${buildingsHtml}
+              ${upgradesHtml}
+              <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
+              ${tokensHtml}
             </div>
-            <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-              ${tilesHtml}
-              ${debugMode ? debugZonesHtml : ''}
-            </svg>
-            ${buildingsHtml}
-            ${upgradesHtml}
-            <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
-            ${tokensHtml}
+            ${cameraState.mode === 'corporation' ? '<div class="camera-dim-overlay"></div>' : ''}
+            ${debugMode ? renderCameraDebugPanel() : ''}
           </div>
-          ${cameraState.mode === 'corporation' ? '<div class="camera-dim-overlay"></div>' : ''}
-          ${debugMode ? renderCameraDebugPanel() : ''}
           <div class="mobile-board-controls">
             <button class="mbc-btn" id="mbcZoomIn" aria-label="Zoom in">+</button>
             <button class="mbc-btn" id="mbcZoomOut" aria-label="Zoom out">\u2212</button>
@@ -5989,6 +6164,7 @@ function renderGame() {
         </div>
       </div>
       <div class="game-sidebar">
+        ${!isMobileView ? `
         ${renderTurnStatusHeader(room, currentPlayer)}
         ${renderPlayersPanel(room, currentPlayer)}
         ${renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow)}
@@ -5997,24 +6173,12 @@ function renderGame() {
         ${renderOwnedCompaniesPanel(room)}
         ${renderWealthRankingPanel(room)}
         ${renderActivityTimeline(room)}
+        ` : ''}
       </div>
     </div>
     ${wealthModalOpen ? renderWealthChartModal(room) : ''}
-    <div class="mobile-sticky-bar">
-      <span class="msb-avatar" style="--ring-color:${currentPlayer.color}">${currentPlayer.token}</span>
-      <span class="msb-name">${currentPlayer.name}</span>
-      ${room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy' ? `
-        <button class="msb-btn msb-roll msb-action-btn" id="mobileBuyBtn">\ud83d\udcb0 \u0410\u0412\u0410\u0425</button>
-        <button class="msb-btn msb-end msb-action-btn" id="mobileSkipBuyBtn">\u0410\u041b\u0413\u0410\u0421\u0410\u0425</button>
-      ` : room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'build' ? `
-        <button class="msb-btn msb-roll msb-action-btn" id="mobileBuildBtn">\ud83c\udfd7\ufe0f \u0411\u0410\u0420\u0418\u0425</button>
-        <button class="msb-btn msb-end msb-action-btn" id="mobileSkipBuildBtn">\u0410\u041b\u0413\u0410\u0421\u0410\u0425</button>
-      ` : `
-        <div class="msb-dice">${renderDie(d1, diceRollingNow)}${renderDie(d2, diceRollingNow)}</div>
-        <button class="msb-btn msb-roll" id="mobileRollBtn" ${(!myTurn || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || isAnimatingMovement || buildingAnimationActive || rentCinematicActive || wealthModalOpen) ? 'disabled' : ''}>\ud83c\udfb2</button>
-        <button class="msb-btn msb-end" id="mobileEndTurnBtn" ${(!myTurn || !room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || wealthModalOpen) ? 'disabled' : ''}>\u2713</button>
-      `}
-    </div>
+    ${isMobileView ? renderMobileBottomSheet(room, currentPlayer, me) : ''}
+    ${isMobileView ? renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow) : ''}
     ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
   </div>`;
 }
@@ -6617,6 +6781,13 @@ function attachGameEvents() {
     saveSettings(); render();
   };
   const openSettings = document.getElementById('openSettingsBtn'); if (openSettings) openSettings.onclick = () => toggleSettingsModal(true);
+  const mobileSettingsBtn = document.getElementById('mobileSettingsBtn'); if (mobileSettingsBtn) mobileSettingsBtn.onclick = () => toggleSettingsModal(true);
+  const sheetToggle = document.getElementById('mobileSheetToggle');
+  if (sheetToggle) sheetToggle.onclick = () => { mobileSheetExpanded = !mobileSheetExpanded; audioManager.playSfx('buttonClick'); vibrate(15); render(); };
+  const madCompanyBtn = document.getElementById('madCompanyBtn');
+  if (madCompanyBtn) madCompanyBtn.onclick = () => { mobileSheetExpanded = true; render(); setTimeout(() => { const el = document.querySelector('.sb-company-scroll') || document.querySelector('.mobile-sheet-content'); if (el) el.scrollIntoView({ block: 'nearest' }); }, 50); };
+  const madWealthBtn = document.getElementById('madWealthBtn');
+  if (madWealthBtn) madWealthBtn.onclick = () => { wealthModalOpen = true; wealthModalPlayerId = myId; render(); };
   const wealthDetailBtn = document.getElementById('wealthChartDetailBtn');
   if (wealthDetailBtn) wealthDetailBtn.onclick = () => { wealthModalOpen = true; wealthModalPlayerId = wealthDetailBtn.dataset.player; render(); };
   if (wealthModalOpen) attachWealthModalEvents();
