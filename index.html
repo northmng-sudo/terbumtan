@@ -483,7 +483,7 @@
     .tile text { font-size: 15px !important; }
     .tile .tile-price { font-size: 12px !important; }
     .tile-building-badge { transform: scale(1.35); }
-    .ptoken { width: clamp(24px, 4.2vw, 40px) !important; height: clamp(24px, 4.2vw, 40px) !important; font-size: clamp(16px, 2.8vw, 24px) !important; }
+    .ptoken { width: clamp(15px, 3vw, 24px) !important; height: clamp(15px, 3vw, 24px) !important; font-size: clamp(11px, 2vw, 16px) !important; }
     .sb-dice-btn { padding: 18px; font-size: 17px; }
     .sb-endturn-btn { padding: 13px; font-size: 14px; }
     .sb-panel-title { font-size: 13px; }
@@ -4410,12 +4410,22 @@ function syncBoardFrameSize() {
   frame.style.height = Math.round(fh) + 'px';
 }
 
+let lastKnownFrameRect = null;
 function computeCameraTransform(targetXvb, targetYvb, scale) {
   const viewport = document.getElementById('boardFrame') || document.getElementById('boardViewport');
-  if (!viewport) return { tx: 0, ty: 0, scale: 1 };
+  if (!viewport) return lastKnownFrameRect ? computeFromRect(lastKnownFrameRect, targetXvb, targetYvb, scale) : { tx: 0, ty: 0, scale: 1 };
   const rect = viewport.getBoundingClientRect();
+  let w = rect.width, h = rect.height;
+  if (!w || !h) {
+    if (!lastKnownFrameRect) return { tx: 0, ty: 0, scale: 1 };
+    w = lastKnownFrameRect.width; h = lastKnownFrameRect.height;
+  } else {
+    lastKnownFrameRect = { width: w, height: h };
+  }
+  return computeFromRect({ width: w, height: h }, targetXvb, targetYvb, scale);
+}
+function computeFromRect(rect, targetXvb, targetYvb, scale) {
   const w = rect.width, h = rect.height;
-  if (!w || !h) return { tx: 0, ty: 0, scale: 1 };
   const fx = targetXvb / 1672, fy = targetYvb / 941;
   const px = fx * w, py = fy * h;
   let tx = w / 2 - scale * px;
