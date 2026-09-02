@@ -1036,6 +1036,16 @@
     pointer-events: none;
   }
 
+  .card-result-toast {
+    top: auto; bottom: 14%; width: min(88vw, 320px); border-radius: 16px;
+    padding: 12px 16px; text-align: center; animation: passGoPop 4s ease forwards;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .crt-deck { font-size: 10px; letter-spacing: 1.5px; color: var(--gold-light, var(--steppe-gold)); font-weight: 800; }
+  .crt-title { font-size: 15px; font-weight: 800; color: var(--cream); }
+  .crt-desc { font-size: 11.5px; color: #c9c2a8; font-weight: 500; white-space: normal; line-height: 1.4; }
+  .card-toast-legendary { border-color: #a855f7; box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 24px rgba(168,85,247,0.5); }
+
   .tile-tooltip {
     position: fixed; z-index: 500; pointer-events: none;
     background: linear-gradient(155deg, #1c1c1c 0%, #0c0c0c 100%);
@@ -5177,7 +5187,7 @@ function render() {
     } else {
       attachGameEvents();
       maybeFlashMoney(currentRoom);
-      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); }
+      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); maybeShowCardResultToast(currentRoom); }
       if (rentCinematicActive) animateRentCounters();
     }
     return;
@@ -6376,6 +6386,8 @@ async function resolveCardFinal(card, chosenTileIdx) {
   try {
     applyCardEffect(room, card, player, chosenTileIdx);
   } finally {
+    const logMsg = room.log.length > 0 ? room.log[room.log.length - 1] : `${player.name}: "${card.title}"`;
+    room.lastResolvedCard = { id: Date.now() + '-' + Math.random().toString(36).slice(2), deck: card.deck, title: card.title, rarity: card.rarity, playerId: player.id, playerName: player.name, description: logMsg };
     room.cardDraw.resolved = true;
     room.cardDraw = null;
     await saveRoom(room); currentRoom = room;
@@ -6384,6 +6396,22 @@ async function resolveCardFinal(card, chosenTileIdx) {
     if (root) root.innerHTML = '';
     render();
   }
+}
+
+let lastSeenResolvedCardId = null;
+function maybeShowCardResultToast(room) {
+  const lc = room && room.lastResolvedCard;
+  if (!lc || lc.id === lastSeenResolvedCardId) return;
+  lastSeenResolvedCardId = lc.id;
+  if (lc.playerId === myId) return; // the drawer already saw the full modal
+  const root = document.getElementById('card-popup-root');
+  if (!root) return;
+  const deckLabel = lc.deck === 'chance' ? '\ud83c\udf40 \u0411\u041e\u041b\u041e\u041c\u0416' : '\ud83d\udcc8 \u0417\u0410\u0425 \u0417\u042d\u042d\u041b';
+  const el = document.createElement('div');
+  el.className = 'passgo-toast card-result-toast' + (lc.rarity === 'legendary' ? ' card-toast-legendary' : '');
+  el.innerHTML = `<div class="crt-deck">${deckLabel}</div><div class="crt-title">${lc.title}</div><div class="crt-desc">${lc.description}</div>`;
+  root.appendChild(el);
+  setTimeout(() => { el.remove(); }, 4200);
 }
 
 let buyModalKey = null;
@@ -6596,14 +6624,14 @@ async function confirmReplay() {
   room.decks = null; ensureDecks(room);
   room.currentPlayerIndex = 0; room.hasRolled = false; room.lastDice = null;
   room.diceRollId = null; room.animPath = null; room.cardDraw = null; room.winnerId = null; room.turnCount = 0;
-  room.pendingAction = null; room.log = []; room.lastRentTransaction = null;
+  room.pendingAction = null; room.log = []; room.lastRentTransaction = null; room.lastResolvedCard = null;
   pushLog(room, '\u0428\u0438\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043b\u0442 \u044d\u0445\u044d\u043b\u043b\u044d\u044d!');
   await saveRoom(room); currentRoom = room;
   gameResults = { isOpen: false, stage: 'counting', rankings: [], winnerId: null };
   resultsTriggered = false;
   cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
   buildingAnim = null; buildingAnimationActive = false;
-  rentCinematicActive = false; rentCinematicTxn = null; rentCinematicStage = 'appear'; lastRentTxnId = null;
+  rentCinematicActive = false; rentCinematicTxn = null; rentCinematicStage = 'appear'; lastRentTxnId = null; lastSeenResolvedCardId = null;
   knownLevels = {}; levelsInitialized = false; seenBuildings = new Set(); seenUpgrades = new Set();
   render();
 }
