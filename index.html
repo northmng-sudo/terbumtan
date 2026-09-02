@@ -4417,7 +4417,10 @@ function setCameraRaw(tx, ty, scale, tileId) {
   document.addEventListener('pointercancel', endPointer, { passive: true });
 
   document.addEventListener('click', (e) => {
-    if (suppressNextClick && isMobileView) { e.stopPropagation(); e.preventDefault(); suppressNextClick = false; }
+    if (!suppressNextClick || !isMobileView) return;
+    const vp = getViewport();
+    if (vp && vp.contains(e.target)) { e.stopPropagation(); e.preventDefault(); }
+    suppressNextClick = false;
   }, true);
 })();
 
@@ -5439,8 +5442,13 @@ function renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, rolling
       </div></div>`;
   }
   if (!myTurn) {
-    return `<div class="sb-panel sb-dice-panel"><div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
-      <div class="sb-waiting"><span class="pulse-dot"></span>${currentPlayer.name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u0431\u0430\u0439\u043d\u0430...</div></div>`;
+    const sum = room.lastDice ? room.lastDice[0] + room.lastDice[1] : null;
+    return `<div class="sb-panel sb-dice-panel">
+      <div class="sb-panel-title">\u25c8 \u0422\u0410\u041d\u042b \u042d\u042d\u041b\u0416 \u25c8</div>
+      <div class="sb-waiting"><span class="pulse-dot"></span>${currentPlayer.name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+      ${room.lastDice ? `<div class="sb-dice-row">${renderDie(d1, rolling)}${renderDie(d2, rolling)}</div>
+      ${sum !== null ? `<div class="sb-dice-sum-label">\u0421\u04af\u04af\u0434 \u0433\u0430\u0440\u0441\u0430\u043d:</div><div class="sb-dice-sum-badge">\u2756 <span>${sum}</span> \u2756</div>` : ''}` : ''}
+    </div>`;
   }
   const sum = room.lastDice ? room.lastDice[0] + room.lastDice[1] : null;
   return `<div class="sb-panel sb-dice-panel">
