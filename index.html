@@ -71,6 +71,13 @@
     --panel: rgba(5, 30, 24, 0.88);
     --panel-light: rgba(14, 61, 47, 0.86);
     --lp-muted: #a9beb7;
+    --chart-bg: #041713;
+    --chart-grid: rgba(255,255,255,0.06);
+    --candle-up: #23d18b;
+    --candle-down: #ef5b5b;
+    --candle-neutral: #e4b943;
+    --chart-text: #e9ddba;
+    --crosshair: #f5c94f;
   }
   .lobby-screen { position: relative; min-height: 100vh; overflow: hidden; padding: 0; }
   .lobby-bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse at 50% 100%, var(--bg-emerald) 0%, var(--bg-deep) 65%), var(--bg-deep); }
@@ -123,14 +130,14 @@
   .hero-city { position: relative; height: clamp(180px, 24vw, 300px); margin-bottom: 26px; }
   .hero-city-glow { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 70%; height: 60%; background: radial-gradient(ellipse, rgba(37,203,144,0.28) 0%, transparent 75%); }
   .hero-bldg { position: absolute; bottom: 0; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)); }
-  .hero-bldg-corp { left: 50%; transform: translateX(-50%); height: 100%; z-index: 4; animation: corpRiseIn 0.8s 0.5s cubic-bezier(.2,.9,.3,1) both, heroFloat 6s 1.3s ease-in-out infinite; }
+  .hero-bldg-corp { left: 50%; transform: translateX(-50%); height: 100%; max-width: 40%; z-index: 4; animation: corpRiseIn 0.8s 0.5s cubic-bezier(.2,.9,.3,1) both, heroFloat 6s 1.3s ease-in-out infinite; }
   @keyframes corpRiseIn { from { opacity: 0; transform: translateX(-50%) scale(0.85) translateY(20px); } to { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); } }
   @keyframes heroFloat { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-6px); } }
-  .hero-bldg-bank { left: 6%; height: 62%; z-index: 2; opacity: 0.9; animation: bldgFadeIn 0.7s 0.7s ease both; }
-  .hero-bldg-mine { left: 20%; height: 45%; z-index: 1; opacity: 0.75; animation: bldgFadeIn 0.7s 0.85s ease both; }
-  .hero-bldg-telecom { right: 22%; height: 58%; z-index: 2; opacity: 0.85; animation: bldgFadeIn 0.7s 0.75s ease both; }
-  .hero-bldg-retail { right: 5%; height: 50%; z-index: 2; opacity: 0.85; animation: bldgFadeIn 0.7s 0.9s ease both; }
-  .hero-bldg-factory { right: 12%; height: 38%; z-index: 1; opacity: 0.7; animation: bldgFadeIn 0.7s 1s ease both; }
+  .hero-bldg-bank { left: 0%; height: 55%; max-width: 22%; z-index: 2; opacity: 0.85; animation: bldgFadeIn 0.7s 0.7s ease both; }
+  .hero-bldg-mine { display: none; }
+  .hero-bldg-telecom { right: 0%; height: 62%; max-width: 22%; z-index: 2; opacity: 0.85; animation: bldgFadeIn 0.7s 0.75s ease both; }
+  .hero-bldg-retail { display: none; }
+  .hero-bldg-factory { display: none; }
   @keyframes bldgFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: var(--final-op, 0.85); transform: translateY(0); } }
   .hero-coins { position: absolute; inset: 0; pointer-events: none; }
   .hero-coins span { position: absolute; bottom: 10%; font-size: 18px; opacity: 0; left: calc(10% + var(--i) * 11%); animation: coinFloatUp 4.5s calc(var(--i) * 0.4s + 1.4s) ease-in-out infinite; }
@@ -1054,6 +1061,63 @@
   .card-select-item span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-dark); }
   .card-select-item:hover { background: rgba(255,255,255,0.85); border-color: var(--gold); }
 
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+
+  /* ===== WEALTH CANDLESTICK CHART ===== */
+  .wealth-mini-panel { background: var(--chart-bg); }
+  .wc-mini-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .wc-mini-value { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 15px; color: var(--chart-text); }
+  .wc-mini-change { font-weight: 800; font-size: 12px; }
+  .wc-up { color: var(--candle-up); }
+  .wc-down { color: var(--candle-down); }
+  .wc-flat { color: var(--candle-neutral); }
+  .wealth-chart-svg { width: 100%; height: auto; display: block; background: var(--chart-bg); border-radius: 8px; }
+  .wc-detail-btn { display: block; width: 100%; margin-top: 8px; padding: 7px; border-radius: 8px; background: transparent; border: 1px solid rgba(245,202,85,0.3); color: var(--gold-light); font-size: 11px; font-weight: 700; cursor: pointer; }
+  .wealth-candle, .wealth-marker { cursor: pointer; }
+  .wealth-candle { animation: candleEnter 0.35s ease both; }
+  .wealth-candle:last-child rect { filter: drop-shadow(0 0 3px currentColor); }
+  @keyframes candleEnter { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+  .results-wealth-charts { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .results-stage-subtitle { text-align: center; font-size: 12px; letter-spacing: 1.5px; color: var(--gold-light); margin-bottom: 4px; }
+  .results-player-chart-head { font-weight: 800; font-size: 12px; color: var(--sb-text); margin-bottom: 4px; border-left: 3px solid var(--ring-color, var(--gold)); padding-left: 8px; }
+
+  .wealth-modal-backdrop { position: fixed; inset: 0; z-index: 3200; background: rgba(2,10,8,0.8); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .wealth-modal {
+    position: relative; width: min(94vw, 720px); max-height: 88vh; overflow-y: auto;
+    background: linear-gradient(160deg, var(--panel-light), var(--panel)); border: 2px solid var(--gold);
+    border-radius: 20px; padding: 20px; box-shadow: 0 30px 70px rgba(0,0,0,0.6);
+  }
+  .wc-close-btn { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(245,202,85,0.4); background: rgba(0,0,0,0.3); color: var(--gold-light); font-size: 14px; cursor: pointer; }
+  .wc-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .wc-tab { border: 1.5px solid var(--ring-color, var(--gold)); background: transparent; color: var(--sb-text); border-radius: 16px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .wc-tab.active { background: color-mix(in srgb, var(--ring-color, var(--gold)) 25%, transparent); }
+  .wc-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .wc-header-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 2.5px solid var(--ring-color, var(--gold)); background: rgba(255,255,255,0.06); flex-shrink: 0; }
+  .wc-header-name { font-size: 11px; letter-spacing: 1px; color: var(--sb-muted); text-transform: uppercase; }
+  .wc-header-value { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 24px; color: var(--chart-text); }
+  .wc-header-change { font-weight: 800; font-size: 13px; }
+  .wc-header-stats { margin-left: auto; font-size: 11px; color: var(--sb-muted); text-align: right; line-height: 1.6; }
+  .wc-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+  .wc-tf-group { display: flex; gap: 5px; }
+  .wc-tf-btn { border: 1px solid rgba(245,202,85,0.35); background: transparent; color: var(--sb-muted); border-radius: 12px; padding: 5px 11px; font-size: 10.5px; font-weight: 700; cursor: pointer; }
+  .wc-tf-btn.active { background: var(--gold); color: #241a0d; border-color: var(--gold); }
+  .wc-table-toggle { border: 1px solid rgba(245,202,85,0.35); background: transparent; color: var(--gold-light); border-radius: 12px; padding: 5px 11px; font-size: 10.5px; font-weight: 700; cursor: pointer; }
+  .wc-chart-area { background: var(--chart-bg); border-radius: 12px; padding: 6px; overflow-x: auto; }
+  .wc-table { width: 100%; border-collapse: collapse; font-size: 11px; color: var(--chart-text); }
+  .wc-table th, .wc-table td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--chart-grid); }
+  .wc-table th:first-child, .wc-table td:first-child { text-align: left; }
+  .wc-legend { display: flex; gap: 16px; margin-top: 10px; font-size: 10.5px; color: var(--sb-muted); }
+  .wc-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+
+  @media (max-width: 640px) {
+    .wc-header { flex-wrap: wrap; }
+    .wc-header-stats { margin-left: 0; text-align: left; }
+    .wealth-modal { padding: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wealth-candle, .wealth-marker { transition: none !important; }
+  }
+
   .market-effect-badge {
     display: flex; align-items: center; gap: 8px;
     background: rgba(0,0,0,0.22); border: 1px solid rgba(245,202,85,0.35); border-radius: 10px;
@@ -1353,7 +1417,11 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 /* ===== AUTH ===== */
 async function authSignUp(email, password, displayName) {
   const { data, error } = await supabaseClient.auth.signUp({
-    email, password, options: { data: { display_name: displayName } },
+    email, password,
+    options: {
+      data: { display_name: displayName },
+      emailRedirectTo: window.location.href.split('#')[0].split('?')[0],
+    },
   });
   return { data, error };
 }
@@ -3840,6 +3908,58 @@ async function startGame() {
 
 function isMyTurn(room) { return room.players[room.currentPlayerIndex] && room.players[room.currentPlayerIndex].id === myId; }
 function pushLog(room, text) { room.log.push(text); if (room.log.length > 40) room.log = room.log.slice(-40); }
+
+/* ===== WEALTH CANDLESTICK HISTORY ===== */
+function currentRoundNumber(room) { return Math.floor((room.turnCount || 0) / room.players.length) + 1; }
+function ensureWealthHistory(room) {
+  if (!room.wealthHistory) room.wealthHistory = {};
+  room.players.forEach(p => { if (!room.wealthHistory[p.id]) room.wealthHistory[p.id] = []; });
+}
+function ensureCurrentCandle(room, playerId) {
+  ensureWealthHistory(room);
+  const hist = room.wealthHistory[playerId];
+  const round = currentRoundNumber(room);
+  let candle = hist.length > 0 ? hist[hist.length - 1] : null;
+  if (!candle || candle.round !== round) {
+    const player = room.players.find(p => p.id === playerId);
+    const netWorth = player ? computePlayerWealth(room, player).total : 1500;
+    candle = { playerId, round, open: netWorth, high: netWorth, low: netWorth, close: netWorth, change: 0, changePercent: 0, transactionVolume: 0, events: [] };
+    hist.push(candle);
+    if (hist.length > 260) room.wealthHistory[playerId] = hist.slice(-220);
+  }
+  return candle;
+}
+function recordWealthChange(room, { playerId, type, amount, tileId, companyId, description, eventId }) {
+  if (!room || !playerId) return;
+  const player = room.players.find(p => p.id === playerId);
+  if (!player) return;
+  if (eventId) {
+    if (!room._recordedEventIds) room._recordedEventIds = [];
+    if (room._recordedEventIds.includes(eventId)) return;
+    room._recordedEventIds.push(eventId);
+    if (room._recordedEventIds.length > 400) room._recordedEventIds = room._recordedEventIds.slice(-400);
+  }
+  const candle = ensureCurrentCandle(room, playerId);
+  const netWorth = computePlayerWealth(room, player).total;
+  candle.high = Math.max(candle.high, netWorth);
+  candle.low = Math.min(candle.low, netWorth);
+  candle.close = netWorth;
+  candle.change = candle.close - candle.open;
+  candle.changePercent = candle.open !== 0 ? (candle.change / Math.abs(candle.open) * 100) : 0;
+  candle.transactionVolume = (candle.transactionVolume || 0) + Math.abs(amount || 0);
+  if (type) {
+    candle.events.push({
+      id: eventId || (Date.now() + '-' + Math.random().toString(36).slice(2)),
+      type, amount: amount || 0, tileId: tileId != null ? tileId : null, companyId: companyId || null,
+      description: description || '', round: candle.round, netWorthAfter: netWorth,
+    });
+  }
+}
+function ensureRoundCandles(room) {
+  ensureWealthHistory(room);
+  room.players.forEach(p => ensureCurrentCandle(room, p.id));
+}
+
 function checkWinner(room) { const active = room.players.filter(p => !p.bankrupt); if (active.length === 1) room.winnerId = active[0].id; }
 
 function bankrupt(room, player) {
@@ -3912,6 +4032,9 @@ function resolvePropertyOrTax(room, player, idx) {
       payerStats.rentPaid += rent; payerStats.highestRentPaid = Math.max(payerStats.highestRentPaid, rent); payerStats.rentTransactions++;
       ownerStats.rentReceived += rent; ownerStats.highestRentReceived = Math.max(ownerStats.highestRentReceived, rent);
       pushLog(room, `${player.name} "${sp.name}" \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436, ${ownerPlayer.name}-\u0434 \u20ae${rent} \u0442\u04af\u0440\u044d\u044d\u0441 \u0442\u04e9\u043b\u04e9\u0432.`);
+      const rentEventId = 'rent-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      recordWealthChange(room, { playerId: player.id, type: 'pay_rent', amount: -rent, tileId: idx, companyId: idx, description: `"${sp.name}" \u0434\u044d\u044d\u0440 \u0442\u04af\u0440\u044d\u044d\u0441 \u20ae${rent} \u0442\u04e9\u043b\u04e9\u0432`, eventId: rentEventId + '-payer' });
+      recordWealthChange(room, { playerId: ownerPlayer.id, type: 'receive_rent', amount: rent, tileId: idx, companyId: idx, description: `"${sp.name}"-\u0433\u0430\u0430\u0441 \u20ae${rent} \u0442\u04af\u0440\u044d\u044d\u0441 \u0430\u0432\u0430\u0432`, eventId: rentEventId + '-owner' });
       room.lastRentTransaction = {
         id: Date.now() + '-' + Math.random().toString(36).slice(2),
         payerId: player.id, ownerId: owner, tileIdx: idx, breakdown,
@@ -3923,6 +4046,7 @@ function resolvePropertyOrTax(room, player, idx) {
   } else if (sp.type === 'tax') {
     player.money -= sp.amount;
     pushLog(room, `${player.name} \u0442\u0430\u0442\u0432\u0430\u0440 \u20ae${sp.amount} \u0442\u04e9\u043b\u04e9\u0432.`);
+    recordWealthChange(room, { playerId: player.id, type: 'tax', amount: -sp.amount, tileId: idx, description: `\u0422\u0430\u0442\u0432\u0430\u0440 \u20ae${sp.amount} \u0442\u04e9\u043b\u04e9\u0432` });
     if (player.money < 0) bankrupt(room, player);
   }
 }
@@ -3950,6 +4074,7 @@ function applyCardEffect(room, card, player, chosenTileIdx) {
     case 'cash': {
       player.money += card.value;
       pushLog(room, `${player.name}: "${card.title}" \u2014 ${card.value >= 0 ? '+' : ''}\u20ae${card.value}.`);
+      recordWealthChange(room, { playerId: player.id, type: 'chance_card', amount: card.value, description: `"${card.title}"` });
       if (card.value >= 0) audioManager.playSfx('coinReward');
       if (player.money < 0) bankrupt(room, player);
       break;
@@ -3965,6 +4090,7 @@ function applyCardEffect(room, card, player, chosenTileIdx) {
         const lvl = houseLevel(room, chosenTileIdx) + (card.upgradeAmount || 1);
         room.houses[chosenTileIdx] = Math.min(lvl, 4);
         pushLog(room, `${player.name}: "${card.title}" \u2014 "${BOARD_CONFIG[chosenTileIdx].name}"-\u0434 \u04af\u043d\u044d\u0433\u04af\u0439 \u0431\u0430\u0439\u0448\u0438\u043d \u0431\u0430\u0440\u0438\u0432.`);
+        recordWealthChange(room, { playerId: player.id, type: 'chance_card', amount: 0, tileId: chosenTileIdx, companyId: chosenTileIdx, description: `"${card.title}" \u2014 \u04af\u043d\u044d\u0433\u04af\u0439 \u0431\u0430\u0439\u0448\u0438\u043d` });
       } else {
         pushLog(room, `${player.name}: "${card.title}" \u2014 \u0431\u0430\u0440\u0438\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u043b\u0434\u0441\u043e\u043d\u0433\u04af\u0439.`);
       }
@@ -3976,6 +4102,7 @@ function applyCardEffect(room, card, player, chosenTileIdx) {
         const lvl = houseLevel(room, chosenTileIdx) + (card.upgradeAmount || 1);
         room.houses[chosenTileIdx] = Math.min(lvl, 4);
         pushLog(room, `${player.name}: "${card.title}" \u2014 "${BOARD_CONFIG[chosenTileIdx].name}" \u04af\u043d\u044d\u0433\u04af\u0439 \u0441\u0430\u0439\u0436\u0440\u0430\u0432.`);
+        recordWealthChange(room, { playerId: player.id, type: 'chance_card', amount: 0, tileId: chosenTileIdx, companyId: chosenTileIdx, description: `"${card.title}" \u2014 \u04af\u043d\u044d\u0433\u04af\u0439 \u0441\u0430\u0439\u0436\u0440\u0430\u043b\u0442` });
       } else {
         pushLog(room, `${player.name}: "${card.title}" \u2014 \u0441\u0430\u0439\u0436\u0440\u0443\u0443\u043b\u0430\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u043b\u0434\u0441\u043e\u043d\u0433\u04af\u0439.`);
       }
@@ -4015,7 +4142,7 @@ function tickMarketEffects(room) {
 
 async function rollDice() {
   const room = await getRoom(currentRoom.roomCode);
-  if (!room || !isMyTurn(room) || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved)) return;
+  if (!room || !isMyTurn(room) || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || wealthModalOpen) return;
   audioManager.playSfx('diceRoll'); vibrate(25);
   const player = room.players[room.currentPlayerIndex];
 
@@ -4036,7 +4163,7 @@ async function rollDice() {
   const newPos = (oldPos + sum) % BOARD_CONFIG.length;
   const passedGo = newPos < oldPos;
   room.animPath = { playerId: player.id, from: oldPos, steps: sum, id: Date.now() + Math.random() };
-  if (passedGo) { player.money += 200; pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u20ae200 \u0430\u0432\u043b\u0430\u0430.`); }
+  if (passedGo) { player.money += 200; pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u20ae200 \u0430\u0432\u043b\u0430\u0430.`); recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: 200, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u0431\u043e\u043d\u0443\u0441' }); }
   player.position = newPos;
   room.hasRolled = true;
   pushLog(room, `${player.name} \ud83c\udfb2${d1}+${d2}=${sum}, ${BOARD_CONFIG[newPos].name} \u0434\u044d\u044d\u0440 \u043e\u0447\u0438\u0432.`);
@@ -4054,6 +4181,7 @@ async function buyProperty() {
   if (player.money < sp.price) { room.pendingAction = null; await saveRoom(room); currentRoom = room; render(); return; }
   player.money -= sp.price; room.propOwner[idx] = player.id;
   pushLog(room, `${player.name} "${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432.`);
+  recordWealthChange(room, { playerId: player.id, type: 'buy_company', amount: -sp.price, tileId: idx, companyId: idx, description: `"${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432` });
   room.pendingAction = null;
   await saveRoom(room); currentRoom = room; render();
   audioManager.playSfx('companyPurchase'); vibrate([30, 40, 30]);
@@ -4077,6 +4205,7 @@ async function buildProperty() {
   const level = houseLevel(room, idx) + 1;
   room.houses[idx] = level; player.money -= cost;
   pushLog(room, `${player.name} "${sp.name}"-\u0434 ${buildLevelLabel(level)} \u0431\u0430\u0440\u0438\u0432 (\u20ae${cost}).`);
+  recordWealthChange(room, { playerId: player.id, type: level >= 4 ? 'build_corporation' : 'build_house', amount: -cost, tileId: idx, companyId: idx, description: `"${sp.name}"-\u0434 ${buildLevelLabel(level)} \u0431\u0430\u0440\u0438\u0432` });
   room.pendingAction = null;
   await saveRoom(room); currentRoom = room; render();
 }
@@ -4094,7 +4223,7 @@ async function endTurn() {
   do { next = (next + 1) % room.players.length; } while (room.players[next].bankrupt);
   room.currentPlayerIndex = next; room.hasRolled = false; room.lastDice = null;
   room.turnCount = (room.turnCount || 0) + 1;
-  if (room.turnCount % room.players.length === 0) tickMarketEffects(room);
+  if (room.turnCount % room.players.length === 0) { tickMarketEffects(room); ensureRoundCandles(room); }
   pushLog(room, `\u2014 ${room.players[next].name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u2014`);
   await saveRoom(room); currentRoom = room; render();
 }
@@ -5156,7 +5285,7 @@ function renderLanding() {
           <button class="lp-join-btn" id="joinBtn">\u04e8\u0420\u04e8\u04e8\u041d\u0414 \u041d\u042d\u0413\u0414\u042d\u0425</button>
 
           <div class="error-msg" role="alert">${errorMsg}</div>
-          ${!authState.user ? `<div class="lp-guest-note">\u0417\u043e\u0447\u043d\u043e\u043e\u0440 \u0442\u043e\u0433\u043b\u043e\u0436 \u0431\u0430\u0439\u043d\u0430 \u2014 <a href="#" id="landingSignupLink2">\u0431\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u0431\u044d\u043b \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u043e \u0445\u0430\u0434\u0433\u0430\u043b\u043d\u0430</a></div>` : ''}
+          ${!authState.user ? `<div class="lp-guest-note">\u0417\u043e\u0447\u043d\u043e\u043e\u0440 \u0442\u043e\u0433\u043b\u043e\u0436 \u0431\u0430\u0439\u043d\u0430 \u2014 <a href="#" id="landingSignupLink2">\u0431\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u0432\u044d\u043b \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u043e \u0445\u0430\u0434\u0433\u0430\u043b\u043d\u0430</a></div>` : ''}
         </div>
       </div>
     </div>
@@ -5355,6 +5484,95 @@ function renderWealthRankingPanel(room) {
   return `<div class="sb-panel"><div class="sb-panel-title">\u25c8 \u0425\u04e8\u0420\u04e8\u041d\u0413\u0418\u0419\u041d \u0428\u0410\u0422\u041b\u0410\u041b \u25c8</div><div class="sb-rank-grid">${cards}</div></div>`;
 }
 
+/* ===== WEALTH CANDLESTICK CHART ===== */
+const CHART_MARKER_ICON = {
+  buy_company: { icon: '\ud83c\udfe2', color: '#f5c94f' },
+  receive_rent: { icon: '\ud83e\ude99', color: '#23d18b' },
+  pay_rent: { icon: '\ud83e\ude99', color: '#ef5b5b' },
+  build_house: { icon: '\ud83c\udfe0', color: '#4599ff' },
+  build_corporation: { icon: '\ud83d\uddfc', color: '#a855f7' },
+  tax: { icon: '\u2b07\ufe0f', color: '#ef5b5b' },
+  chance_card: { icon: '\u2b50', color: '#f5c94f' },
+  pass_go: { icon: '\ud83e\ude99', color: '#23d18b' },
+};
+function renderCandlestickSVG(candles, opts) {
+  opts = opts || {};
+  const w = opts.width || 560, h = opts.height || 200;
+  const padL = 44, padR = 14, padT = 16, padB = 20;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+  if (!candles || candles.length === 0) {
+    return `<svg viewBox="0 0 ${w} ${h}" class="wealth-chart-svg"><text x="${w/2}" y="${h/2}" text-anchor="middle" fill="var(--chart-text)" font-size="12">\u041e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u0442\u04af\u04af\u0445 \u0431\u0430\u0439\u0445\u0433\u04af\u0439</text></svg>`;
+  }
+  const allVals = candles.flatMap(c => [c.high, c.low]);
+  let vMin = Math.min(...allVals), vMax = Math.max(...allVals);
+  if (vMin === vMax) { vMin -= 100; vMax += 100; }
+  const vPad = (vMax - vMin) * 0.1;
+  vMin -= vPad; vMax += vPad;
+  const yOf = v => padT + plotH - ((v - vMin) / (vMax - vMin)) * plotH;
+  const n = candles.length;
+  const slot = plotW / n;
+  const candleW = Math.max(3, Math.min(22, slot * 0.55));
+
+  let gridHtml = '';
+  for (let i = 0; i <= 4; i++) {
+    const gy = padT + (plotH / 4) * i;
+    const val = vMax - ((vMax - vMin) / 4) * i;
+    gridHtml += `<line x1="${padL}" y1="${gy}" x2="${w - padR}" y2="${gy}" stroke="var(--chart-grid)" stroke-width="1"></line>
+      <text x="${padL - 6}" y="${gy + 3}" text-anchor="end" font-size="9" fill="var(--chart-text)" opacity="0.7">\u20ae${fmt(val)}</text>`;
+  }
+
+  let candlesHtml = '';
+  candles.forEach((c, i) => {
+    const cx = padL + slot * i + slot / 2;
+    const isUp = c.close > c.open;
+    const isFlat = c.close === c.open;
+    const color = isFlat ? 'var(--candle-neutral)' : (isUp ? 'var(--candle-up)' : 'var(--candle-down)');
+    const yHigh = yOf(c.high), yLow = yOf(c.low);
+    const yOpen = yOf(c.open), yClose = yOf(c.close);
+    const bodyTop = Math.min(yOpen, yClose), bodyBot = Math.max(yOpen, yClose);
+    const bodyH = Math.max(1.5, bodyBot - bodyTop);
+    candlesHtml += `<g class="wealth-candle" data-round="${c.round}" data-open="${c.open}" data-high="${c.high}" data-low="${c.low}" data-close="${c.close}" data-change="${c.change}" data-changepct="${c.changePercent.toFixed(2)}">
+      <line x1="${cx}" y1="${yHigh}" x2="${cx}" y2="${yLow}" stroke="${color}" stroke-width="1.5"></line>
+      <rect x="${cx - candleW/2}" y="${bodyTop}" width="${candleW}" height="${bodyH}" fill="${color}" rx="1"></rect>
+    </g>`;
+    if (c.events && c.events.length > 0 && opts.showMarkers !== false) {
+      const uniqueTypes = [...new Set(c.events.map(e => e.type))].slice(0, 3);
+      uniqueTypes.forEach((type, mi) => {
+        const m = CHART_MARKER_ICON[type] || { icon: '\u2022', color: '#e4b943' };
+        const my = yHigh - 12 - mi * 13;
+        candlesHtml += `<text class="wealth-marker" data-round="${c.round}" data-type="${type}" x="${cx}" y="${my}" text-anchor="middle" font-size="10" style="cursor:pointer;">${m.icon}</text>`;
+      });
+    }
+  });
+
+  const lastClose = candles[candles.length - 1].close;
+  const lineY = yOf(lastClose);
+  const lineHtml = `<line x1="${padL}" y1="${lineY}" x2="${w - padR}" y2="${lineY}" stroke="${opts.playerColor || 'var(--crosshair)'}" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"></line>`;
+
+  return `<svg viewBox="0 0 ${w} ${h}" class="wealth-chart-svg" role="img" aria-label="\u0425\u04e9\u0440\u04e9\u043d\u0433\u0438\u0439\u043d \u0433\u0440\u0430\u0444\u0438\u043a, ${n} \u04af\u0435">
+    ${gridHtml}${lineHtml}${candlesHtml}
+  </svg>`;
+}
+function renderMiniWealthChart(room, player) {
+  const hist = (room.wealthHistory && room.wealthHistory[player.id]) || [];
+  const last5 = hist.slice(-5);
+  const latest = hist.length > 0 ? hist[hist.length - 1] : null;
+  const netWorth = latest ? latest.close : netWorth2(room, player);
+  const changePct = latest ? latest.changePercent : 0;
+  const arrow = changePct > 0 ? '\u25b2' : (changePct < 0 ? '\u25bc' : '\u2013');
+  const colorClass = changePct > 0 ? 'wc-up' : (changePct < 0 ? 'wc-down' : 'wc-flat');
+  return `<div class="sb-panel wealth-mini-panel">
+    <div class="sb-panel-title">\u25c8 \u0425\u04e8\u0420\u04e8\u041d\u0413\u0418\u0419\u041d \u0413\u0420\u0410\u0424\u0418\u041a \u25c8</div>
+    <div class="wc-mini-header">
+      <span class="wc-mini-value">\u20ae${fmt(netWorth)}</span>
+      <span class="wc-mini-change ${colorClass}">${arrow} ${Math.abs(changePct).toFixed(1)}%</span>
+    </div>
+    ${renderCandlestickSVG(last5, { width: 280, height: 90, showMarkers: false })}
+    <button class="wc-detail-btn" id="wealthChartDetailBtn" data-player="${player.id}">\u0414\u044d\u043b\u0433\u044d\u0440\u044d\u043d\u0433\u04af\u0439 \u2192</button>
+  </div>`;
+}
+function netWorth2(room, player) { return computePlayerWealth(room, player).total; }
+
 function renderMarketEffectsPanel(room) {
   const effects = room.activeMarketEffects || [];
   if (effects.length === 0) return '';
@@ -5533,6 +5751,16 @@ function renderGameResultsCinematic(room) {
         ${ach.bestRentIncome ? `<div class="results-achieve-card"><span class="ra-icon">\ud83d\udcb0</span><span class="ra-value">\u20ae${fmt(ach.bestRentIncome.amount)}</span><span class="ra-label">\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u0438\u0445 \u0442\u04af\u0440\u044d\u044d\u0441\u0438\u0439\u043d \u043e\u0440\u043b\u043e\u0433\u043e (${ach.bestRentIncome.name})</span></div>` : ''}
         ${ach.highestSingleRent ? `<div class="results-achieve-card"><span class="ra-icon">\u26a1</span><span class="ra-value">\u20ae${fmt(ach.highestSingleRent.amount)}</span><span class="ra-label">\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u04e9\u043d\u0434\u04e9\u0440 \u043d\u044d\u0433 \u0443\u0434\u0430\u0430\u0433\u0438\u0439\u043d \u0442\u04af\u0440\u044d\u044d\u0441 (${ach.highestSingleRent.name})</span></div>` : ''}
         ${ach.totalRentPaid > 0 ? `<div class="results-achieve-card"><span class="ra-icon">\ud83d\udcca</span><span class="ra-value">\u20ae${fmt(ach.totalRentPaid)}</span><span class="ra-label">\u041d\u0438\u0439\u0442 \u0442\u04e9\u043b\u0441\u04e9\u043d \u0442\u04af\u0440\u044d\u044d\u0441</span></div>` : ''}
+      </div>
+      <div class="results-wealth-charts">
+        <div class="results-stage-subtitle">\u25c8 \u0425\u04e9\u0420\u04e8\u041d\u0413\u0418\u0419\u041d \u0413\u0420\u0410\u0424\u0418\u041a \u25c8</div>
+        ${room.players.map(p => {
+          const hist = (room.wealthHistory && room.wealthHistory[p.id]) || [];
+          return `<div class="results-player-chart">
+            <div class="results-player-chart-head" style="--ring-color:${p.color}">${p.token} ${p.name}</div>
+            ${renderCandlestickSVG(hist, { width: 560, height: 130, playerColor: p.color })}
+          </div>`;
+        }).join('')}
       </div>`;
   } else if (stage === 'podium' || stage === 'celebration' || stage === 'completed') {
     const top3 = rankings.slice(0, Math.min(3, rankings.length));
@@ -5750,12 +5978,14 @@ function renderGame() {
         ${renderTurnStatusHeader(room, currentPlayer)}
         ${renderPlayersPanel(room, currentPlayer)}
         ${renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow)}
+        ${me ? renderMiniWealthChart(room, me) : ''}
         ${renderMarketEffectsPanel(room)}
         ${renderOwnedCompaniesPanel(room)}
         ${renderWealthRankingPanel(room)}
         ${renderActivityTimeline(room)}
       </div>
     </div>
+    ${wealthModalOpen ? renderWealthChartModal(room) : ''}
     <div class="mobile-sticky-bar">
       <span class="msb-avatar" style="--ring-color:${currentPlayer.color}">${currentPlayer.token}</span>
       <span class="msb-name">${currentPlayer.name}</span>
@@ -6049,6 +6279,7 @@ let resultsTriggered = false;
 
 function computePlayerWealth(room, player) {
   let companyValue = 0, houseValue = 0, corporationValue = 0, companyCount = 0, corpCount = 0, houseCount = 0;
+  let mortgageDebt = 0;
   Object.keys(room.propOwner).forEach(idx => {
     if (room.propOwner[idx] !== player.id) return;
     const sp = BOARD_CONFIG[idx];
@@ -6056,9 +6287,10 @@ function computePlayerWealth(room, player) {
     const level = houseLevel(room, idx);
     if (level >= 4) { corporationValue += buildCost(sp, room) * 4; corpCount++; }
     else if (level > 0) { houseValue += buildCost(sp, room) * level; houseCount += level; }
+    if (room.mortgaged && room.mortgaged[idx]) mortgageDebt += Math.round(sp.price * 0.5);
   });
-  const total = player.money + companyValue + houseValue + corporationValue;
-  return { playerId: player.id, cash: player.money, companyValue, houseValue, corporationValue, total, companyCount, corpCount, houseCount };
+  const total = player.money + companyValue + houseValue + corporationValue - mortgageDebt;
+  return { playerId: player.id, cash: player.money, companyValue, houseValue, corporationValue, mortgageDebt, total, companyCount, corpCount, houseCount };
 }
 
 function computeRankings(room) {
@@ -6137,6 +6369,94 @@ async function confirmReplay() {
 }
 
 let settingsModalOpen = false;
+let wealthModalOpen = false;
+let wealthModalPlayerId = null;
+let wealthModalTimeframe = 'all'; // '1' | '5' | '10' | 'all'
+let wealthModalTableView = false;
+
+function renderWealthChartModal(room) {
+  const players = room.players;
+  const activeId = wealthModalPlayerId || (players[0] && players[0].id);
+  const player = players.find(p => p.id === activeId) || players[0];
+  const hist = (room.wealthHistory && room.wealthHistory[player.id]) || [];
+  const tfMap = { '1': 1, '5': 5, '10': 10, 'all': hist.length };
+  const shown = hist.slice(-tfMap[wealthModalTimeframe]);
+  const latest = hist.length > 0 ? hist[hist.length - 1] : null;
+  const netWorth = latest ? latest.close : computePlayerWealth(room, player).total;
+  const totalChange = hist.length > 0 ? (netWorth - hist[0].open) : 0;
+  const totalChangePct = hist.length > 0 && hist[0].open !== 0 ? (totalChange / Math.abs(hist[0].open) * 100) : 0;
+  const highAll = hist.length > 0 ? Math.max(...hist.map(c => c.high)) : netWorth;
+  const lowAll = hist.length > 0 ? Math.min(...hist.map(c => c.low)) : netWorth;
+  const arrow = totalChange > 0 ? '\u25b2' : (totalChange < 0 ? '\u25bc' : '\u2013');
+
+  const tabsHtml = players.map(p => `<button class="wc-tab ${p.id === player.id ? 'active' : ''}" data-player-tab="${p.id}" style="--ring-color:${p.color}">${p.token} ${p.name}</button>`).join('');
+  const tfHtml = ['1','5','10','all'].map(tf => `<button class="wc-tf-btn ${wealthModalTimeframe === tf ? 'active' : ''}" data-tf="${tf}">${tf === 'all' ? '\u0411\u04ae\u0413\u0414' : tf + ' \u04ae\u0415'}</button>`).join('');
+
+  const tableHtml = wealthModalTableView ? `
+    <table class="wc-table">
+      <caption class="sr-only">\u04ae\u0435 \u0431\u04af\u0440\u0438\u0439\u043d \u043d\u044d\u044d\u043b\u0442, \u0445\u0430\u043c\u0433\u0438\u0439\u043d \u04e9\u043d\u0434\u04e9\u0440, \u0445\u0430\u043c\u0433\u0438\u0439\u043d \u0431\u0430\u0433\u0430, \u0445\u0430\u0430\u043b\u0442 \u04af\u0435\u0434\u0438\u0439\u043d \u043d\u04af\u0434</caption>
+      <thead><tr><th>\u04ae\u0415</th><th>\u041d\u042d\u042d\u041b\u0422</th><th>\u0425\u0410\u041c\u0413\u0418\u0419\u041d \u04e8\u041d\u0414\u04e8\u0420</th><th>\u0425\u0410\u041c\u0413\u0418\u0419\u041d \u0411\u0410\u0413\u0410</th><th>\u0425\u0410\u0410\u041b\u0422</th></tr></thead>
+      <tbody>${shown.slice().reverse().map(c => `<tr><td>${c.round}</td><td>\u20ae${fmt(c.open)}</td><td>\u20ae${fmt(c.high)}</td><td>\u20ae${fmt(c.low)}</td><td>\u20ae${fmt(c.close)}</td></tr>`).join('')}</tbody>
+    </table>` : renderCandlestickSVG(shown, { width: 640, height: 260, playerColor: player.color });
+
+  return `<div class="wealth-modal-backdrop" id="wealthModalBackdrop">
+    <div class="wealth-modal">
+      <button class="wc-close-btn" id="wealthModalClose" aria-label="\u0425\u0430\u0430\u0445">\u2715</button>
+      <div class="wc-tabs">${tabsHtml}</div>
+      <div class="wc-header">
+        <span class="wc-header-avatar" style="--ring-color:${player.color}">${player.token}</span>
+        <div>
+          <div class="wc-header-name">${player.name} \u2014 \u041d\u0418\u0419\u0422 \u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8</div>
+          <div class="wc-header-value">\u20ae${fmt(netWorth)}</div>
+          <div class="wc-header-change ${totalChange > 0 ? 'wc-up' : totalChange < 0 ? 'wc-down' : 'wc-flat'}">${totalChange >= 0 ? '+' : ''}\u20ae${fmt(totalChange)} ${arrow}${Math.abs(totalChangePct).toFixed(2)}%</div>
+        </div>
+        <div class="wc-header-stats">
+          <div>\u0414\u044d\u044d\u0434: \u20ae${fmt(highAll)}</div>
+          <div>\u0414\u043e\u043e\u0434: \u20ae${fmt(lowAll)}</div>
+        </div>
+      </div>
+      <div class="wc-controls">
+        <div class="wc-tf-group">${tfHtml}</div>
+        <button class="wc-table-toggle" id="wealthTableToggle">${wealthModalTableView ? '\ud83d\udcc8 \u0413\u0440\u0430\u0444\u0438\u043a' : '\ud83d\udccb \u0425\u04af\u0441\u043d\u044d\u0433\u0442'}</button>
+      </div>
+      <div class="wc-chart-area">${tableHtml}</div>
+      <div class="wc-legend"><span><i style="background:var(--candle-up)"></i>\u04e8\u0441\u04e9\u043b\u0442</span><span><i style="background:var(--candle-down)"></i>\u0411\u0443\u0443\u0440\u0430\u043b\u0442</span><span><i style="background:var(--candle-neutral)"></i>\u04e8\u04e9\u0440\u0447\u043b\u04e9\u0433\u04e9\u04e9\u0433\u04af\u0439</span></div>
+    </div>
+  </div>`;
+}
+function attachWealthModalEvents() {
+  const backdrop = document.getElementById('wealthModalBackdrop');
+  if (backdrop) backdrop.onclick = (e) => { if (e.target === backdrop) { wealthModalOpen = false; render(); } };
+  const closeBtn = document.getElementById('wealthModalClose'); if (closeBtn) closeBtn.onclick = () => { wealthModalOpen = false; render(); };
+  document.querySelectorAll('.wc-tab[data-player-tab]').forEach(btn => {
+    btn.onclick = () => { wealthModalPlayerId = btn.dataset.playerTab; render(); };
+  });
+  document.querySelectorAll('.wc-tf-btn[data-tf]').forEach(btn => {
+    btn.onclick = () => { wealthModalTimeframe = btn.dataset.tf; render(); };
+  });
+  const tableToggle = document.getElementById('wealthTableToggle');
+  if (tableToggle) tableToggle.onclick = () => { wealthModalTableView = !wealthModalTableView; render(); };
+  const detailBtn = document.getElementById('wealthChartDetailBtn');
+  if (detailBtn) detailBtn.onclick = () => { wealthModalOpen = true; wealthModalPlayerId = detailBtn.dataset.player; render(); };
+  let activeTip = null;
+  document.querySelectorAll('.wealth-candle, .wealth-marker').forEach(el => {
+    el.onmouseenter = (e) => {
+      const round = el.dataset.round;
+      const type = el.dataset.type;
+      const tooltip = document.getElementById('tile-tooltip');
+      if (!tooltip) return;
+      let text = `<div class="tt-name">${round}-\u0440 \u04af\u0435</div>`;
+      if (type) { text += `<div class="tt-price">${type}</div>`; }
+      else { text += `<div class="tt-price">\u041d\u0438\u0439\u0442 \u0445\u04e9\u0440\u04e9\u043d\u0433\u04e9: \u20ae${fmt(parseFloat(el.dataset.close))}</div>`; }
+      tooltip.innerHTML = text;
+      tooltip.style.display = 'block';
+      activeTip = tooltip;
+    };
+    el.onmousemove = (e) => { if (activeTip) { activeTip.style.left = (e.clientX + 12) + 'px'; activeTip.style.top = (e.clientY + 12) + 'px'; } };
+    el.onmouseleave = () => { if (activeTip) activeTip.style.display = 'none'; };
+  });
+}
+
 function toggleSettingsModal(open) {
   settingsModalOpen = open;
   const root = document.getElementById('card-popup-root');
@@ -6271,15 +6591,18 @@ function attachGameEvents() {
     saveSettings(); render();
   };
   const openSettings = document.getElementById('openSettingsBtn'); if (openSettings) openSettings.onclick = () => toggleSettingsModal(true);
+  const wealthDetailBtn = document.getElementById('wealthChartDetailBtn');
+  if (wealthDetailBtn) wealthDetailBtn.onclick = () => { wealthModalOpen = true; wealthModalPlayerId = wealthDetailBtn.dataset.player; render(); };
+  if (wealthModalOpen) attachWealthModalEvents();
   const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
   document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => { if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive) return; showCellDetail(idx); };
+    el.onclick = () => { if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen) return; showCellDetail(idx); };
   });
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive;
+    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen;
     const selectTile = () => {
       if (tileInteractionDisabled) return;
       selectedTileId = idx;
@@ -6311,11 +6634,11 @@ function attachGameEvents() {
   });
   document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen) return; showCellDetail(idx); };
   });
   document.querySelectorAll('.upgrade-icon[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen) return; showCellDetail(idx); };
   });
 }
 
