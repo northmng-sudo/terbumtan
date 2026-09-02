@@ -4382,7 +4382,7 @@ let buildingAnim = null; // { tileId, playerId, type: 'house'|'corp', stage, par
 /* ===== CAMERA SYSTEM ===== */
 let cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
 let cameraSeq = 0;
-const CAMERA_PRIORITY = { corporation: 5, purchase: 4, landing: 3, following: 2, returning: 1, overview: 0 };
+const CAMERA_PRIORITY = { corporation: 5, purchase: 4, landing: 3, following: 2, returning: 1, overview: 0, manual: 0 };
 
 let isMobileView = false;
 let mobileCamInitialized = false;
