@@ -555,6 +555,7 @@
   .msb-name { font-weight: 800; color: var(--sb-text); font-size: 12.5px; flex-shrink: 0; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .msb-dice { display: flex; gap: 4px; transform: scale(0.62); transform-origin: left center; flex-shrink: 0; }
   .msb-btn { flex: 1; height: 44px; border-radius: 12px; border: none; font-size: 20px; font-weight: 800; cursor: pointer; }
+  .msb-action-btn { font-size: 12px; padding: 0 6px; white-space: nowrap; }
   .msb-roll { background: linear-gradient(180deg, #ffcf6e, #d9840d); color: #241a0d; box-shadow: 0 3px 0 var(--gold-dark); }
   .msb-roll:disabled { opacity: 0.4; }
   .msb-end { background: var(--emerald); color: var(--cream); max-width: 52px; flex: 0 0 52px; }
@@ -4880,14 +4881,15 @@ function renderBuildingConstructionOverlay(tile, idx, owner, anim, room) {
   // house
   const level = houseLevel(room, idx);
   const prevCount = Math.max(0, Math.min(level - 1, 3));
-  const newSlotIndex = Math.min(level - 1, 2);
-  const staticHouses = tile.houseSlots.slice(0, prevCount).map(([hx, hy]) => {
+  const newSlotIndex = Math.max(0, Math.min(level - 1, 2));
+  const staticHouses = (tile.houseSlots || []).slice(0, prevCount).map(([hx, hy]) => {
     const hw = 16 * (tile.buildingScale || 1);
     const hl = ((hx - hw/2) / 1672 * 100).toFixed(2), ht = ((hy - hw) / 941 * 100).toFixed(2);
     const hwp = (hw/1672*100).toFixed(2), hhp = (hw/941*100).toFixed(2);
     return `<div class="upgrade-icon upgrade-house" style="left:${hl}%; top:${ht}%; width:${hwp}%; height:${hhp}%;"><span class="upgrade-glow-ring"></span><img src="player-house.png" onerror="this.style.display='none'"></div>`;
   }).join('');
-  const [nx, ny] = tile.houseSlots[newSlotIndex];
+  const slot = (tile.houseSlots || [])[newSlotIndex] || [tile.tokenX, tile.tokenY];
+  const [nx, ny] = slot;
   const nw = 16 * (tile.buildingScale || 1);
   const nl = ((nx - nw/2) / 1672 * 100).toFixed(2), nt = ((ny - nw) / 941 * 100).toFixed(2);
   const nwp = (nw/1672*100).toFixed(2), nhp = (nw/941*100).toFixed(2);
@@ -5993,9 +5995,17 @@ function renderGame() {
     <div class="mobile-sticky-bar">
       <span class="msb-avatar" style="--ring-color:${currentPlayer.color}">${currentPlayer.token}</span>
       <span class="msb-name">${currentPlayer.name}</span>
-      <div class="msb-dice">${renderDie(d1, diceRollingNow)}${renderDie(d2, diceRollingNow)}</div>
-      <button class="msb-btn msb-roll" id="mobileRollBtn" ${(!myTurn || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || isAnimatingMovement || buildingAnimationActive || rentCinematicActive) ? 'disabled' : ''}>\ud83c\udfb2</button>
-      <button class="msb-btn msb-end" id="mobileEndTurnBtn" ${(!myTurn || !room.hasRolled || room.pendingAction) ? 'disabled' : ''}>\u2713</button>
+      ${room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'buy' ? `
+        <button class="msb-btn msb-roll msb-action-btn" id="mobileBuyBtn">\ud83d\udcb0 \u0410\u0412\u0410\u0425</button>
+        <button class="msb-btn msb-end msb-action-btn" id="mobileSkipBuyBtn">\u0410\u041b\u0413\u0410\u0421\u0410\u0425</button>
+      ` : room.pendingAction && room.pendingAction.playerId === myId && room.pendingAction.type === 'build' ? `
+        <button class="msb-btn msb-roll msb-action-btn" id="mobileBuildBtn">\ud83c\udfd7\ufe0f \u0411\u0410\u0420\u0418\u0425</button>
+        <button class="msb-btn msb-end msb-action-btn" id="mobileSkipBuildBtn">\u0410\u041b\u0413\u0410\u0421\u0410\u0425</button>
+      ` : `
+        <div class="msb-dice">${renderDie(d1, diceRollingNow)}${renderDie(d2, diceRollingNow)}</div>
+        <button class="msb-btn msb-roll" id="mobileRollBtn" ${(!myTurn || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || isAnimatingMovement || buildingAnimationActive || rentCinematicActive || wealthModalOpen) ? 'disabled' : ''}>\ud83c\udfb2</button>
+        <button class="msb-btn msb-end" id="mobileEndTurnBtn" ${(!myTurn || !room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || wealthModalOpen) ? 'disabled' : ''}>\u2713</button>
+      `}
     </div>
     ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
   </div>`;
@@ -6587,6 +6597,10 @@ function attachGameEvents() {
   const mbcFocus = document.getElementById('mbcFocusPlayer'); if (mbcFocus) mbcFocus.onclick = () => mobileFocusCurrentPlayer();
   const mobileRoll = document.getElementById('mobileRollBtn'); if (mobileRoll) mobileRoll.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); rollDice(); };
   const mobileEnd = document.getElementById('mobileEndTurnBtn'); if (mobileEnd) mobileEnd.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); endTurn(); };
+  const mobileBuy = document.getElementById('mobileBuyBtn'); if (mobileBuy) mobileBuy.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); buyProperty(); };
+  const mobileSkipBuy = document.getElementById('mobileSkipBuyBtn'); if (mobileSkipBuy) mobileSkipBuy.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); skipBuy(); };
+  const mobileBuild = document.getElementById('mobileBuildBtn'); if (mobileBuild) mobileBuild.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); buildProperty(); };
+  const mobileSkipBuild = document.getElementById('mobileSkipBuildBtn'); if (mobileSkipBuild) mobileSkipBuild.onclick = () => { audioManager.playSfx('buttonClick'); vibrate(15); skipBuild(); };
   const quickMute = document.getElementById('quickMuteToggle');
   if (quickMute) quickMute.onclick = () => {
     const nowMuted = gameSettings.sfxEnabled || gameSettings.musicEnabled;
