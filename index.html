@@ -69,13 +69,18 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
   }
   label { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #8b96b0; margin: 18px 0 7px; }
-  input[type=text] {
+  input[type=text], input[type=email], input[type=password] {
     width: 100%; padding: 13px 14px; border-radius: 8px; border: 1px solid var(--slate-line);
     background: var(--night-indigo); color: var(--parchment); font-size: 16px; font-family: 'Work Sans', sans-serif;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
-  input[type=text]:focus { outline: none; border-color: var(--steppe-gold); box-shadow: 0 0 0 3px rgba(212,162,78,0.15); }
-  input[type=text]::placeholder { color: #5c6a86; }
+  input[type=text]:focus, input[type=email]:focus, input[type=password]:focus { outline: none; border-color: var(--steppe-gold); box-shadow: 0 0 0 3px rgba(212,162,78,0.15); }
+  input[type=text]::placeholder, input[type=email]::placeholder, input[type=password]::placeholder { color: #5c6a86; }
+  input[type=checkbox] { accent-color: var(--steppe-gold); width: 16px; height: 16px; }
+  .pw-row { position: relative; }
+  .pw-row input { padding-right: 44px; }
+  .pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 16px; cursor: pointer; opacity: 0.7; padding: 6px; }
+  .pw-toggle:hover { opacity: 1; }
   .btn {
     display: block; width: 100%; padding: 14px; margin-top: 14px; border: none; border-radius: 8px;
     font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.5px;
@@ -1188,6 +1193,84 @@
 const SUPABASE_URL = 'https://hqfmdergdpudwebisbtf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxZm1kZXJnZHB1ZHdlYmlzYnRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTc5MzYsImV4cCI6MjEwMzU3MzkzNn0._0pspquFI8-NqtDaTlhPWCxC3GHjFo6vP7OTekQr-0k';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ===== AUTH ===== */
+async function authSignUp(email, password, displayName) {
+  const { data, error } = await supabaseClient.auth.signUp({
+    email, password, options: { data: { display_name: displayName } },
+  });
+  return { data, error };
+}
+async function authSignIn(email, password) {
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  return { data, error };
+}
+async function authSignInWithGoogle() {
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href.split('#')[0].split('?')[0] },
+  });
+  return { data, error };
+}
+async function authSignOut() {
+  await supabaseClient.auth.signOut();
+  authState.user = null; authState.profile = null; authState.session = null; authState.isGuest = false;
+}
+async function authResetPassword(email) {
+  const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href.split('#')[0].split('?')[0],
+  });
+  return { data, error };
+}
+function authContinueAsGuest() {
+  authState.isGuest = true;
+  authState.user = null; authState.profile = null;
+  view = 'landing';
+  render();
+}
+async function fetchProfile(userId) {
+  try {
+    const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', userId).single();
+    if (error) return null;
+    return data;
+  } catch (e) { return null; }
+}
+async function fetchStatistics(userId) {
+  try {
+    const { data, error } = await supabaseClient.from('player_statistics').select('*').eq('user_id', userId).single();
+    if (error) return null;
+    return data;
+  } catch (e) { return null; }
+}
+async function initAuth() {
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    if (data && data.session) {
+      authState.session = data.session;
+      authState.user = data.session.user;
+      authState.profile = await fetchProfile(data.session.user.id);
+      myId = data.session.user.id;
+      myName = authState.profile ? authState.profile.display_name : (data.session.user.email || 'Тоглогч');
+      view = 'landing';
+    }
+  } catch (e) { /* offline or auth unavailable - fall back to auth gate */ }
+  authState.isLoading = false;
+  render();
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      authState.session = session; authState.user = session.user; authState.isGuest = false;
+      authState.profile = await fetchProfile(session.user.id);
+      myId = session.user.id;
+      myName = authState.profile ? authState.profile.display_name : (session.user.email || 'Тоглогч');
+      if (view === 'auth' || view.startsWith('auth-')) { view = 'landing'; render(); }
+    } else if (event === 'SIGNED_OUT') {
+      authState.session = null; authState.user = null; authState.profile = null;
+      myId = getOrCreateGuestId();
+      view = 'auth';
+      render();
+    }
+  });
+}
 
 const TOKENS = ['\ud83d\udc2b','\ud83d\udc0e','\ud83e\udd85','\ud83d\udc3a'];
 const TOKEN_COLORS = ['#D4A24E','#A63D2F','#7A9B63','#5A7EA6'];
@@ -3363,10 +3446,27 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-let myId = uid();
+function getOrCreateGuestId() {
+  try {
+    let gid = localStorage.getItem('ikhKhorongoGuestId');
+    if (!gid) { gid = 'guest-' + uid(); localStorage.setItem('ikhKhorongoGuestId', gid); }
+    return gid;
+  } catch (e) { return 'guest-' + uid(); }
+}
+
+let authState = {
+  user: null,        // Supabase auth user object, null if guest/unauthenticated
+  profile: null,      // row from profiles table
+  session: null,
+  isLoading: true,
+  isGuest: false,
+};
+
+let myId = getOrCreateGuestId();
 let myName = '';
+try { myName = localStorage.getItem('ikhKhorongoGuestName') || ''; } catch (e) {}
 let currentRoom = null;
-let view = 'landing';
+let view = 'auth';
 let errorMsg = '';
 let justRolled = false;
 let debugMode = false;
@@ -4605,6 +4705,12 @@ function renderBuildings(level) {
 function render() {
   const app = document.getElementById('app');
   if (currentRoom) { /* card popup now handled by maybeShowCardModal in the render() dispatcher */ }
+  if (authState.isLoading) { app.innerHTML = renderAuthLoading(); return; }
+  if (view === 'auth') { app.innerHTML = renderAuthGate(); attachAuthGateEvents(); return; }
+  if (view === 'auth-signup') { app.innerHTML = renderAuthSignup(); attachAuthSignupEvents(); return; }
+  if (view === 'auth-signin') { app.innerHTML = renderAuthSignin(); attachAuthSigninEvents(); return; }
+  if (view === 'auth-reset') { app.innerHTML = renderAuthReset(); attachAuthResetEvents(); return; }
+  if (view === 'profile') { app.innerHTML = renderProfile(); attachProfileEvents(); return; }
   if (view === 'landing') { app.innerHTML = renderLanding(); attachLandingEvents(); return; }
   if (view === 'waiting') { app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
   if (view === 'game') {
@@ -4633,13 +4739,204 @@ function render() {
   }
 }
 
+let authFormState = { loading: false, error: '', info: '' };
+
+function renderAuthLoading() {
+  return `<div class="screen"><div class="eyebrow">\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9</div>
+    <div class="landing-card" style="text-align:center; padding:40px 20px;">
+      <div class="pulse-dot" style="display:inline-block; width:10px; height:10px; margin-bottom:10px;"></div>
+      <div style="color:#9AA6BE;">\u0410\u0447\u0430\u0430\u043b\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+    </div></div>`;
+}
+
+function renderAuthGate() {
+  return `<div class="screen">
+    <div class="eyebrow">\u0422\u0430\u0432\u0442\u0430\u0439 \u0442\u043e\u0433\u043b\u043e\u043b\u0442</div>
+    <div class="seal-title">\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9</div>
+    <div class="subtitle">\u041d\u044d\u0432\u0442\u044d\u0440\u044d\u044d\u0434 \u044d\u0441\u0432\u044d\u043b \u0437\u043e\u0447\u043d\u043e\u043e\u0440 \u04af\u0440\u0433\u044d\u043b\u0436\u043b\u04af\u04af\u043b\u043d\u044d</div>
+    <div class="landing-card">
+      <button class="btn btn-secondary" id="guestBtn">\ud83d\udc64 \u0417\u043e\u0447\u043d\u043e\u043e\u0440 \u04af\u0440\u0433\u044d\u043b\u0436\u043b\u04af\u04af\u043b\u044d\u0445</button>
+      <button class="btn btn-secondary" id="googleBtn">\ud83d\udd0d Google-\u044d\u044d\u0440 \u043d\u044d\u0432\u0442\u044d\u0440\u044d\u0445</button>
+      <button class="btn btn-primary" id="emailSigninBtn">\u2709\ufe0f \u0418-\u043c\u044d\u0439\u043b\u044d\u044d\u0440 \u043d\u044d\u0432\u0442\u044d\u0440\u044d\u0445</button>
+      <div class="divider">\u044d\u0441\u0432\u044d\u043b</div>
+      <button class="btn btn-secondary" id="signupBtn">\u0428\u0438\u043d\u044d\u044d\u0440 \u0431\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u044d\u0445</button>
+      <div class="error-msg">${authFormState.error}</div>
+    </div>
+  </div>`;
+}
+function attachAuthGateEvents() {
+  document.getElementById('guestBtn').onclick = () => authContinueAsGuest();
+  document.getElementById('googleBtn').onclick = async () => {
+    authFormState.error = '';
+    const { error } = await authSignInWithGoogle();
+    if (error) { authFormState.error = error.message; render(); }
+  };
+  document.getElementById('emailSigninBtn').onclick = () => { authFormState = { loading: false, error: '', info: '' }; view = 'auth-signin'; render(); };
+  document.getElementById('signupBtn').onclick = () => { authFormState = { loading: false, error: '', info: '' }; view = 'auth-signup'; render(); };
+}
+
+function renderAuthSignup() {
+  return `<div class="screen">
+    <div class="eyebrow">\u0428\u0438\u043d\u044d\u044d\u0440 \u0431\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u044d\u0445</div>
+    <div class="seal-title">\u0411\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u044d\u0445</div>
+    <div class="landing-card">
+      <label>\u0422\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0439\u043d \u043d\u044d\u0440</label>
+      <input type="text" id="suName" maxlength="16" placeholder="\u041d\u044d\u0440\u044d\u044d \u0431\u0438\u0447\u043d\u044d \u04af\u04af">
+      <label>\u0418-\u043c\u044d\u0439\u043b</label>
+      <input type="email" id="suEmail" placeholder="you@example.com">
+      <label>\u041d\u0443\u0443\u0446 \u04af\u0433 <span style="opacity:0.6;">(\u0445\u0430\u043c\u0433\u0438\u0439\u043d \u0431\u0430\u0433\u0430 8 \u0442\u044d\u043c\u0434\u044d\u0433\u0442)</span></label>
+      <div class="pw-row"><input type="password" id="suPass" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"><button type="button" class="pw-toggle" id="suPassToggle">\ud83d\udc41</button></div>
+      <label>\u041d\u0443\u0443\u0446 \u04af\u0433 \u0434\u0430\u0432\u0442\u0430\u0445</label>
+      <input type="password" id="suPass2" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022">
+      <label style="display:flex; align-items:center; gap:8px; font-weight:400; margin-top:6px;"><input type="checkbox" id="suTerms" style="width:auto;"> \u041d\u04e9\u0445\u0446\u04e9\u043b\u0438\u0439\u0433 \u0437\u04e9\u0432\u0448\u04e9\u04e9\u0440\u043d\u04e9</label>
+      <button class="btn btn-primary" id="suSubmit" ${authFormState.loading ? 'disabled' : ''}>${authFormState.loading ? '...' : '\u0411\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u044d\u0445'}</button>
+      <div class="error-msg">${authFormState.error}</div>
+      ${authFormState.info ? `<div style="color:var(--grass-green); font-size:12.5px; text-align:center; margin-top:6px;">${authFormState.info}</div>` : ''}
+      <button class="btn btn-secondary" id="suBackBtn" style="margin-top:10px;">\u2190 \u0411\u0443\u0446\u0430\u0445</button>
+    </div>
+  </div>`;
+}
+function attachAuthSignupEvents() {
+  document.getElementById('suPassToggle').onclick = () => {
+    const el = document.getElementById('suPass');
+    el.type = el.type === 'password' ? 'text' : 'password';
+  };
+  document.getElementById('suBackBtn').onclick = () => { authFormState = { loading: false, error: '', info: '' }; view = 'auth'; render(); };
+  document.getElementById('suSubmit').onclick = async () => {
+    if (authFormState.loading) return;
+    const name = document.getElementById('suName').value.trim();
+    const email = document.getElementById('suEmail').value.trim();
+    const pass = document.getElementById('suPass').value;
+    const pass2 = document.getElementById('suPass2').value;
+    const terms = document.getElementById('suTerms').checked;
+    if (!name) { authFormState.error = '\u041d\u044d\u0440\u044d\u044d \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.'; render(); return; }
+    if (!email) { authFormState.error = '\u0418-\u043c\u044d\u0439\u043b\u044d\u044d \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.'; render(); return; }
+    if (pass.length < 8) { authFormState.error = '\u041d\u0443\u0443\u0446 \u04af\u0433 \u0445\u0430\u043c\u0433\u0438\u0439\u043d \u0431\u0430\u0433\u0430 8 \u0442\u044d\u043c\u0434\u044d\u0433\u0442 \u0431\u0430\u0439\u043d\u0430.'; render(); return; }
+    if (pass !== pass2) { authFormState.error = '\u041d\u0443\u0443\u0446 \u04af\u0433 \u0442\u043e\u0445\u0438\u0440\u043e\u0445\u0433\u04af\u0439 \u0431\u0430\u0439\u043d\u0430.'; render(); return; }
+    if (!terms) { authFormState.error = '\u041d\u04e9\u0445\u0446\u04e9\u043b\u0438\u0439\u0433 \u0437\u04e9\u0432\u0448\u04e9\u04e9\u0440\u04e9\u0445 \u0448\u0430\u0430\u0440\u0434\u043b\u0430\u0433\u0430\u0442\u0430\u0439.'; render(); return; }
+    authFormState = { loading: true, error: '', info: '' }; render();
+    const { error } = await authSignUp(email, pass, name);
+    authFormState.loading = false;
+    if (error) { authFormState.error = error.message; render(); return; }
+    authFormState.info = '\u0411\u04af\u0440\u0442\u0433\u044d\u043b\u04af\u04af\u043b\u044d\u044d! \u0418-\u043c\u044d\u0439\u043b\u044d\u044d \u0431\u0430\u0442\u0430\u043b\u0433\u0430\u0430\u0436\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.';
+    render();
+  };
+}
+
+function renderAuthSignin() {
+  return `<div class="screen">
+    <div class="eyebrow">\u041d\u044d\u0432\u0442\u044d\u0440\u044d\u0445</div>
+    <div class="seal-title">\u0418-\u043c\u044d\u0439\u043b\u044d\u044d\u0440 \u043d\u044d\u0432\u0442\u044d\u0440\u044d\u0445</div>
+    <div class="landing-card">
+      <label>\u0418-\u043c\u044d\u0439\u043b</label>
+      <input type="email" id="siEmail" placeholder="you@example.com">
+      <label>\u041d\u0443\u0443\u0446 \u04af\u0433</label>
+      <div class="pw-row"><input type="password" id="siPass" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"><button type="button" class="pw-toggle" id="siPassToggle">\ud83d\udc41</button></div>
+      <div style="text-align:right; margin-top:4px;"><a href="#" id="siForgotLink" style="color:var(--steppe-gold); font-size:12px;">\u041d\u0443\u0443\u0446 \u04af\u0433\u044d\u044d \u043c\u0430\u0440\u0442\u0441\u0430\u043d</a></div>
+      <button class="btn btn-primary" id="siSubmit" ${authFormState.loading ? 'disabled' : ''}>${authFormState.loading ? '...' : '\u041d\u044d\u0432\u0442\u044d\u0440\u044d\u0445'}</button>
+      <div class="error-msg">${authFormState.error}</div>
+      <button class="btn btn-secondary" id="siBackBtn" style="margin-top:10px;">\u2190 \u0411\u0443\u0446\u0430\u0445</button>
+    </div>
+  </div>`;
+}
+function attachAuthSigninEvents() {
+  document.getElementById('siPassToggle').onclick = () => {
+    const el = document.getElementById('siPass');
+    el.type = el.type === 'password' ? 'text' : 'password';
+  };
+  document.getElementById('siBackBtn').onclick = () => { authFormState = { loading: false, error: '', info: '' }; view = 'auth'; render(); };
+  document.getElementById('siForgotLink').onclick = (e) => { e.preventDefault(); authFormState = { loading: false, error: '', info: '' }; view = 'auth-reset'; render(); };
+  document.getElementById('siSubmit').onclick = async () => {
+    if (authFormState.loading) return;
+    const email = document.getElementById('siEmail').value.trim();
+    const pass = document.getElementById('siPass').value;
+    if (!email || !pass) { authFormState.error = '\u0418-\u043c\u044d\u0439\u043b, \u043d\u0443\u0443\u0446 \u04af\u0433\u044d\u044d\u0433 \u0431\u04af\u0442\u044d\u043d \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.'; render(); return; }
+    authFormState = { loading: true, error: '', info: '' }; render();
+    const { error } = await authSignIn(email, pass);
+    authFormState.loading = false;
+    if (error) { authFormState.error = error.message; render(); return; }
+  };
+}
+
+function renderAuthReset() {
+  return `<div class="screen">
+    <div class="eyebrow">\u041d\u0443\u0443\u0446 \u04af\u0433 \u0441\u044d\u0440\u0433\u044d\u044d\u0445</div>
+    <div class="seal-title">\u041d\u0443\u0443\u0446 \u04af\u0433\u044d\u044d \u043c\u0430\u0440\u0442\u0441\u0430\u043d</div>
+    <div class="landing-card">
+      <label>\u0418-\u043c\u044d\u0439\u043b</label>
+      <input type="email" id="rsEmail" placeholder="you@example.com">
+      <button class="btn btn-primary" id="rsSubmit" ${authFormState.loading ? 'disabled' : ''}>${authFormState.loading ? '...' : '\u0418\u043b\u0433\u044d\u044d\u0445'}</button>
+      <div class="error-msg">${authFormState.error}</div>
+      ${authFormState.info ? `<div style="color:var(--grass-green); font-size:12.5px; text-align:center; margin-top:6px;">${authFormState.info}</div>` : ''}
+      <button class="btn btn-secondary" id="rsBackBtn" style="margin-top:10px;">\u2190 \u0411\u0443\u0446\u0430\u0445</button>
+    </div>
+  </div>`;
+}
+function attachAuthResetEvents() {
+  document.getElementById('rsBackBtn').onclick = () => { authFormState = { loading: false, error: '', info: '' }; view = 'auth-signin'; render(); };
+  document.getElementById('rsSubmit').onclick = async () => {
+    if (authFormState.loading) return;
+    const email = document.getElementById('rsEmail').value.trim();
+    if (!email) { authFormState.error = '\u0418-\u043c\u044d\u0439\u043b\u044d\u044d \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.'; render(); return; }
+    authFormState = { loading: true, error: '', info: '' }; render();
+    const { error } = await authResetPassword(email);
+    authFormState.loading = false;
+    if (error) { authFormState.error = error.message; render(); return; }
+    authFormState.info = '\u0418\u043b\u0433\u044d\u044d\u0441\u044d\u043d \u0445\u043e\u043b\u0431\u043e\u043e\u0441 \u0442\u0430\u043d\u044b \u0438-\u043c\u044d\u0439\u043b\u0440\u04af\u04af \u0438\u043b\u0433\u044d\u044d\u0433\u0434\u044d\u0432.';
+    render();
+  };
+}
+
+function renderProfile() {
+  if (authState.isGuest || !authState.user) {
+    return `<div class="screen">
+      <div class="eyebrow">\u041f\u0440\u043e\u0444\u0430\u0439\u043b</div>
+      <div class="seal-title">\u0417\u043e\u0447\u043d\u044b \u0442\u043e\u0433\u043b\u043e\u0433\u0447</div>
+      <div class="landing-card" style="text-align:center;">
+        <div style="color:#9AA6BE; margin-bottom:14px;">\u0422\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u043e \u0445\u0430\u0434\u0433\u0430\u043b\u0430\u0445\u044b\u043d \u0442\u0443\u043b\u0434 \u0431\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u043d\u04af\u04af.</div>
+        <button class="btn btn-primary" id="profileSignupBtn">\u0428\u0438\u043d\u044d\u044d\u0440 \u0431\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u044d\u0445</button>
+        <button class="btn btn-secondary" id="profileBackBtn" style="margin-top:10px;">\u2190 \u0411\u0443\u0446\u0430\u0445</button>
+      </div>
+    </div>`;
+  }
+  const p = authState.profile || {};
+  const s = authState._stats || {};
+  return `<div class="screen">
+    <div class="eyebrow">\u041f\u0440\u043e\u0444\u0430\u0439\u043b</div>
+    <div class="landing-card" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">${p.avatar || '\ud83d\udc2b'}</div>
+      <div class="seal-title" style="font-size:20px;">${p.display_name || authState.user.email}</div>
+      <div class="detail-row"><span>\u041d\u0438\u0439\u0442 \u0442\u043e\u0433\u043b\u043e\u043b\u0442</span><span>${s.games_played || 0}</span></div>
+      <div class="detail-row"><span>\u042f\u043b\u0430\u043b\u0442</span><span>${s.games_won || 0}</span></div>
+      <div class="detail-row"><span>\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u04e9\u043d\u0434\u04e9\u0440 \u0445\u04e9\u0440\u04e9\u043d\u0433\u04e9</span><span>\u20ae${fmt(s.highest_wealth || 0)}</span></div>
+      <div class="detail-row"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0441\u0430\u043d \u043a\u043e\u043c\u043f\u0430\u043d\u0438</span><span>${s.companies_purchased || 0}</span></div>
+      <div class="detail-row"><span>\u0411\u0430\u0439\u0433\u0443\u0443\u043b\u0441\u0430\u043d \u043a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438</span><span>${s.corporations_built || 0}</span></div>
+      <button class="btn btn-secondary" id="profileBackBtn" style="margin-top:14px;">\u2190 \u0411\u0443\u0446\u0430\u0445</button>
+      <button class="btn btn-secondary" id="logoutBtn" style="margin-top:8px; color:var(--sb-danger, #e85d5d);">\u0413\u0430\u0440\u0430\u0445</button>
+    </div>
+  </div>`;
+}
+function attachProfileEvents() {
+  const backBtn = document.getElementById('profileBackBtn'); if (backBtn) backBtn.onclick = () => { view = 'landing'; render(); };
+  const signupBtn = document.getElementById('profileSignupBtn'); if (signupBtn) signupBtn.onclick = () => { view = 'auth-signup'; render(); };
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.onclick = async () => { await authSignOut(); view = 'auth'; render(); };
+  if (authState.user && !authState._stats) {
+    fetchStatistics(authState.user.id).then(s => { authState._stats = s || {}; render(); });
+  }
+}
+
 function renderLanding() {
+  const acctLine = authState.user
+    ? `\ud83d\udc64 ${authState.profile ? authState.profile.display_name : authState.user.email} \u00b7 <a href="#" id="landingProfileLink" style="color:var(--steppe-gold);">\u041f\u0440\u043e\u0444\u0430\u0439\u043b</a> \u00b7 <a href="#" id="landingLogoutLink" style="color:#9AA6BE;">\u0413\u0430\u0440\u0430\u0445</a>`
+    : `\ud83d\udc64 \u0417\u043e\u0447\u043d\u043e\u043e\u0440 \u00b7 <a href="#" id="landingSignupLink" style="color:var(--steppe-gold);">\u0411\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u044d\u044d\u0434 \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u043e \u0445\u0430\u0434\u0433\u0430\u043b\u0430\u0445</a>`;
   return `<div class="screen">
     <div class="eyebrow">\u041e\u043d\u043b\u0430\u0439\u043d \u043e\u043b\u043e\u043d \u0442\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0439\u043d \u0442\u044d\u043c\u0446\u044d\u044d\u043d</div>
     <div class="seal-title">\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9</div>
     <div class="subtitle">\u041a\u043e\u043c\u043f\u0430\u043d\u0438 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432, \u0442\u04af\u0440\u044d\u044d\u0441\u044d\u044d \u0446\u0443\u0433\u043b\u0443\u0443\u043b, \u044d\u0437\u044d\u043d\u0442 \u0443\u043b\u0441\u0430\u0430 \u04e9\u0440\u0433\u04e9\u0442\u0433\u04e9</div>
     <div class="motif-strip">\ud83c\udfe2 \u00b7 \ud83c\udfe6 \u00b7 \u26cf\ufe0f \u00b7 \ud83d\udcb0</div>
     <div class="landing-card">
+      <div style="text-align:center; font-size:11.5px; color:#9AA6BE; margin-bottom:10px;">${acctLine}</div>
       <label>\u0422\u0430\u043d\u044b \u043d\u044d\u0440</label>
       <input type="text" id="nameInput" maxlength="16" placeholder="\u041d\u044d\u0440\u044d\u044d \u0431\u0438\u0447\u043d\u044d \u04af\u04af" value="${myName}">
       <button class="btn btn-primary" id="createBtn">\u0428\u0438\u043d\u044d \u04e9\u0440\u04e9\u04e9 \u04af\u04af\u0441\u0433\u044d\u0445</button>
@@ -4655,15 +4952,18 @@ function attachLandingEvents() {
   document.getElementById('createBtn').onclick = () => {
     const name = document.getElementById('nameInput').value.trim();
     if (!name) { errorMsg = '\u041d\u044d\u0440\u044d\u044d \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.'; render(); return; }
-    myName = name; errorMsg = ''; createRoom(name);
+    myName = name; errorMsg = ''; if (!authState.user) { try { localStorage.setItem('ikhKhorongoGuestName', name); } catch (e) {} } createRoom(name);
   };
   document.getElementById('joinBtn').onclick = () => {
     const name = document.getElementById('nameInput').value.trim();
     const code = document.getElementById('codeInput').value.trim();
     if (!name) { errorMsg = '\u041d\u044d\u0440\u044d\u044d \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.'; render(); return; }
     if (!code) { errorMsg = '\u04e8\u0440\u04e9\u04e9\u043d\u0438\u0439 \u043a\u043e\u0434\u043e\u043e \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443.'; render(); return; }
-    myName = name; errorMsg = ''; joinRoom(code, name);
+    myName = name; errorMsg = ''; if (!authState.user) { try { localStorage.setItem('ikhKhorongoGuestName', name); } catch (e) {} } joinRoom(code, name);
   };
+  const profileLink = document.getElementById('landingProfileLink'); if (profileLink) profileLink.onclick = (e) => { e.preventDefault(); view = 'profile'; render(); };
+  const logoutLink = document.getElementById('landingLogoutLink'); if (logoutLink) logoutLink.onclick = async (e) => { e.preventDefault(); await authSignOut(); view = 'auth'; render(); };
+  const signupLink = document.getElementById('landingSignupLink'); if (signupLink) signupLink.onclick = (e) => { e.preventDefault(); authFormState = { loading: false, error: '', info: '' }; view = 'auth-signup'; render(); };
 }
 function renderWaiting() {
   const room = currentRoom;
@@ -5801,6 +6101,7 @@ window.addEventListener('resize', () => {
 });
 
 render();
+initAuth();
 </script>
 </body>
 </html>
