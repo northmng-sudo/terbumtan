@@ -7438,7 +7438,7 @@ function renderGame() {
     </div>
     ${wealthModalOpen ? renderWealthChartModal(room) : ''}
     ${isMobileView ? renderMobileBottomSheet(room, currentPlayer, me) : ''}
-    ${isMobileView ? renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow) : ''}
+    ${isMobileView && !chatOpen ? renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow) : ''}
     ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
     ${!isMobileView ? renderChatWidget(room) : ''}
   </div>`;
