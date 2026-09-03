@@ -754,6 +754,38 @@
   .emoji-picker-btn:hover { background: rgba(245,202,85,0.15); }
 
   .chat-widget-anchor { position: fixed; right: 16px; bottom: 16px; z-index: 45; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+
+  /* ===== GAME DIRECTOR: BANNER ===== */
+  .director-banner {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 55;
+    background: linear-gradient(160deg, rgba(10,42,34,0.96), rgba(4,20,16,0.98));
+    border: 1.5px solid var(--gold); border-radius: 14px; padding: 8px 20px;
+    font-size: 13px; font-weight: 800; color: var(--gold-light, #ffe8a3); text-align: center;
+    max-width: 88vw; box-shadow: 0 8px 22px rgba(0,0,0,0.5);
+    animation: bannerSlide 0.35s ease, bannerFadeOut 0.4s ease 1.8s forwards;
+    pointer-events: none;
+  }
+  @keyframes bannerSlide { from { opacity: 0; transform: translate(-50%, -14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  @keyframes bannerFadeOut { to { opacity: 0; } }
+  @media (max-width: 768px) { .director-banner { font-size: 11.5px; padding: 7px 14px; top: calc(env(safe-area-inset-top) + 6px); max-width: 92vw; } }
+
+  /* ===== GAME DIRECTOR: FINAL SHOWDOWN ===== */
+  .fsd-overlay {
+    position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; gap: 6vw;
+    background: radial-gradient(ellipse at 50% 50%, rgba(20,10,4,0.65) 0%, rgba(2,6,5,0.92) 100%);
+    animation: fsdFadeIn 0.4s ease;
+  }
+  @keyframes fsdFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .fsd-side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .fsd-avatar { width: 76px; height: 76px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 3px solid var(--ring, var(--gold)); display: flex; align-items: center; justify-content: center; font-size: 38px; box-shadow: 0 0 30px var(--ring, var(--gold)); }
+  .fsd-name { font-weight: 800; font-size: 16px; color: var(--cream, #fff); }
+  .fsd-worth { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--gold-light, #ffe8a3); font-weight: 800; }
+  .fsd-sub { font-size: 11px; color: var(--sb-muted, #9AA6BE); }
+  .fsd-mid { text-align: center; }
+  .fsd-title { font-family: 'Cinzel', serif; font-weight: 800; font-size: 30px; letter-spacing: 3px; color: var(--gold); text-shadow: 0 0 24px rgba(245,202,85,0.8); animation: fsdTitlePulse 1s ease-in-out infinite; }
+  @keyframes fsdTitlePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  .fsd-skip-btn { position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 10px; padding: 6px 14px; font-size: 11px; cursor: pointer; }
+  @media (max-width: 768px) { .fsd-overlay { flex-direction: column; gap: 3vh; } .fsd-avatar { width: 56px; height: 56px; font-size: 28px; } .fsd-title { font-size: 22px; } }
   .chat-toggle-btn {
     width: 52px; height: 52px; border-radius: 50%; font-size: 22px; cursor: pointer;
     background: linear-gradient(160deg, var(--emerald-light, #25cb90), var(--emerald, #0a7a59));
@@ -1523,6 +1555,10 @@
   .detail-group-chip { flex: 1; height: 6px; border-radius: 4px; align-self: center; }
   .settings-popup { max-width: 380px; }
   .settings-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+  .settings-row-col { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .cinematic-intensity-row { display: flex; gap: 6px; width: 100%; }
+  .ci-btn { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(245,202,85,0.25); border-radius: 8px; padding: 6px; font-size: 11px; color: var(--sb-muted, #9AA6BE); cursor: pointer; }
+  .ci-btn.active { background: rgba(245,202,85,0.18); border-color: var(--gold); color: var(--gold-light, #ffe8a3); font-weight: 800; }
   .settings-toggle { border: 1.5px solid var(--steppe-gold); border-radius: 20px; padding: 5px 14px; font-size: 11px; font-weight: 800; cursor: pointer; background: transparent; color: var(--steppe-gold); }
   .settings-toggle.on { background: var(--steppe-gold); color: #241a0d; }
   .settings-slider { width: 130px; accent-color: var(--steppe-gold); }
@@ -4269,7 +4305,7 @@ let justRolled = false;
 let debugMode = false;
 
 /* ===== SETTINGS (audio/vibration/environment) ===== */
-const DEFAULT_SETTINGS = { sfxEnabled: true, musicEnabled: true, vibrationEnabled: true, environmentEnabled: true, sfxVolume: 0.75, musicVolume: 0.35, chatSoundEnabled: true, reactionsEnabled: true };
+const DEFAULT_SETTINGS = { sfxEnabled: true, musicEnabled: true, vibrationEnabled: true, environmentEnabled: true, sfxVolume: 0.75, musicVolume: 0.35, chatSoundEnabled: true, reactionsEnabled: true, cinematicIntensity: 'full' };
 let gameSettings = loadSettings();
 function loadSettings() {
   try {
@@ -4728,6 +4764,41 @@ function watchBankruptcies(room) {
     if (p.bankrupt && !knownBankruptIds.has(p.id)) {
       knownBankruptIds.add(p.id);
       if (gameSettings.reactionsEnabled) suggestContextualReaction('bankruptcy', 'bankrupt-' + p.id);
+      showDirectorBanner(`${p.name} \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u043e\u0441 \u0445\u0430\u0441\u0430\u0433\u0434\u043b\u0430\u0430`, { dedupeKey: 'bankrupt-banner-' + p.id });
+    }
+  });
+}
+
+function watchRankingChanges(room) {
+  if (!room) return;
+  const active = room.players.filter(p => !p.bankrupt);
+  const order = active.map(p => ({ id: p.id, worth: netWorth(room, p) })).sort((a, b) => b.worth - a.worth).map(x => x.id);
+  if (!directorState.knownRankOrder) { directorState.knownRankOrder = order; return; }
+  const prevOrder = directorState.knownRankOrder;
+  if (order[0] && order[0] !== prevOrder[0] && prevOrder.includes(order[0])) {
+    const leader = room.players.find(p => p.id === order[0]);
+    if (leader) showDirectorBanner(`\ud83d\udc51 \u0428\u0438\u043d\u044d \u0445\u04e9\u0440\u04e9\u043d\u0433\u0438\u0439\u043d \u0442\u044d\u0440\u0433\u04af\u04af\u043b\u044d\u0433\u0447: ${leader.name}`, { dedupeKey: 'leader-' + order[0] + '-' + room.turnCount });
+  }
+  directorState.knownRankOrder = order;
+}
+
+let knownFullGroupIds = new Set();
+function watchDirectorBannerEvents(room) {
+  if (!room) return;
+  ['A', 'B', 'C', 'D'].forEach(grp => {
+    const props = BOARD_CONFIG.filter(t => t.type === 'property' && t.colorGroup === grp);
+    if (props.length === 0) return;
+    const ownerId = room.propOwner[props[0].id];
+    if (!ownerId) return;
+    const fullyOwned = props.every(t => room.propOwner[t.id] === ownerId);
+    const key = grp + '-' + ownerId;
+    if (fullyOwned && !knownFullGroupIds.has(key)) {
+      knownFullGroupIds.add(key);
+      const p = room.players.find(pl => pl.id === ownerId);
+      if (p) {
+        showDirectorBanner(`${p.name} \u0441\u0430\u043b\u0431\u0430\u0440\u044b\u0433 \u0431\u04af\u0440\u044d\u043d \u044d\u0437\u044d\u043c\u0448\u0438\u043b\u043b\u044d\u044d`, { dedupeKey: 'fullgroup-' + key });
+        if (gameSettings.reactionsEnabled) suggestContextualReaction('build_corporation', 'fullgroup-' + key + '-reaction');
+      }
     }
   });
 }
@@ -5622,7 +5693,10 @@ function maybeTriggerBuildAnimation(room) {
       const type = now >= 4 ? 'corp' : 'house';
       knownLevels = currentLevels; knownOwners = currentOwners;
       runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, type);
-      if (type === 'corp' && gameSettings.reactionsEnabled) suggestContextualReaction('build_corporation', 'corp-' + idx);
+      if (type === 'corp') {
+        if (gameSettings.reactionsEnabled) suggestContextualReaction('build_corporation', 'corp-' + idx);
+        if (owner && canPlayBigCinematic()) { markBigCinematicPlayed(); showDirectorBanner('\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438 \u0431\u0430\u0439\u0433\u0443\u0443\u043b\u0430\u0433\u0434\u043b\u0430\u0430', { dedupeKey: 'corpbanner-' + idx }); }
+      }
       return;
     }
   }
@@ -5634,6 +5708,7 @@ function maybeTriggerBuildAnimation(room) {
       const owner = room.players.find(p => p.id === nowOwner);
       runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, 'purchase');
       if (gameSettings.reactionsEnabled) suggestContextualReaction('buy_company', 'buy-' + idx + '-' + nowOwner);
+      if (owner) showDirectorBanner(`${BOARD_CONFIG[idx].name} \u0448\u0438\u043d\u044d \u044d\u0437\u044d\u043c\u0448\u0438\u0433\u0447\u0442\u044d\u0439 \u0431\u043e\u043b\u043b\u043e\u043e`, { dedupeKey: 'ownerbanner-' + idx });
       return;
     }
   }
@@ -5642,7 +5717,11 @@ function maybeTriggerBuildAnimation(room) {
 
 let movingPlayerId = null;
 let reducedMotion = false;
-try { reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+try {
+  const osPrefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (osPrefersReduced && !localStorage.getItem('ikhKhorongoSettings')) { gameSettings.cinematicIntensity = 'reduced'; saveSettings(); }
+  reducedMotion = gameSettings.cinematicIntensity !== 'full';
+} catch (e) {}
 
 function playStepSound() {
   try {
@@ -6041,7 +6120,9 @@ function render() {
         maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); maybeTriggerBuildAnimation(currentRoom);
         maybeTriggerRentCinematic(currentRoom);
         updateEnvironment(Math.floor((currentRoom.turnCount || 0) / currentRoom.players.length) + 1);
-        checkTensionMusic(currentRoom);
+        updateDirectorMood(currentRoom);
+        watchRankingChanges(currentRoom);
+        watchDirectorBannerEvents(currentRoom);
       }
       if (isMobileView && !mobileCamInitialized && cameraState.mode === 'overview') {
         mobileCamInitialized = true;
@@ -7444,6 +7525,8 @@ function renderGame() {
     ${isMobileView && !chatOpen ? renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow) : ''}
     ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
     ${!isMobileView ? renderChatWidget(room) : ''}
+    ${renderDirectorBanner()}
+    ${renderFinalShowdownOverlay()}
   </div>`;
 }
 
@@ -7713,12 +7796,13 @@ function maybeTriggerRentCinematic(room) {
   if (!txn || txn.id === lastRentTxnId) return;
   if (isAnimatingMovement || buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive) return;
   lastRentTxnId = txn.id;
-  if (gameSettings.reactionsEnabled) {
-    const intensity = getRentIntensity(txn);
-    if (intensity.key !== 'normal') {
-      const key = myId === txn.payerId ? 'rent_paid' : myId === txn.ownerId ? 'rent_received' : 'rent_witness';
-      suggestContextualReaction(key, txn.id);
-    }
+  const intensity = getRentIntensity(txn);
+  if (gameSettings.reactionsEnabled && intensity.key !== 'normal') {
+    const key = myId === txn.payerId ? 'rent_paid' : myId === txn.ownerId ? 'rent_received' : 'rent_witness';
+    suggestContextualReaction(key, txn.id);
+  }
+  if (intensity.key === 'big' || intensity.key === 'massive') {
+    showDirectorBanner(`\u20ae${fmt(txn.breakdown.total)}-\u044b\u043d \u0438\u0445 \u0442\u04af\u0440\u044d\u044d\u0441 \u0442\u04e9\u043b\u04e9\u0433\u0434\u043b\u04e9\u04e9`, { dedupeKey: 'rentbanner-' + txn.id });
   }
   runRentCinematic(room, txn);
 }
@@ -7759,6 +7843,149 @@ function getRentIntensity(txn) {
   if (ratio >= 0.25) return { key: 'big', label: '\u0418\u0425 \u0422\u04ae\u0420\u042d\u042d\u0421!' };
   if (ratio >= 0.10) return { key: 'valuable', label: '\u0421\u0410\u0419\u041d \u041e\u0420\u041b\u041e\u0413\u041e' };
   return { key: 'normal', label: '' };
+}
+
+/* ===== GAME DIRECTOR ===== */
+const DIRECTOR_MOOD_PRIORITY = { calm: 0, active: 1, high_stakes: 2, critical: 3, final_showdown: 4, victory: 5 };
+let directorState = {
+  mood: 'calm',
+  bannerQueue: [],
+  currentBanner: null,
+  cinematicTimestamps: [], // last "big" cinematics, for the max-3-per-minute rule
+  lastCinematicAt: 0,
+  finalShowdownShown: false,
+  knownRankOrder: null, // playerId array, most-wealth-first, for rank-change detection
+};
+
+function getCinematicIntensity() {
+  if (gameSettings.cinematicIntensity) return gameSettings.cinematicIntensity;
+  return reducedMotion ? 'reduced' : 'full';
+}
+
+function computeDirectorMood(room) {
+  if (!room) return 'calm';
+  if (room.winnerId) return 'victory';
+  const active = room.players.filter(p => !p.bankrupt);
+  const roundN = Math.floor((room.turnCount || 0) / room.players.length) + 1;
+  const minutesLeft = room.gameStartedAt ? ECONOMY_CONFIG.matchLimits.rankedMinutes - (Date.now() - room.gameStartedAt) / 60000 : 999;
+  const roundsLeft = ECONOMY_CONFIG.matchLimits.maxRounds - roundN;
+
+  const startedWithMore = room.players.length > 2;
+  const reducedToTwo = startedWithMore && active.length <= 2;
+  if (reducedToTwo || roundsLeft <= 3 || minutesLeft <= 2) return 'final_showdown';
+
+  const anyPayerCritical = active.some(p => p.money < 100);
+  const nearBankruptcy = active.some(p => p.money < 150);
+  const gameHasProgressed = (room.turnCount || 0) >= room.players.length * 2 && Object.keys(room.propOwner || {}).length > 0;
+  const cashDiverged = active.some(p => p.money !== ECONOMY_CONFIG.startingCash);
+  const twoLeadersClose = gameHasProgressed && cashDiverged && (() => {
+    const worths = active.map(p => netWorth(room, p)).sort((a, b) => b - a);
+    return worths.length >= 2 && Math.abs(worths[0] - worths[1]) < worths[0] * 0.12;
+  })();
+  const reducedToThree = room.players.length > 3 && active.length <= 3;
+  if (anyPayerCritical || nearBankruptcy || (minutesLeft <= 5) || (reducedToThree && roundsLeft <= 8) || twoLeadersClose) return 'critical';
+
+  const txn = room.lastRentTransaction;
+  const rentHigh = txn && txn.breakdown && (txn.breakdown.total / Math.max(txn.payerBalanceBefore, 1)) >= 0.25;
+  const anyCorp = Object.keys(room.houses || {}).some(k => room.houses[k] >= 4);
+  if (rentHigh || anyCorp) return 'high_stakes';
+
+  const anyOwned = Object.keys(room.propOwner || {}).length > 0;
+  return anyOwned ? 'active' : 'calm';
+}
+
+function updateDirectorMood(room) {
+  const newMood = computeDirectorMood(room);
+  if (newMood === directorState.mood) return;
+  const wasHigherOrEqual = DIRECTOR_MOOD_PRIORITY[directorState.mood] >= DIRECTOR_MOOD_PRIORITY[newMood];
+  directorState.mood = newMood;
+  if (newMood === 'final_showdown' && !directorState.finalShowdownShown) {
+    directorState.finalShowdownShown = true;
+    runFinalShowdownSequence(room);
+  } else if (!wasHigherOrEqual || newMood === 'critical') {
+    checkTensionMusic(room);
+  }
+}
+
+function canPlayBigCinematic() {
+  const now = Date.now();
+  directorState.cinematicTimestamps = directorState.cinematicTimestamps.filter(t => now - t < 60000);
+  if (directorState.cinematicTimestamps.length >= 3) return false;
+  if (now - directorState.lastCinematicAt < 5000 && directorState.cinematicTimestamps.length > 0) return false;
+  return true;
+}
+function markBigCinematicPlayed() {
+  const now = Date.now();
+  directorState.cinematicTimestamps.push(now);
+  directorState.lastCinematicAt = now;
+}
+
+let bannerHistory = new Set();
+let bannerCountThisMinute = [];
+function showDirectorBanner(text, opts) {
+  opts = opts || {};
+  const now = Date.now();
+  bannerCountThisMinute = bannerCountThisMinute.filter(t => now - t < 60000);
+  if (bannerCountThisMinute.length >= 5 && !opts.force) return;
+  if (opts.dedupeKey) {
+    if (bannerHistory.has(opts.dedupeKey)) return;
+    bannerHistory.add(opts.dedupeKey);
+  }
+  bannerCountThisMinute.push(now);
+  directorState.bannerQueue.push({ id: now + '-' + Math.random().toString(36).slice(2), text, expiresAt: 0 });
+  processBannerQueue();
+}
+function processBannerQueue() {
+  if (directorState.currentBanner || directorState.bannerQueue.length === 0) return;
+  const next = directorState.bannerQueue.shift();
+  const intensity = getCinematicIntensity();
+  if (intensity === 'off') { processBannerQueue(); return; }
+  next.expiresAt = Date.now() + (intensity === 'reduced' ? 1500 : 2200);
+  directorState.currentBanner = next;
+  render();
+  setTimeout(() => {
+    if (directorState.currentBanner && directorState.currentBanner.id === next.id) {
+      directorState.currentBanner = null;
+      render();
+      processBannerQueue();
+    }
+  }, intensity === 'reduced' ? 1550 : 2250);
+}
+
+function renderDirectorBanner() {
+  if (!directorState.currentBanner) return '';
+  return `<div class="director-banner">\u25c6 ${directorState.currentBanner.text} \u25c6</div>`;
+}
+
+let finalShowdownState = { isOpen: false, stage: 'appear' };
+async function runFinalShowdownSequence(room) {
+  const intensity = getCinematicIntensity();
+  if (intensity === 'off') return;
+  const active = room.players.filter(p => !p.bankrupt);
+  if (active.length < 2) return;
+  const ranked = active.map(p => ({ p, worth: netWorth(room, p) })).sort((a, b) => b.worth - a.worth).slice(0, 2);
+  finalShowdownState = { isOpen: true, stage: 'appear', players: ranked.map(r => ({ id: r.p.id, name: r.p.name, token: r.p.token, color: r.p.color, worth: r.worth, companies: Object.keys(room.propOwner).filter(k => room.propOwner[k] === r.p.id).length, corps: Object.keys(room.houses || {}).filter(k => room.propOwner[k] === r.p.id && room.houses[k] >= 4).length })) };
+  const t = intensity === 'reduced' ? 0.4 : 1;
+  audioManager.duck(0.7, 1000);
+  render();
+  await new Promise(r => setTimeout(r, 1000 * t));
+  finalShowdownState.stage = 'showdown'; render();
+  if (environment.timeOfDay !== 'night') { environment.previousTimeOfDay = environment.timeOfDay; environment.timeOfDay = 'night'; }
+  if (gameSettings.musicEnabled) audioManager.playMusic('gameTensionTheme');
+  audioManager.playSfx('bonusUnlocked');
+  await new Promise(r => setTimeout(r, 2500 * t));
+  finalShowdownState.isOpen = false; render();
+}
+function skipFinalShowdown() { finalShowdownState.isOpen = false; render(); }
+function renderFinalShowdownOverlay() {
+  if (!finalShowdownState.isOpen) return '';
+  const [a, b] = finalShowdownState.players;
+  return `<div class="fsd-overlay ${finalShowdownState.stage}">
+    <button class="fsd-skip-btn" id="fsdSkipBtn">\u041e\u0442\u043e\u0445</button>
+    <div class="fsd-side"><span class="fsd-avatar" style="--ring:${a.color}">${a.token}</span><div class="fsd-name">${a.name}</div><div class="fsd-worth">\u20ae${fmt(a.worth)}</div><div class="fsd-sub">${a.companies} \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u00b7 ${a.corps} \u043a\u043e\u0440\u043f</div></div>
+    <div class="fsd-mid"><div class="fsd-title">FINAL<br>SHOWDOWN</div></div>
+    <div class="fsd-side"><span class="fsd-avatar" style="--ring:${b.color}">${b.token}</span><div class="fsd-name">${b.name}</div><div class="fsd-worth">\u20ae${fmt(b.worth)}</div><div class="fsd-sub">${b.companies} \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u00b7 ${b.corps} \u043a\u043e\u0440\u043f</div></div>
+  </div>`;
 }
 
 let gameResults = { isOpen: false, stage: 'counting', rankings: [], winnerId: null };
@@ -8085,16 +8312,34 @@ function renderSettingsModal() {
     <div class="card-popup-eyebrow">\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e</div>
     ${toggleRow('\u0414\u0443\u0443\u043d\u044b \u044d\u0444\u0444\u0435\u043a\u0442', 'sfxEnabled')}
     ${toggleRow('\u0425\u04e9\u0433\u0436\u0438\u043c', 'musicEnabled')}
+    ${toggleRow('\u0427\u0430\u0442\u043d\u044b \u0434\u0443\u0443', 'chatSoundEnabled')}
+    ${toggleRow('Reaction/Emoji', 'reactionsEnabled')}
     ${toggleRow('Vibration', 'vibrationEnabled')}
     ${toggleRow('\u041e\u0440\u0447\u043d\u044b \u04e9\u04e9\u0440\u0447\u043b\u04e9\u043b\u0442 (\u04e9\u0434\u04e9\u0440/\u0448\u04e9\u043d\u04e9)', 'environmentEnabled')}
     ${sliderRow('\u0414\u0443\u0443\u043d\u044b \u044d\u0444\u0444\u0435\u043a\u0442\u0438\u0439\u043d \u0442\u0430\u0432', 'sfxVolume')}
     ${sliderRow('\u0425\u04e9\u0433\u0436\u043c\u0438\u0439\u043d \u0442\u0430\u0432', 'musicVolume')}
+    <div class="settings-row settings-row-col"><span>Cinematic \u0447\u0430\u043d\u0430\u0440</span>
+      <div class="cinematic-intensity-row">
+        <button class="ci-btn ${gameSettings.cinematicIntensity==='full'?'active':''}" data-ci="full">Full</button>
+        <button class="ci-btn ${gameSettings.cinematicIntensity==='reduced'?'active':''}" data-ci="reduced">Reduced</button>
+        <button class="ci-btn ${gameSettings.cinematicIntensity==='off'?'active':''}" data-ci="off">Off</button>
+      </div>
+    </div>
     <div class="settings-row"><span>Debug \u0433\u043e\u0440\u0438\u043c</span><button class="settings-toggle ${debugMode?'on':'off'}" id="settingsDebugToggle">${debugMode?'\u0418\u0414\u042d\u0412\u0425\u0422\u042d\u0419':'\u0423\u041d\u0422\u0410\u0420\u0410\u0410'}</button></div>
     <button class="btn btn-secondary" id="closeSettingsBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
   </div>`;
   root.appendChild(div);
   div.onclick = (e) => { if (e.target === div) toggleSettingsModal(false); };
   div.querySelector('#closeSettingsBtn').onclick = () => toggleSettingsModal(false);
+  div.querySelectorAll('.ci-btn[data-ci]').forEach(btn => {
+    btn.onclick = () => {
+      gameSettings.cinematicIntensity = btn.dataset.ci;
+      reducedMotion = gameSettings.cinematicIntensity !== 'full';
+      saveSettings();
+      renderSettingsModal();
+      render();
+    };
+  });
   div.querySelectorAll('.settings-toggle[data-setting]').forEach(btn => {
     btn.onclick = () => {
       const key = btn.dataset.setting;
@@ -8185,6 +8430,7 @@ function showCellDetail(idx) {
 
 function attachGameEvents() {
   attachChatEvents();
+  const fsdSkip = document.getElementById('fsdSkipBtn'); if (fsdSkip) fsdSkip.onclick = skipFinalShowdown;
   const withClickFx = (fn) => (...args) => { audioManager.playSfx('buttonClick'); vibrate(15); return fn(...args); };
   const roll = document.getElementById('rollBtn'); if (roll) roll.onclick = withClickFx(rollDice);
   const end = document.getElementById('endTurnBtn'); if (end) end.onclick = withClickFx(endTurn);
