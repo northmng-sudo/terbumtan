@@ -644,6 +644,19 @@
   .mhud-pname { font-size: 11px; font-weight: 800; color: var(--cream); line-height: 1.2; white-space: nowrap; }
   .mhud-pmoney { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--gold-light); line-height: 1.2; }
   .mhud-settings { flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(245,202,85,0.4); background: rgba(0,0,0,0.25); color: var(--gold-light); font-size: 17px; cursor: pointer; }
+  .mhud-chat-btn { position: relative; flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(245,202,85,0.4); background: rgba(0,0,0,0.25); color: var(--gold-light); font-size: 16px; cursor: pointer; }
+
+  .mobile-chat-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(2,10,8,0.6); display: flex; align-items: flex-end; }
+  .mobile-chat-sheet {
+    width: 100%; max-height: 62vh; display: flex; flex-direction: column;
+    background: linear-gradient(160deg, var(--panel-light, rgba(14,61,47,0.98)), var(--panel, rgba(5,30,24,0.99)));
+    border-top: 2px solid var(--gold); border-radius: 20px 20px 0 0;
+    padding-bottom: env(safe-area-inset-bottom); animation: bottomSheetUp 0.28s ease;
+  }
+  .mobile-chat-handle { width: 40px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.25); margin: 10px auto 4px; flex-shrink: 0; }
+  .mobile-qc-grid, .mobile-emoji-grid { display: flex; flex-direction: column; gap: 8px; }
+  .mobile-emoji-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 6px 0; }
+  .mobile-emoji-grid .emoji-picker-btn { font-size: 28px; padding: 10px; }
 
   /* ===== MOBILE BOTTOM SHEET ===== */
   .mobile-sheet {
@@ -707,6 +720,85 @@
   .mad-endturn-btn:not(:disabled) { border-color: var(--gold); background: rgba(245,202,85,0.08); }
   .mad-endturn-btn:disabled { opacity: 0.4; }
   .mad-skip-btn { border-color: var(--sb-danger, #e85d5d); color: #ff9a9a; background: rgba(232,93,93,0.08); }
+
+  /* ===== SOCIAL / CHAT SYSTEM ===== */
+  .social-row-anchor { position: relative; }
+  .social-row { display: flex; gap: 8px; margin: 8px 0; }
+  .social-btn { flex: 1; background: rgba(255,255,255,0.05); border: 1.5px solid rgba(245,202,85,0.3); border-radius: 10px; padding: 8px; color: var(--gold-light, #ffe8a3); font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .social-btn:hover { background: rgba(245,202,85,0.1); }
+
+  .mad-social-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 8px; position: relative; }
+  .mad-social-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1.5px solid rgba(245,202,85,0.35); font-size: 17px; cursor: pointer; }
+
+  .contextual-popup {
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 8px;
+    display: flex; gap: 6px; background: rgba(4,26,22,0.95); border: 1.5px solid var(--gold);
+    border-radius: 20px; padding: 6px 10px; z-index: 40; box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    animation: bubblePop 0.25s ease;
+  }
+  .ctx-emoji-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 2px; }
+  .ctx-emoji-btn:hover { transform: scale(1.2); }
+
+  .quick-chat-popover, .emoji-picker-popover {
+    position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 10px;
+    background: rgba(4,26,22,0.97); border: 1.5px solid var(--gold); border-radius: 14px;
+    padding: 10px; z-index: 40; box-shadow: 0 10px 26px rgba(0,0,0,0.55);
+    max-height: 260px; overflow-y: auto;
+  }
+  .quick-chat-popover { display: flex; flex-direction: column; gap: 6px; width: 220px; }
+  .qc-item { text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(245,202,85,0.2); border-radius: 8px; padding: 7px 10px; color: var(--sb-text, #e8e0c8); font-size: 12px; cursor: pointer; }
+  .qc-item:hover { background: rgba(245,202,85,0.12); }
+  .emoji-picker-popover { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 180px; }
+  .emoji-picker-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(245,202,85,0.2); border-radius: 8px; font-size: 20px; padding: 6px; cursor: pointer; }
+  .emoji-picker-btn:hover { background: rgba(245,202,85,0.15); }
+
+  .chat-widget-anchor { position: fixed; right: 16px; bottom: 16px; z-index: 45; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .chat-toggle-btn {
+    width: 52px; height: 52px; border-radius: 50%; font-size: 22px; cursor: pointer;
+    background: linear-gradient(160deg, var(--emerald-light, #25cb90), var(--emerald, #0a7a59));
+    border: 2px solid var(--gold); box-shadow: 0 8px 20px rgba(0,0,0,0.5); position: relative;
+  }
+  .chat-unread-badge {
+    position: absolute; top: -4px; right: -4px; background: var(--sb-danger, #e85d5d); color: #fff;
+    font-size: 10px; font-weight: 800; border-radius: 10px; padding: 2px 6px; border: 1.5px solid var(--sidebar-bg, #041a16);
+    animation: chatUnreadPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes chatUnreadPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+  .chat-panel {
+    width: 320px; max-height: 60vh; display: flex; flex-direction: column;
+    background: linear-gradient(160deg, var(--panel-light, rgba(14,61,47,0.95)), var(--panel, rgba(5,30,24,0.97)));
+    border: 2px solid var(--gold); border-radius: 18px; overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+  }
+  .chat-panel-tabs { display: flex; align-items: center; border-bottom: 1.5px solid rgba(245,202,85,0.25); flex-shrink: 0; }
+  .chat-tab-btn { flex: 1; background: none; border: none; padding: 10px 6px; font-size: 11.5px; font-weight: 800; color: var(--sb-muted, #9AA6BE); cursor: pointer; }
+  .chat-tab-btn.active { color: var(--gold-light, #ffe8a3); border-bottom: 2px solid var(--gold); }
+  .chat-close-btn { background: none; border: none; color: var(--sb-muted, #9AA6BE); font-size: 14px; padding: 8px 12px; cursor: pointer; }
+  .chat-panel-body { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-height: 200px; }
+  .chat-empty { text-align: center; color: var(--sb-muted, #9AA6BE); font-size: 12px; padding: 20px 0; }
+  .chat-msg-row { display: flex; gap: 8px; }
+  .chat-msg-row.own { flex-direction: row-reverse; }
+  .chat-msg-row.own .chat-msg-body { align-items: flex-end; }
+  .chat-msg-avatar { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 1.5px solid var(--ring-color, var(--gold)); background: rgba(255,255,255,0.06); }
+  .chat-msg-body { display: flex; flex-direction: column; gap: 2px; max-width: 78%; }
+  .chat-msg-head { display: flex; gap: 6px; align-items: baseline; }
+  .chat-msg-name { font-size: 10.5px; font-weight: 800; color: var(--gold-light, #ffe8a3); }
+  .chat-msg-time { font-size: 9px; color: var(--sb-muted, #9AA6BE); }
+  .chat-msg-text { background: rgba(255,255,255,0.07); border-radius: 10px; padding: 6px 10px; font-size: 12.5px; color: var(--sb-text, #e8e0c8); word-break: break-word; }
+  .chat-msg-row.own .chat-msg-text { background: rgba(245,202,85,0.16); }
+  .chat-msg-emoji { font-size: 22px; background: none; padding: 0; }
+  .chat-sys-msg { text-align: center; font-size: 10.5px; color: var(--sb-muted, #9AA6BE); font-style: italic; padding: 3px 0; }
+  .chat-history-line { text-align: left; font-style: normal; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 5px 0; }
+  .chat-input-row { display: flex; gap: 6px; padding: 8px 10px; border-top: 1.5px solid rgba(245,202,85,0.2); flex-shrink: 0; }
+  .chat-input-row input { flex: 1; background: rgba(0,0,0,0.25); border: 1px solid rgba(245,202,85,0.3); border-radius: 18px; padding: 8px 12px; color: var(--sb-text, #e8e0c8); font-size: 12.5px; }
+  .chat-input-row button { width: 34px; height: 34px; border-radius: 50%; background: var(--gold); border: none; font-size: 14px; cursor: pointer; }
+
+  @media (max-width: 768px) {
+    .chat-widget-anchor { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .speech-bubble, .emoji-reaction-pop { animation: none !important; opacity: 1 !important; }
+  }
 
   @media (max-width: 768px) {
     .mobile-hud { display: block; }
@@ -1116,6 +1208,32 @@
   }
   .ptoken.token-hop { animation: tokenHop 0.26s cubic-bezier(.33,.1,.4,1); }
   .ptoken.token-hop-reduced { animation: tokenHopReduced 0.15s ease; }
+
+  .speech-bubble {
+    position: absolute; transform: translate(-50%, -100%);
+    max-width: 130px; background: rgba(255,255,255,0.96); color: #241a0d;
+    border: 2px solid var(--bubble-ring, var(--gold)); border-radius: 12px;
+    padding: 5px 9px; font-size: 10.5px; font-weight: 700; line-height: 1.25;
+    text-align: center; z-index: 30; pointer-events: none;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    animation: bubblePop 0.25s cubic-bezier(.3,1.4,.4,1), bubbleFade 0.4s ease 2.5s forwards;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  }
+  .speech-bubble::after {
+    content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--bubble-ring, var(--gold));
+  }
+  @keyframes bubblePop { from { opacity: 0; transform: translate(-50%, -80%) scale(0.6); } to { opacity: 1; transform: translate(-50%, -100%) scale(1); } }
+  @keyframes bubbleFade { to { opacity: 0; } }
+
+  .emoji-reaction-pop {
+    position: absolute; transform: translate(-50%, -100%);
+    font-size: 26px; z-index: 31; pointer-events: none;
+    animation: reactionSpring 0.4s cubic-bezier(.34,1.56,.4,1), reactionFloat 2.3s ease-out, reactionFadeOut 0.5s ease 2.1s forwards;
+  }
+  @keyframes reactionSpring { 0% { transform: translate(-50%, -80%) scale(0); } 60% { transform: translate(-50%, -105%) scale(1.3); } 100% { transform: translate(-50%, -100%) scale(1); } }
+  @keyframes reactionFloat { from { margin-top: 0; } to { margin-top: -10px; } }
+  @keyframes reactionFadeOut { to { opacity: 0; } }
 
   .passgo-toast {
     position: fixed; top: 18%; left: 50%; transform: translateX(-50%);
@@ -4136,7 +4254,7 @@ let justRolled = false;
 let debugMode = false;
 
 /* ===== SETTINGS (audio/vibration/environment) ===== */
-const DEFAULT_SETTINGS = { sfxEnabled: true, musicEnabled: true, vibrationEnabled: true, environmentEnabled: true, sfxVolume: 0.75, musicVolume: 0.35 };
+const DEFAULT_SETTINGS = { sfxEnabled: true, musicEnabled: true, vibrationEnabled: true, environmentEnabled: true, sfxVolume: 0.75, musicVolume: 0.35, chatSoundEnabled: true, reactionsEnabled: true };
 let gameSettings = loadSettings();
 function loadSettings() {
   try {
@@ -4314,7 +4432,6 @@ const AudioManager = (function () {
 
   function stopMusic() {
     if (musicEl) { musicEl.pause(); musicEl = null; }
-    musicKey = null;
   }
 
   function resetVictoryLock() { victoryLocked = false; }
@@ -4328,7 +4445,7 @@ const AudioManager = (function () {
     if (type === 'sfx') gameSettings.sfxEnabled = !muted;
     if (type === 'music') {
       gameSettings.musicEnabled = !muted;
-      if (muted) { stopMusic(); } else if (musicKey) { playMusic(musicKey); }
+      if (muted) { stopMusic(); } else if (musicKey) { const k = musicKey; musicKey = null; playMusic(k); }
     }
     saveSettings();
   }
@@ -4411,6 +4528,10 @@ async function joinRoom(code, name, avatarToken) {
   const { data, error } = await supabaseClient.rpc('join_room', { p_room_code: code, p_player: player });
   if (error || !data) { errorMsg = '\u041d\u044d\u0433\u0434\u044d\u0445\u044d\u0434 \u0430\u043b\u0434\u0430\u0430 \u0433\u0430\u0440\u0447\u043b\u0430\u0430, \u0434\u0430\u0445\u0438\u043d \u043e\u0440\u043e\u043b\u0434\u043e\u043d\u043e \u0443\u0443.'; render(); return; }
   currentRoom = data; view = 'waiting'; startPolling(); render();
+  try {
+    const fresh = await getRoom(code);
+    if (fresh) { pushChatMessage(fresh, null, 'system', `${name} \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u043d\u044d\u0433\u0434\u043b\u044d\u044d`); await saveRoom(fresh); currentRoom = fresh; render(); }
+  } catch (e) {}
 }
 
 async function startGame() {
@@ -4425,6 +4546,197 @@ async function startGame() {
 
 function isMyTurn(room) { return room.players[room.currentPlayerIndex] && room.players[room.currentPlayerIndex].id === myId; }
 function pushLog(room, text) { room.log.push(text); if (room.log.length > 40) room.log = room.log.slice(-40); }
+
+/* ===== SOCIAL INTERACTION SYSTEM ===== */
+const QUICK_CHAT_PHRASES = [
+  { id: 'qc1', text: '\u0410\u043c\u0436\u0438\u043b\u0442 \u0445\u04af\u0441\u044c\u0435!' },
+  { id: 'qc2', text: '\u0421\u0430\u0439\u0445\u0430\u043d \u043d\u04af\u04af\u0434\u044d\u043b!' },
+  { id: 'qc3', text: '\u04e8\u04e9, \u0430\u0437\u0433\u04af\u0439 \u044e\u043c \u0430\u0430!' },
+  { id: 'qc4', text: '\u0411\u0430\u044f\u0440 \u0445\u04af\u0440\u0433\u044d\u044d!' },
+  { id: 'qc5', text: '\u0422\u04af\u0440\u044d\u044d\u0441\u044d\u044d \u0442\u04e9\u043b\u04e9\u04e9\u0440\u044d\u0439 \ud83d\ude0e' },
+  { id: 'qc6', text: '\u042d\u043d\u044d \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043c\u0438\u043d\u0438\u0439\u0445 \u0431\u043e\u043b\u043d\u043e!' },
+  { id: 'qc7', text: '\u042f\u043c\u0430\u0440 \u0430\u0437 \u0432\u044d!' },
+  { id: 'qc8', text: '\u0414\u0430\u0440\u0430\u0430\u0433\u0438\u0439\u043d \u0443\u0434\u0430\u0430 \u04af\u0437\u04af\u04af\u043b\u043d\u044d \u044d\u044d!' },
+  { id: 'qc9', text: '\u0425\u0443\u0440\u0434\u043b\u0430\u0430\u0440\u0430\u0439!' },
+  { id: 'qc10', text: '\u0421\u0430\u0439\u043d \u0442\u043e\u0433\u043b\u043e\u0436 \u0431\u0430\u0439\u043d\u0430!' },
+];
+const EMOJI_REACTIONS = ['\ud83d\ude02', '\ud83d\ude2e', '\ud83d\ude0e', '\ud83d\ude2d', '\ud83d\udd25', '\ud83d\udc4f', '\ud83d\udcb0', '\ud83d\udc51', '\ud83e\udd1d', '\ud83d\ude21', '\ud83c\udfe2', '\ud83c\udf89'];
+const CONTEXTUAL_REACTIONS = {
+  rent_paid: ['\ud83d\ude2d', '\ud83d\ude21', '\ud83d\udcb8'],
+  rent_received: ['\ud83d\ude0e', '\ud83d\udcb0', '\ud83d\udc51'],
+  rent_witness: ['\ud83d\ude2e', '\ud83d\ude02', '\ud83d\udd25'],
+  buy_company: ['\ud83d\udc4f', '\ud83c\udfe2', '\ud83d\ude0e', '\ud83d\udd25'],
+  build_corporation: ['\ud83c\udf89', '\ud83d\udc51', '\ud83d\udd25', '\ud83d\ude2e'],
+  double_dice: ['\ud83c\udfb2', '\ud83d\udd25', '\ud83d\ude2e'],
+  bankruptcy: ['\ud83e\udd1d', '\ud83d\udc4f'],
+};
+
+let mutedPlayerIds = new Set();
+try { (JSON.parse(localStorage.getItem('ikhKhorongoMuted') || '[]')).forEach(id => mutedPlayerIds.add(id)); } catch (e) {}
+function saveMutedIds() { try { localStorage.setItem('ikhKhorongoMuted', JSON.stringify([...mutedPlayerIds])); } catch (e) {} }
+
+const rateLimitLog = { text: [], quickChat: [], emoji: [] };
+function checkRateLimit(kind) {
+  const now = Date.now();
+  const windows = { text: 10000, quickChat: 4000, emoji: 2000 };
+  const maxCounts = { text: 3, quickChat: 1, emoji: 1 };
+  rateLimitLog[kind] = rateLimitLog[kind].filter(t => now - t < windows[kind]);
+  if (rateLimitLog[kind].length >= maxCounts[kind]) return false;
+  rateLimitLog[kind].push(now);
+  return true;
+}
+
+function sanitizeChatText(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function ensureChatState(room) {
+  if (!room.messages) room.messages = [];
+}
+
+function pushChatMessage(room, senderId, type, content, extra) {
+  ensureChatState(room);
+  const player = room.players.find(p => p.id === senderId);
+  const msg = {
+    id: Date.now() + '-' + Math.random().toString(36).slice(2),
+    roomId: room.roomCode, senderId: senderId || null, senderName: player ? player.name : null,
+    type, content: type === 'system' ? content : sanitizeChatText(content).slice(0, 120),
+    createdAt: Date.now(),
+    ...extra,
+  };
+  room.messages.push(msg);
+  if (room.messages.length > 100) room.messages = room.messages.slice(-100);
+  return msg;
+}
+
+let lastChatMsgId = null;
+let chatOpen = false;
+let chatActiveTab = 'chat'; // 'chat' | 'history'
+let chatUnreadCount = 0;
+let mobileChatTab = 'chat'; // 'chat' | 'quick' | 'emoji'
+let speechBubbles = {}; // playerId -> {text, expiresAt}
+let activeReactions = {}; // playerId -> {emoji, expiresAt}
+let contextualSuggestion = null; // { eventKey, expiresAt }
+let lastContextEventId = null;
+
+async function sendTextChatMessage(text) {
+  text = (text || '').trim();
+  if (!text || !currentRoom) return;
+  if (!checkRateLimit('text')) return;
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room) return;
+  const me = room.players.find(p => p.id === myId);
+  if (!me) return;
+  const last = room.messages && room.messages.length > 0 ? room.messages[room.messages.length - 1] : null;
+  if (last && last.senderId === myId && last.content === sanitizeChatText(text).slice(0, 120)) return; // no exact repeat spam
+  pushChatMessage(room, myId, 'text', text);
+  await saveRoom(room); currentRoom = room;
+  audioManager.playSfx('buttonClick');
+  render();
+}
+async function sendQuickChatMessage(phraseId) {
+  const phrase = QUICK_CHAT_PHRASES.find(p => p.id === phraseId);
+  if (!phrase || !currentRoom) return;
+  if (!checkRateLimit('quickChat')) return;
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room) return;
+  pushChatMessage(room, myId, 'quick_chat', phrase.text);
+  await saveRoom(room); currentRoom = room;
+  showSpeechBubbleLocal(myId, phrase.text);
+  playChatSound('quickChat');
+  render();
+}
+async function sendEmojiReaction(emoji) {
+  if (!currentRoom) return;
+  if (!checkRateLimit('emoji')) return;
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room) return;
+  pushChatMessage(room, myId, 'emoji', emoji, { emojiCode: emoji });
+  await saveRoom(room); currentRoom = room;
+  showReactionLocal(myId, emoji);
+  playChatSound(emojiSoundCategory(emoji));
+  render();
+}
+function emojiSoundCategory(emoji) {
+  if (emoji === '\ud83d\udc4f') return 'clap';
+  if (emoji === '\ud83d\ude02') return 'laugh';
+  if (emoji === '\ud83d\udcb0') return 'money';
+  return 'pop';
+}
+function playChatSound(kind) {
+  if (!gameSettings.chatSoundEnabled) return;
+  try {
+    if (!playChatSound._ctx) playChatSound._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = playChatSound._ctx;
+    const freqs = { pop: 700, clap: 500, laugh: 620, money: 880, join: 440, countdown: 330, mention: 950 };
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freqs[kind] || 600;
+    gain.gain.setValueAtTime(0.001, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.2);
+  } catch (e) {}
+}
+function showSpeechBubbleLocal(playerId, text) {
+  const shown = text.length > 45 ? text.slice(0, 45) + '\u2026' : text;
+  speechBubbles[playerId] = { text: shown, expiresAt: Date.now() + 3000 };
+  const activeCount = Object.keys(speechBubbles).filter(k => speechBubbles[k].expiresAt > Date.now()).length;
+  if (activeCount > 3) {
+    const oldest = Object.keys(speechBubbles).sort((a, b) => speechBubbles[a].expiresAt - speechBubbles[b].expiresAt)[0];
+    delete speechBubbles[oldest];
+  }
+  render();
+  setTimeout(() => { if (speechBubbles[playerId] && speechBubbles[playerId].expiresAt <= Date.now() + 50) { delete speechBubbles[playerId]; render(); } }, 3050);
+}
+function showReactionLocal(playerId, emoji) {
+  activeReactions[playerId] = { emoji, expiresAt: Date.now() + 2600 };
+  render();
+  setTimeout(() => { if (activeReactions[playerId] && activeReactions[playerId].emoji === emoji) { delete activeReactions[playerId]; render(); } }, 2650);
+}
+function suggestContextualReaction(eventKey, uniqueId) {
+  if (uniqueId === lastContextEventId) return;
+  lastContextEventId = uniqueId;
+  contextualSuggestion = { eventKey, expiresAt: Date.now() + 5000 };
+  render();
+  setTimeout(() => { if (contextualSuggestion && contextualSuggestion.eventKey === eventKey) { contextualSuggestion = null; render(); } }, 5050);
+}
+
+let knownBankruptIds = new Set();
+function watchBankruptcies(room) {
+  if (!room) return;
+  room.players.forEach(p => {
+    if (p.bankrupt && !knownBankruptIds.has(p.id)) {
+      knownBankruptIds.add(p.id);
+      if (gameSettings.reactionsEnabled) suggestContextualReaction('bankruptcy', 'bankrupt-' + p.id);
+    }
+  });
+}
+
+function watchChatMessages(room) {
+  if (!room || !room.messages || room.messages.length === 0) { return; }
+  const latest = room.messages[room.messages.length - 1];
+  if (latest.id === lastChatMsgId) return;
+  const isFirstLoad = lastChatMsgId === null;
+  lastChatMsgId = latest.id;
+  if (isFirstLoad) return;
+  if (mutedPlayerIds.has(latest.senderId)) return;
+  if (latest.senderId === myId) return;
+  if (latest.type === 'text' || latest.type === 'quick_chat') {
+    if (latest.type === 'quick_chat') showSpeechBubbleLocal(latest.senderId, latest.content);
+    playChatSound('pop');
+    if (!chatOpen) chatUnreadCount++;
+  } else if (latest.type === 'emoji') {
+    if (gameSettings.reactionsEnabled) showReactionLocal(latest.senderId, latest.emojiCode || latest.content);
+    playChatSound(emojiSoundCategory(latest.emojiCode || latest.content));
+  } else if (latest.type === 'system') {
+    if (!chatOpen) chatUnreadCount++;
+  }
+  render();
+}
+
 
 /* ===== WEALTH CANDLESTICK HISTORY ===== */
 function currentRoundNumber(room) { return Math.floor((room.turnCount || 0) / room.players.length) + 1; }
@@ -5293,6 +5605,7 @@ function maybeTriggerBuildAnimation(room) {
       const type = now >= 4 ? 'corp' : 'house';
       knownLevels = currentLevels; knownOwners = currentOwners;
       runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, type);
+      if (type === 'corp' && gameSettings.reactionsEnabled) suggestContextualReaction('build_corporation', 'corp-' + idx);
       return;
     }
   }
@@ -5303,6 +5616,7 @@ function maybeTriggerBuildAnimation(room) {
       knownLevels = currentLevels; knownOwners = currentOwners;
       const owner = room.players.find(p => p.id === nowOwner);
       runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, 'purchase');
+      if (gameSettings.reactionsEnabled) suggestContextualReaction('buy_company', 'buy-' + idx + '-' + nowOwner);
       return;
     }
   }
@@ -5382,7 +5696,12 @@ function displayPos(room, p) {
   return p.position;
 }
 function maybeTriggerDiceAnimation(room) {
-  if (room.diceRollId && room.diceRollId !== lastDiceRollId) { lastDiceRollId = room.diceRollId; animateDiceRoll(); }
+  if (room.diceRollId && room.diceRollId !== lastDiceRollId) {
+    lastDiceRollId = room.diceRollId; animateDiceRoll();
+    if (gameSettings.reactionsEnabled && room.lastDice && room.lastDice[0] === room.lastDice[1]) {
+      suggestContextualReaction('double_dice', room.diceRollId);
+    }
+  }
 }
 function animateDiceRoll() {
   diceRollingNow = true; let ticks = 0; const maxTicks = 6;
@@ -5719,7 +6038,7 @@ function render() {
     } else {
       attachGameEvents();
       maybeFlashMoney(currentRoom);
-      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); maybeShowCardResultToast(currentRoom); }
+      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); maybeShowCardResultToast(currentRoom); watchChatMessages(currentRoom); watchBankruptcies(currentRoom); }
       if (rentCinematicActive) animateRentCounters();
     }
     return;
@@ -6153,6 +6472,28 @@ function timeAgoLabel(logIndexFromEnd) {
 
 let mobileSheetExpanded = false;
 
+function renderMobileChatPanel(room) {
+  return `<div class="mobile-chat-backdrop" id="mobileChatBackdrop">
+    <div class="mobile-chat-sheet">
+      <div class="mobile-chat-handle"></div>
+      <div class="chat-panel-tabs">
+        <button class="chat-tab-btn ${mobileChatTab==='chat'?'active':''}" data-mtab="chat">\u0427\u0430\u0442</button>
+        <button class="chat-tab-btn ${mobileChatTab==='quick'?'active':''}" data-mtab="quick">\u0422\u04af\u0440\u0433\u044d\u043d \u04af\u0433</button>
+        <button class="chat-tab-btn ${mobileChatTab==='emoji'?'active':''}" data-mtab="emoji">Emoji</button>
+        <button class="chat-close-btn" id="mobileChatCloseBtn">\u2715</button>
+      </div>
+      <div class="chat-panel-body" id="chatScrollBody">
+        ${mobileChatTab === 'chat' ? renderMessageList(room) : mobileChatTab === 'quick'
+          ? `<div class="mobile-qc-grid">${QUICK_CHAT_PHRASES.map(p => `<button class="qc-item" data-phrase="${p.id}">${p.text}</button>`).join('')}</div>`
+          : `<div class="mobile-emoji-grid">${EMOJI_REACTIONS.map(e => `<button class="emoji-picker-btn" data-emoji="${e}">${e}</button>`).join('')}</div>`}
+      </div>
+      ${mobileChatTab === 'chat' ? `<div class="chat-input-row">
+        <input type="text" id="chatTextInput" maxlength="120" placeholder="\u041c\u0435\u0441\u0441\u0435\u0436 \u0431\u0438\u0447\u0438\u0445...">
+        <button id="chatSendBtn">\u27a4</button>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
 function renderMobileHUD(room, currentPlayer) {
   const roundN = currentRoundNumber(room);
   return `<div class="mobile-hud">
@@ -6168,9 +6509,106 @@ function renderMobileHUD(room, currentPlayer) {
           </div>`;
         }).join('')}
       </div>
+      <button class="mhud-chat-btn" id="chatToggleBtn" aria-label="\u0427\u0430\u0442">\ud83d\udcac${chatUnreadCount > 0 ? `<span class="chat-unread-badge">${chatUnreadCount > 9 ? '9+' : chatUnreadCount}</span>` : ''}</button>
       <button class="mhud-settings" id="mobileSettingsBtn" aria-label="\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e">\u2699\ufe0f</button>
     </div>
+    ${chatOpen ? renderMobileChatPanel(room) : ''}
   </div>`;
+}
+
+/* ===== CHAT / SOCIAL UI ===== */
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return '\u0430\u0437\u0430\u0445\u0430\u043d';
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + '\u043c';
+  return Math.floor(m / 60) + '\u0446';
+}
+function renderMessageList(room) {
+  const msgs = (room.messages || []).filter(m => !mutedPlayerIds.has(m.senderId));
+  if (msgs.length === 0) return `<div class="chat-empty">\u0425\u0430\u0440\u0438\u043b\u0446\u0430\u0430 \u04af\u0433\u04af\u0439 \u0431\u0430\u0439\u0445\u0433\u04af\u0439 \u2014 \u044d\u043d\u0434\u04af\u04af\u0433\u044d\u044d\u0440 \u0431\u0438\u0447\u043d\u044d \u04af\u04af!</div>`;
+  return msgs.map(m => {
+    const p = room.players.find(pl => pl.id === m.senderId);
+    if (m.type === 'system') return `<div class="chat-sys-msg">${m.content}</div>`;
+    return `<div class="chat-msg-row ${m.senderId === myId ? 'own' : ''}">
+      <span class="chat-msg-avatar" style="--ring-color:${p ? p.color : '#999'}">${p ? p.token : '?'}</span>
+      <div class="chat-msg-body">
+        <div class="chat-msg-head"><span class="chat-msg-name">${p ? p.name : '?'}</span><span class="chat-msg-time">${timeAgo(m.createdAt)}</span></div>
+        <div class="chat-msg-text ${m.type === 'emoji' ? 'chat-msg-emoji' : ''}">${m.content}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderContextualPopup() {
+  if (!contextualSuggestion || !gameSettings.reactionsEnabled) return '';
+  const emojis = CONTEXTUAL_REACTIONS[contextualSuggestion.eventKey] || [];
+  if (emojis.length === 0) return '';
+  return `<div class="contextual-popup">${emojis.map(e => `<button class="ctx-emoji-btn" data-emoji="${e}">${e}</button>`).join('')}</div>`;
+}
+function renderQuickChatPicker() {
+  if (!quickChatOpen) return '';
+  return `<div class="quick-chat-popover">
+    ${QUICK_CHAT_PHRASES.map(p => `<button class="qc-item" data-phrase="${p.id}">${p.text}</button>`).join('')}
+  </div>`;
+}
+function renderEmojiPicker() {
+  if (!emojiPickerOpen) return '';
+  return `<div class="emoji-picker-popover">${EMOJI_REACTIONS.map(e => `<button class="emoji-picker-btn" data-emoji="${e}">${e}</button>`).join('')}</div>`;
+}
+
+function renderChatWidget(room) {
+  const unread = chatUnreadCount > 0 ? `<span class="chat-unread-badge">${chatUnreadCount > 9 ? '9+' : chatUnreadCount}</span>` : '';
+  return `<div class="chat-widget-anchor">
+    ${chatOpen ? `<div class="chat-panel">
+      <div class="chat-panel-tabs">
+        <button class="chat-tab-btn ${chatActiveTab==='chat'?'active':''}" data-tab="chat">\u0425\u0430\u0440\u0438\u043b\u0446\u0430\u0430</button>
+        <button class="chat-tab-btn ${chatActiveTab==='history'?'active':''}" data-tab="history">\u0422\u043e\u0433\u043b\u043e\u043b\u0442\u044b\u043d \u0442\u04af\u04af\u0445</button>
+        <button class="chat-close-btn" id="chatCloseBtn">\u2715</button>
+      </div>
+      <div class="chat-panel-body" id="chatScrollBody">
+        ${chatActiveTab === 'chat' ? renderMessageList(room) : renderActivityTimelineList(room)}
+      </div>
+      ${chatActiveTab === 'chat' ? `<div class="chat-input-row">
+        <input type="text" id="chatTextInput" maxlength="120" placeholder="\u041c\u0435\u0441\u0441\u0435\u0436 \u0431\u0438\u0447\u0438\u0445...">
+        <button id="chatSendBtn">\u27a4</button>
+      </div>` : ''}
+    </div>` : ''}
+    <button class="chat-toggle-btn" id="chatToggleBtn">\ud83d\udcac${unread}</button>
+  </div>`;
+}
+function renderActivityTimelineList(room) {
+  const log = (room.log || []).slice().reverse();
+  if (log.length === 0) return `<div class="chat-empty">\u0422\u04af\u04af\u0445 \u0445\u043e\u043e\u0441\u043e\u043d</div>`;
+  return log.map(l => `<div class="chat-sys-msg chat-history-line">${l}</div>`).join('');
+}
+
+let quickChatOpen = false;
+let emojiPickerOpen = false;
+
+function attachChatEvents() {
+  const toggleBtn = document.getElementById('chatToggleBtn');
+  if (toggleBtn) toggleBtn.onclick = () => { chatOpen = !chatOpen; if (chatOpen) chatUnreadCount = 0; render(); setTimeout(scrollChatToBottom, 30); };
+  const closeBtn = document.getElementById('chatCloseBtn');
+  if (closeBtn) closeBtn.onclick = () => { chatOpen = false; render(); };
+  document.querySelectorAll('.chat-tab-btn[data-tab]').forEach(btn => { btn.onclick = () => { chatActiveTab = btn.dataset.tab; render(); }; });
+  const sendBtn = document.getElementById('chatSendBtn');
+  const input = document.getElementById('chatTextInput');
+  if (sendBtn && input) {
+    sendBtn.onclick = () => { sendTextChatMessage(input.value); };
+    input.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); sendTextChatMessage(input.value); } };
+  }
+  document.querySelectorAll('.ctx-emoji-btn[data-emoji]').forEach(btn => { btn.onclick = () => { sendEmojiReaction(btn.dataset.emoji); contextualSuggestion = null; }; });
+  document.querySelectorAll('.qc-item[data-phrase]').forEach(btn => { btn.onclick = () => { sendQuickChatMessage(btn.dataset.phrase); quickChatOpen = false; render(); }; });
+  document.querySelectorAll('.emoji-picker-btn[data-emoji]').forEach(btn => { btn.onclick = () => { sendEmojiReaction(btn.dataset.emoji); emojiPickerOpen = false; render(); }; });
+  const qcToggle = document.getElementById('quickChatToggleBtn'); if (qcToggle) qcToggle.onclick = (e) => { e.stopPropagation(); quickChatOpen = !quickChatOpen; emojiPickerOpen = false; render(); };
+  const emojiToggle = document.getElementById('emojiToggleBtn'); if (emojiToggle) emojiToggle.onclick = (e) => { e.stopPropagation(); emojiPickerOpen = !emojiPickerOpen; quickChatOpen = false; render(); };
+  const mobileCloseBtn = document.getElementById('mobileChatCloseBtn'); if (mobileCloseBtn) mobileCloseBtn.onclick = () => { chatOpen = false; render(); };
+  const mobileBackdrop = document.getElementById('mobileChatBackdrop'); if (mobileBackdrop) mobileBackdrop.onclick = (e) => { if (e.target === mobileBackdrop) { chatOpen = false; render(); } };
+  document.querySelectorAll('.chat-tab-btn[data-mtab]').forEach(btn => { btn.onclick = () => { mobileChatTab = btn.dataset.mtab; render(); setTimeout(scrollChatToBottom, 30); }; });
+}
+function scrollChatToBottom() {
+  const el = document.getElementById('chatScrollBody');
+  if (el) el.scrollTop = el.scrollHeight;
 }
 
 function renderMobileBottomSheet(room, currentPlayer, me) {
@@ -6219,6 +6657,13 @@ function renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, rolling
     : `<button class="mad-endturn-btn" id="mobileEndTurnBtn" ${endDisabled ? 'disabled' : ''}>\u25c6 \u042d\u042d\u041b\u0416 \u0414\u0423\u0423\u0421\u0413\u0410\u0425</button>`;
 
   return `<div class="mobile-action-dock">
+    ${renderContextualPopup()}
+    ${renderQuickChatPicker()}
+    ${renderEmojiPicker()}
+    <div class="mad-social-row">
+      <button class="mad-social-btn" id="quickChatToggleBtn">\u26a1</button>
+      <button class="mad-social-btn" id="emojiToggleBtn">\ud83d\ude0a</button>
+    </div>
     <div class="mad-row">
       <button class="mad-side-btn" id="madCompanyBtn"><span class="mad-side-icon">\ud83c\udfe2</span><span>\u041a\u041e\u041c\u041f\u0410\u041d\u0418</span></button>
       ${centerHtml}
@@ -6830,6 +7275,22 @@ function renderGame() {
       style="left:${left}%; top:${top}%; --token-ring:${p.color}; --token-scale:${scale}; z-index:${isMover ? 20 : 10 + Math.round(tile.tokenY / 20)};">${p.token}</div>`;
   }).join('');
 
+  const bubbleSuppressed = buildingAnimationActive || buyModalOpen || cardModalOpen || rentCinematicActive;
+  const bubblesHtml = bubbleSuppressed ? '' : room.players.filter(p => !p.bankrupt && speechBubbles[p.id] && speechBubbles[p.id].expiresAt > Date.now()).map((p, bi) => {
+    const pos = displayPos(room, p);
+    const tile = BOARD_CONFIG[pos];
+    const left = clampPct(tile.tokenX / 1672 * 100 + (bi % 3 - 1) * 1.2);
+    const top = clampPct((tile.tokenY - 34) / 941 * 100);
+    return `<div class="speech-bubble" style="left:${left}%; top:${top}%; --bubble-ring:${p.color};">${speechBubbles[p.id].text}</div>`;
+  }).join('');
+  const reactionsHtml = bubbleSuppressed ? '' : room.players.filter(p => !p.bankrupt && activeReactions[p.id] && activeReactions[p.id].expiresAt > Date.now()).map((p) => {
+    const pos = displayPos(room, p);
+    const tile = BOARD_CONFIG[pos];
+    const left = clampPct(tile.tokenX / 1672 * 100);
+    const top = clampPct((tile.tokenY - 30) / 941 * 100);
+    return `<div class="emoji-reaction-pop" style="left:${left}%; top:${top}%;">${activeReactions[p.id].emoji}</div>`;
+  }).join('');
+
   const camZoom = (buildingAnim && buildingAnim.type === 'corp' && (buildingAnim.stage === 'facade' || buildingAnim.stage === 'ceremony') && !reducedMotion);
   let camStyle = '';
   const camTransform = renderCameraTransformStyle();
@@ -6855,6 +7316,8 @@ function renderGame() {
               ${upgradesHtml}
               <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
               ${tokensHtml}
+              ${bubblesHtml}
+              ${reactionsHtml}
             </div>
             ${cameraState.mode === 'corporation' ? '<div class="camera-dim-overlay"></div>' : ''}
             ${debugMode ? renderCameraDebugPanel() : ''}
@@ -6872,6 +7335,15 @@ function renderGame() {
         ${renderTurnStatusHeader(room, currentPlayer)}
         ${renderPlayersPanel(room, currentPlayer)}
         ${renderDiceControlPanel(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow)}
+        <div class="social-row-anchor">
+          ${renderContextualPopup()}
+          ${renderQuickChatPicker()}
+          ${renderEmojiPicker()}
+          <div class="social-row">
+            <button class="social-btn" id="quickChatToggleBtn">\u26a1 \u0422\u04af\u0440\u0433\u044d\u043d \u04af\u0433</button>
+            <button class="social-btn" id="emojiToggleBtn">\ud83d\ude0a Emoji</button>
+          </div>
+        </div>
         ${me ? renderMiniWealthChart(room, me) : ''}
         ${renderMarketEffectsPanel(room)}
         ${renderOwnedCompaniesPanel(room)}
@@ -6884,6 +7356,7 @@ function renderGame() {
     ${isMobileView ? renderMobileBottomSheet(room, currentPlayer, me) : ''}
     ${isMobileView ? renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow) : ''}
     ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
+    ${!isMobileView ? renderChatWidget(room) : ''}
   </div>`;
 }
 
@@ -7153,6 +7626,13 @@ function maybeTriggerRentCinematic(room) {
   if (!txn || txn.id === lastRentTxnId) return;
   if (isAnimatingMovement || buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive) return;
   lastRentTxnId = txn.id;
+  if (gameSettings.reactionsEnabled) {
+    const intensity = getRentIntensity(txn);
+    if (intensity.key !== 'normal') {
+      const key = myId === txn.payerId ? 'rent_paid' : myId === txn.ownerId ? 'rent_received' : 'rent_witness';
+      suggestContextualReaction(key, txn.id);
+    }
+  }
   runRentCinematic(room, txn);
 }
 async function runRentCinematic(room, txn) {
@@ -7617,6 +8097,7 @@ function showCellDetail(idx) {
 }
 
 function attachGameEvents() {
+  attachChatEvents();
   const withClickFx = (fn) => (...args) => { audioManager.playSfx('buttonClick'); vibrate(15); return fn(...args); };
   const roll = document.getElementById('rollBtn'); if (roll) roll.onclick = withClickFx(rollDice);
   const end = document.getElementById('endTurnBtn'); if (end) end.onclick = withClickFx(endTurn);
