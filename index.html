@@ -202,6 +202,59 @@
   .lp-join-btn:hover { box-shadow: 0 0 18px rgba(37,203,144,0.5); }
 
   .lp-guest-note { text-align: center; font-size: 11.5px; color: var(--lp-muted); margin-top: 14px; }
+
+  /* ===== PROFILE LEVEL/RANK ===== */
+  .profile-title-badge { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--gold-light); border: 1px solid rgba(245,202,85,0.4); border-radius: 14px; padding: 4px 12px; margin: 6px 0 12px; background: rgba(245,202,85,0.08); }
+  .profile-level-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .profile-level-num { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 13px; color: var(--gold-light); flex-shrink: 0; }
+  .profile-xp-bar { flex: 1; height: 8px; border-radius: 5px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .profile-xp-fill { height: 100%; background: linear-gradient(90deg, var(--emerald-light), var(--gold)); border-radius: 5px; transition: width 0.4s ease; }
+  .profile-xp-label { font-size: 10px; color: var(--lp-muted, #9AA6BE); flex-shrink: 0; }
+  .profile-rank-badge { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--rank-color, var(--gold)); border-radius: 16px; padding: 6px 16px; margin-bottom: 14px; }
+  .prb-tier { font-weight: 800; font-size: 13px; color: var(--rank-color, var(--gold)); }
+  .prb-mmr { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--lp-muted, #9AA6BE); }
+
+  /* ===== RANKED MATCHMAKING ===== */
+  .lp-mm-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; height: 54px; margin-top: 10px; border-radius: 14px;
+    background: linear-gradient(160deg, #3a1030, #1a0818); border: 1.5px solid #c94fd8;
+    color: #f3d8ff; font-weight: 800; font-size: 13.5px; letter-spacing: 0.5px; cursor: pointer;
+  }
+  .lp-mm-btn:hover { box-shadow: 0 0 18px rgba(201,79,216,0.5); }
+
+  .mm-modal-backdrop { position: fixed; inset: 0; z-index: 3300; background: rgba(2,10,8,0.82); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .mm-modal { position: relative; width: min(92vw, 420px); background: linear-gradient(160deg, var(--panel-light), var(--panel)); border: 2px solid var(--gold); border-radius: 22px; padding: 26px 22px 22px; text-align: center; }
+  .mm-modal-title { font-family: 'Cinzel', serif; font-weight: 800; font-size: 15px; letter-spacing: 2px; color: var(--gold-light); margin-bottom: 18px; }
+  .mm-mode-select { display: flex; flex-direction: column; gap: 10px; }
+  .mm-mode-btn { width: 100%; }
+
+  .mm-searching { display: flex; flex-direction: column; align-items: center; }
+  .mm-radar { position: relative; width: 120px; height: 120px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; }
+  .mm-radar-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid rgba(245,202,85,0.4); animation: mmRadarPulse 2.4s ease-out infinite; }
+  .mm-r2 { animation-delay: 0.6s; }
+  .mm-r3 { animation-delay: 1.2s; }
+  @keyframes mmRadarPulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.15); opacity: 0; } }
+  .mm-radar-scan { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(245,202,85,0.5), transparent 60%); animation: mmScanSpin 2.2s linear infinite; }
+  @keyframes mmScanSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .mm-radar-avatar { position: relative; z-index: 1; width: 56px; height: 56px; border-radius: 50%; background: var(--bg-deep, #041a16); border: 2.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .mm-search-mode { font-weight: 800; font-size: 11px; letter-spacing: 1.5px; color: var(--gold-light); margin-bottom: 4px; }
+  .mm-search-text { font-size: 14px; color: var(--sb-text, #e8e0c8); margin-bottom: 6px; }
+  .mm-search-time { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; color: var(--gold); margin-bottom: 6px; }
+  .mm-search-mmr { font-size: 11px; color: var(--lp-muted, #9AA6BE); margin-bottom: 16px; }
+
+  .mm-found-title { font-family: 'Cinzel', serif; font-weight: 800; font-size: 17px; color: var(--gold); margin-bottom: 16px; animation: prepGlow 1s ease-in-out infinite; }
+  .mm-vs-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 14px; }
+  .mm-vs-side { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 110px; }
+  .mm-vs-avatar { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 2.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .mm-vs-name { font-weight: 800; font-size: 12.5px; color: var(--sb-text, #e8e0c8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .mm-vs-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--lp-muted, #9AA6BE); }
+  .mm-vs-mark { font-family: 'Cinzel', serif; font-weight: 800; font-size: 20px; color: #e85d5d; }
+  .mm-countdown { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 800; color: var(--gold-light); margin-bottom: 16px; }
+  .mm-accept-row { display: flex; gap: 10px; }
+  .mm-accept-row .btn { flex: 1; }
+  .mm-waiting-accept { color: var(--emerald-light, #25cb90); font-size: 13px; font-weight: 700; }
+
   .lp-guest-note a { color: var(--gold); }
 
   @media (max-width: 1050px) {
@@ -1097,7 +1150,7 @@
     flex: 0 0 42%;
     position: relative;
     display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--grp) 25%, var(--emerald-dark)) 0%, var(--sidebar-bg) 80%);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--grp) 22%, var(--emerald-dark)) 0%, var(--sidebar-bg) 85%);
     padding: 20px;
   }
   .buy-modal-group-tag { position: absolute; top: 0; left: 0; right: 0; height: 6px; }
@@ -1107,6 +1160,11 @@
   .buy-modal-name { font-size: 22px; font-weight: 800; color: var(--sb-text); margin: 4px 0 14px; line-height: 1.2; }
   .buy-modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-bottom: 14px; }
   .bm-stat { display: flex; flex-direction: column; gap: 2px; }
+  .bm-rent-table { display: flex; flex-direction: column; gap: 3px; margin: 10px 0; padding: 8px 10px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+  .bm-rent-row { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--sb-muted, #9AA6BE); }
+  .bm-rent-row b { color: var(--sb-text, #e8e0c8); }
+  .bm-rent-corp { border-top: 1px solid rgba(245,202,85,0.25); padding-top: 4px; margin-top: 2px; }
+  .bm-rent-corp b { color: var(--gold-light, #ffe8a3); }
   .bm-stat span { font-size: 10.5px; color: var(--sb-muted); }
   .bm-stat b { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--gold-light); }
   .buy-modal-money-row {
@@ -1602,6 +1660,150 @@ async function fetchStatistics(userId) {
     return data;
   } catch (e) { return null; }
 }
+
+/* ===== MATCHMAKING ===== */
+let mmState = {
+  isOpen: false,
+  stage: 'idle', // idle | searching | found | accepting | error
+  mode: 'ranked_1v1',
+  queueId: null,
+  searchStartedAt: null,
+  opponent: null,
+  gameId: null,
+  myAccepted: false,
+  opponentAccepted: false,
+  acceptDeadline: null,
+  error: '',
+};
+let mmPollTimer = null;
+let mmTickTimer = null;
+
+function openMatchmakingModal() {
+  if (!authState.user) { view = 'auth-signup'; authFormState = { loading: false, error: '\u041c\u0430\u0442\u0447\u043c\u0435\u0439\u043a\u0438\u043d\u0433 \u0430\u0448\u0438\u0433\u043b\u0430\u0445\u044b\u043d \u0442\u0443\u043b\u0434 \u0431\u04af\u0440\u0442\u0433\u04af\u04af\u043b\u043d\u04af\u04af.', info: '' }; render(); return; }
+  mmState = { isOpen: true, stage: 'idle', mode: 'ranked_1v1', queueId: null, searchStartedAt: null, opponent: null, gameId: null, myAccepted: false, opponentAccepted: false, acceptDeadline: null, error: '' };
+  render();
+}
+function closeMatchmakingModal() {
+  stopMatchmakingTimers();
+  if (mmState.queueId && mmState.stage === 'searching') cancelMatchmaking();
+  mmState.isOpen = false;
+  render();
+}
+function stopMatchmakingTimers() {
+  if (mmPollTimer) { clearInterval(mmPollTimer); mmPollTimer = null; }
+  if (mmTickTimer) { clearInterval(mmTickTimer); mmTickTimer = null; }
+}
+
+async function startMatchmaking(mode) {
+  mmState.mode = mode; mmState.error = '';
+  try {
+    const { data, error } = await supabaseClient.rpc('join_matchmaking_queue', { p_mode: mode });
+    if (error || !data) { mmState.error = '\u0425\u0430\u0439\u043b\u0442 \u044d\u0445\u043b\u04af\u04af\u043b\u044d\u0445\u044d\u0434 \u0430\u043b\u0434\u0430\u0430 \u0433\u0430\u0440\u043b\u0430\u0430.'; mmState.stage = 'error'; render(); return; }
+    mmState.queueId = data.id; mmState.searchStartedAt = Date.now(); mmState.stage = 'searching';
+    render();
+    audioManager.playSfx('buttonClick');
+    mmTickTimer = setInterval(() => { if (mmState.stage === 'searching') render(); }, 1000);
+    mmPollTimer = setInterval(pollForMatch, 2500);
+    pollForMatch();
+  } catch (e) { mmState.error = '\u0410\u043b\u0434\u0430\u0430 \u0433\u0430\u0440\u043b\u0430\u0430.'; mmState.stage = 'error'; render(); }
+}
+
+async function pollForMatch() {
+  if (!mmState.queueId || mmState.stage !== 'searching') return;
+  try {
+    await supabaseClient.rpc('matchmaking_heartbeat', { p_queue_id: mmState.queueId });
+    const { data, error } = await supabaseClient.rpc('try_find_match', { p_queue_id: mmState.queueId });
+    if (error || !data || data.length === 0) return;
+    const result = data[0];
+    if (result.matched) {
+      stopMatchmakingTimers();
+      mmState.gameId = result.game_id;
+      mmState.stage = 'found';
+      mmState.acceptDeadline = Date.now() + 15000;
+      const { data: prof } = await supabaseClient.from('profiles').select('*').eq('id', result.opponent_user_id).single();
+      const { data: oppStats } = await supabaseClient.from('player_statistics').select('*').eq('user_id', result.opponent_user_id).single();
+      mmState.opponent = { id: result.opponent_user_id, name: (prof && prof.display_name) || '\u0422\u043e\u0433\u043b\u043e\u0433\u0447', avatar: (prof && prof.avatar) || '\ud83d\udc0e', level: (oppStats && oppStats.level) || 1, mmr: (oppStats && oppStats.mmr) || 1000 };
+      audioManager.playSfx('bonusUnlocked'); vibrate([60, 40, 60]);
+      mmTickTimer = setInterval(() => { render(); if (mmState.acceptDeadline && Date.now() > mmState.acceptDeadline && mmState.stage === 'found') handleAcceptTimeout(); }, 500);
+      render();
+    }
+  } catch (e) { /* transient network errors: keep polling silently */ }
+}
+
+async function cancelMatchmaking() {
+  stopMatchmakingTimers();
+  if (mmState.queueId) {
+    try { await supabaseClient.rpc('cancel_matchmaking', { p_queue_id: mmState.queueId }); } catch (e) {}
+  }
+  mmState = { isOpen: mmState.isOpen, stage: 'idle', mode: mmState.mode, queueId: null, searchStartedAt: null, opponent: null, gameId: null, myAccepted: false, opponentAccepted: false, acceptDeadline: null, error: '' };
+  render();
+}
+
+function handleAcceptTimeout() {
+  stopMatchmakingTimers();
+  mmState.stage = 'idle';
+  mmState.error = '\u0425\u0443\u0433\u0430\u0446\u0430\u0430 \u0434\u0443\u0443\u0441\u0441\u0430\u043d, \u0434\u0430\u0445\u0438\u043d \u043e\u0440\u043e\u043b\u0434\u043e\u043d\u043e \u0443\u0443.';
+  render();
+}
+async function acceptMatch() {
+  mmState.myAccepted = true;
+  audioManager.playSfx('coinReward'); vibrate(30);
+  render();
+  try { await supabaseClient.rpc('accept_match', { p_queue_id: mmState.queueId }); } catch (e) {}
+  mmPollTimer = setInterval(pollOpponentAccept, 1500);
+  pollOpponentAccept();
+}
+async function pollOpponentAccept() {
+  if (mmState.stage !== 'found' || !mmState.opponent) return;
+  try {
+    const { data, error } = await supabaseClient.from('matchmaking_queue').select('accepted, declined, status')
+      .eq('matched_game_id', mmState.gameId).eq('user_id', mmState.opponent.id).single();
+    if (error || !data) return;
+    if (data.declined || data.status === 'searching') {
+      stopMatchmakingTimers();
+      mmState.stage = 'idle'; mmState.error = '\u04e8\u0440\u0441\u04e9\u043b\u0434\u04e9\u0433\u0447 \u0442\u0430\u0442\u0433\u0430\u043b\u0437\u043b\u0430\u0430.'; mmState.opponent = null;
+      render(); return;
+    }
+    mmState.opponentAccepted = !!data.accepted;
+    if (mmState.myAccepted && mmState.opponentAccepted) {
+      stopMatchmakingTimers();
+      await startRankedGameFromMatch();
+    } else {
+      render();
+    }
+  } catch (e) {}
+}
+async function startRankedGameFromMatch() {
+  const shortCode = mmState.gameId.replace(/-/g, '').slice(0, 4).toUpperCase();
+  const myStableId = authState.user.id;
+  const oppId = mmState.opponent.id;
+  const myAvatar = TOKENS[myAvatarIndex] || TOKENS[0];
+  const oppAvatar = TOKENS.find(t => t !== myAvatar) || TOKENS[1];
+  const isHostByIdOrder = myStableId < oppId; // deterministic host assignment, same on both clients
+  const mePlayer = { id: myStableId, name: myName || 'Тоглогч', token: myAvatar, color: TOKEN_COLORS[TOKENS.indexOf(myAvatar)], money: 1500, position: 0, jailTurns: 0, bankrupt: false, isHost: isHostByIdOrder };
+  const oppPlayer = { id: oppId, name: mmState.opponent.name, token: oppAvatar, color: TOKEN_COLORS[TOKENS.indexOf(oppAvatar)], money: 1500, position: 0, jailTurns: 0, bankrupt: false, isHost: !isHostByIdOrder };
+  const players = isHostByIdOrder ? [mePlayer, oppPlayer] : [oppPlayer, mePlayer];
+  const room = {
+    roomCode: shortCode, started: true, gameStartedAt: Date.now(), rankedGameId: mmState.gameId, rankedMode: mmState.mode,
+    players,
+    propOwner: {}, houses: {},
+    currentPlayerIndex: 0, hasRolled: false, pendingAction: null,
+    lastDice: null, diceRollId: null, animPath: null, cardDraw: null, winnerId: null, turnCount: 0,
+    log: ['\u0420\u0430\u043d\u043a \u043c\u0430\u0442\u0447 \u043e\u043b\u0434\u043b\u043e\u043e. \u0422\u043e\u0433\u043b\u043e\u043b\u0442 \u044d\u0445\u044d\u043b\u043b\u044d\u044d!'],
+  };
+  const existing = await getRoom(shortCode);
+  if (!existing) { await saveRoom(room); }
+  currentRoom = existing || room; myId = myStableId;
+  mmState.isOpen = false;
+  view = 'game'; startPolling(); render();
+}
+function declineMatch() {
+  if (mmState.queueId) { try { supabaseClient.rpc('decline_match', { p_queue_id: mmState.queueId }); } catch (e) {} }
+  stopMatchmakingTimers();
+  mmState.stage = 'idle'; mmState.opponent = null; mmState.gameId = null;
+  render();
+}
+
 async function initAuth() {
   try {
     const { data } = await supabaseClient.auth.getSession();
@@ -1684,8 +1886,8 @@ const BOARD_CONFIG = [
     "id": 1,
     "type": "property",
     "name": "АПУ",
-    "price": 60,
-    "rent": 8,
+    "price": 100,
+    "rent": 20,
     "colorGroup": "A",
     "polygon": [
       [
@@ -1752,14 +1954,15 @@ const BOARD_CONFIG = [
     "tokenX": 705.1,
     "tokenY": 784.7,
     "tokenDepth": 785,
-    "tokenScale": 0.95
+    "tokenScale": 0.95,
+    "tier": "small"
   },
   {
     "id": 2,
     "type": "property",
     "name": "Мобиком",
-    "price": 70,
-    "rent": 9,
+    "price": 110,
+    "rent": 22,
     "colorGroup": "A",
     "polygon": [
       [
@@ -1826,14 +2029,15 @@ const BOARD_CONFIG = [
     "tokenX": 618.7,
     "tokenY": 725.7,
     "tokenDepth": 726,
-    "tokenScale": 0.95
+    "tokenScale": 0.95,
+    "tier": "small"
   },
   {
     "id": 3,
     "type": "property",
     "name": "Дижитал Концепт",
-    "price": 80,
-    "rent": 10,
+    "price": 120,
+    "rent": 25,
     "colorGroup": "A",
     "polygon": [
       [
@@ -1900,14 +2104,15 @@ const BOARD_CONFIG = [
     "tokenX": 534.1,
     "tokenY": 666.2,
     "tokenDepth": 666,
-    "tokenScale": 0.95
+    "tokenScale": 0.95,
+    "tier": "small"
   },
   {
     "id": 4,
     "type": "property",
     "name": "Юнител",
-    "price": 90,
-    "rent": 11,
+    "price": 135,
+    "rent": 28,
     "colorGroup": "A",
     "polygon": [
       [
@@ -1974,14 +2179,15 @@ const BOARD_CONFIG = [
     "tokenX": 453.6,
     "tokenY": 608.9,
     "tokenDepth": 609,
-    "tokenScale": 0.95
+    "tokenScale": 0.95,
+    "tier": "small"
   },
   {
     "id": 5,
     "type": "property",
     "name": "ХасБанк",
-    "price": 100,
-    "rent": 12,
+    "price": 150,
+    "rent": 32,
     "colorGroup": "A",
     "polygon": [
       [
@@ -2048,7 +2254,8 @@ const BOARD_CONFIG = [
     "tokenX": 377.6,
     "tokenY": 554.6,
     "tokenDepth": 555,
-    "tokenScale": 0.95
+    "tokenScale": 0.95,
+    "tier": "small"
   },
   {
     "id": 6,
@@ -2087,8 +2294,8 @@ const BOARD_CONFIG = [
     "id": 7,
     "type": "property",
     "name": "Шунхлай",
-    "price": 110,
-    "rent": 14,
+    "price": 160,
+    "rent": 35,
     "colorGroup": "A",
     "polygon": [
       [
@@ -2155,7 +2362,8 @@ const BOARD_CONFIG = [
     "tokenX": 236.5,
     "tokenY": 453.9,
     "tokenDepth": 454,
-    "tokenScale": 0.95
+    "tokenScale": 0.95,
+    "tier": "small"
   },
   {
     "id": 8,
@@ -2204,8 +2412,8 @@ const BOARD_CONFIG = [
     "id": 9,
     "type": "property",
     "name": "Хан Алтай Ресурс",
-    "price": 130,
-    "rent": 16,
+    "price": 180,
+    "rent": 36,
     "colorGroup": "B",
     "polygon": [
       [
@@ -2272,14 +2480,15 @@ const BOARD_CONFIG = [
     "tokenX": 277.2,
     "tokenY": 307.2,
     "tokenDepth": 307,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "medium"
   },
   {
     "id": 10,
     "type": "property",
     "name": "Макс Групп",
-    "price": 140,
-    "rent": 17,
+    "price": 200,
+    "rent": 40,
     "colorGroup": "B",
     "polygon": [
       [
@@ -2346,14 +2555,15 @@ const BOARD_CONFIG = [
     "tokenX": 360.5,
     "tokenY": 267.4,
     "tokenDepth": 267,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "medium"
   },
   {
     "id": 11,
     "type": "property",
     "name": "Премиум Нэксус",
-    "price": 150,
-    "rent": 18,
+    "price": 220,
+    "rent": 45,
     "colorGroup": "B",
     "polygon": [
       [
@@ -2420,14 +2630,15 @@ const BOARD_CONFIG = [
     "tokenX": 441.4,
     "tokenY": 229.2,
     "tokenDepth": 229,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "medium"
   },
   {
     "id": 12,
     "type": "property",
     "name": "НИК",
-    "price": 160,
-    "rent": 20,
+    "price": 240,
+    "rent": 50,
     "colorGroup": "B",
     "polygon": [
       [
@@ -2494,14 +2705,15 @@ const BOARD_CONFIG = [
     "tokenX": 519.2,
     "tokenY": 191.8,
     "tokenDepth": 192,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "medium"
   },
   {
     "id": 13,
     "type": "property",
     "name": "Алтан Жолоо",
-    "price": 170,
-    "rent": 21,
+    "price": 260,
+    "rent": 56,
     "colorGroup": "B",
     "polygon": [
       [
@@ -2568,7 +2780,8 @@ const BOARD_CONFIG = [
     "tokenX": 595.3,
     "tokenY": 155.7,
     "tokenDepth": 156,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "medium"
   },
   {
     "id": 14,
@@ -2608,8 +2821,8 @@ const BOARD_CONFIG = [
     "id": 15,
     "type": "property",
     "name": "Болдтөмөр",
-    "price": 180,
-    "rent": 22,
+    "price": 280,
+    "rent": 60,
     "colorGroup": "B",
     "polygon": [
       [
@@ -2676,7 +2889,8 @@ const BOARD_CONFIG = [
     "tokenX": 737.8,
     "tokenY": 90.5,
     "tokenDepth": 91,
-    "tokenScale": 0.7
+    "tokenScale": 0.7,
+    "tier": "medium"
   },
   {
     "id": 16,
@@ -2725,8 +2939,8 @@ const BOARD_CONFIG = [
     "id": 17,
     "type": "property",
     "name": "Саусгоби Сэндс",
-    "price": 200,
-    "rent": 24,
+    "price": 300,
+    "rent": 70,
     "colorGroup": "C",
     "polygon": [
       [
@@ -2793,14 +3007,15 @@ const BOARD_CONFIG = [
     "tokenX": 936.0,
     "tokenY": 90.4,
     "tokenDepth": 90,
-    "tokenScale": 0.7
+    "tokenScale": 0.7,
+    "tier": "large"
   },
   {
     "id": 18,
     "type": "property",
     "name": "Говь ХК",
-    "price": 210,
-    "rent": 25,
+    "price": 330,
+    "rent": 80,
     "colorGroup": "C",
     "polygon": [
       [
@@ -2867,14 +3082,15 @@ const BOARD_CONFIG = [
     "tokenX": 1004.5,
     "tokenY": 121.6,
     "tokenDepth": 122,
-    "tokenScale": 0.7
+    "tokenScale": 0.7,
+    "tier": "large"
   },
   {
     "id": 19,
     "type": "property",
     "name": "Энержи Ресурс",
-    "price": 220,
-    "rent": 26,
+    "price": 360,
+    "rent": 88,
     "colorGroup": "C",
     "polygon": [
       [
@@ -2941,14 +3157,15 @@ const BOARD_CONFIG = [
     "tokenX": 1076.5,
     "tokenY": 154.9,
     "tokenDepth": 155,
-    "tokenScale": 0.7
+    "tokenScale": 0.7,
+    "tier": "large"
   },
   {
     "id": 20,
     "type": "property",
     "name": "ХХБанк",
-    "price": 230,
-    "rent": 28,
+    "price": 385,
+    "rent": 96,
     "colorGroup": "C",
     "polygon": [
       [
@@ -3015,14 +3232,15 @@ const BOARD_CONFIG = [
     "tokenX": 1151.7,
     "tokenY": 191.0,
     "tokenDepth": 191,
-    "tokenScale": 0.7
+    "tokenScale": 0.7,
+    "tier": "large"
   },
   {
     "id": 21,
     "type": "property",
     "name": "Голомт Банк",
-    "price": 240,
-    "rent": 29,
+    "price": 400,
+    "rent": 102,
     "colorGroup": "C",
     "polygon": [
       [
@@ -3089,7 +3307,8 @@ const BOARD_CONFIG = [
     "tokenX": 1229.1,
     "tokenY": 227.7,
     "tokenDepth": 228,
-    "tokenScale": 0.7
+    "tokenScale": 0.7,
+    "tier": "large"
   },
   {
     "id": 22,
@@ -3128,8 +3347,8 @@ const BOARD_CONFIG = [
     "id": 23,
     "type": "property",
     "name": "ХААН Банк",
-    "price": 250,
-    "rent": 30,
+    "price": 420,
+    "rent": 110,
     "colorGroup": "C",
     "polygon": [
       [
@@ -3196,7 +3415,8 @@ const BOARD_CONFIG = [
     "tokenX": 1391.4,
     "tokenY": 306.4,
     "tokenDepth": 306,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "large"
   },
   {
     "id": 24,
@@ -3245,8 +3465,8 @@ const BOARD_CONFIG = [
     "id": 25,
     "type": "property",
     "name": "МАК",
-    "price": 270,
-    "rent": 32,
+    "price": 450,
+    "rent": 122,
     "colorGroup": "D",
     "polygon": [
       [
@@ -3313,14 +3533,15 @@ const BOARD_CONFIG = [
     "tokenX": 1433.9,
     "tokenY": 453.1,
     "tokenDepth": 453,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "national"
   },
   {
     "id": 26,
     "type": "property",
     "name": "Оюутолгой",
-    "price": 290,
-    "rent": 35,
+    "price": 480,
+    "rent": 132,
     "colorGroup": "D",
     "polygon": [
       [
@@ -3387,14 +3608,15 @@ const BOARD_CONFIG = [
     "tokenX": 1366.1,
     "tokenY": 503.0,
     "tokenDepth": 503,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "national"
   },
   {
     "id": 27,
     "type": "property",
     "name": "Скай Март",
-    "price": 300,
-    "rent": 36,
+    "price": 510,
+    "rent": 142,
     "colorGroup": "D",
     "polygon": [
       [
@@ -3461,14 +3683,15 @@ const BOARD_CONFIG = [
     "tokenX": 1294.1,
     "tokenY": 554.4,
     "tokenDepth": 554,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "national"
   },
   {
     "id": 28,
     "type": "property",
     "name": "Бороо Гоулд",
-    "price": 310,
-    "rent": 37,
+    "price": 540,
+    "rent": 150,
     "colorGroup": "D",
     "polygon": [
       [
@@ -3535,14 +3758,15 @@ const BOARD_CONFIG = [
     "tokenX": 1218.5,
     "tokenY": 609.4,
     "tokenDepth": 609,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "national"
   },
   {
     "id": 29,
     "type": "property",
     "name": "Хүрэн Толгой",
-    "price": 320,
-    "rent": 38,
+    "price": 570,
+    "rent": 160,
     "colorGroup": "D",
     "polygon": [
       [
@@ -3609,7 +3833,8 @@ const BOARD_CONFIG = [
     "tokenX": 1137.3,
     "tokenY": 667.5,
     "tokenDepth": 668,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "national"
   },
   {
     "id": 30,
@@ -3649,8 +3874,8 @@ const BOARD_CONFIG = [
     "id": 31,
     "type": "property",
     "name": "СОД Монгол",
-    "price": 340,
-    "rent": 41,
+    "price": 600,
+    "rent": 170,
     "colorGroup": "D",
     "polygon": [
       [
@@ -3717,9 +3942,38 @@ const BOARD_CONFIG = [
     "tokenX": 965.9,
     "tokenY": 786.3,
     "tokenDepth": 786,
-    "tokenScale": 0.82
+    "tokenScale": 0.82,
+    "tier": "national"
   }
 ];
+
+const ECONOMY_CONFIG = {
+  startingCash: 1500,
+  passStartReward: 80,
+  landOnStartReward: 120,
+  rentMultipliers: {
+    noBuilding: 1,
+    oneHouse: 2.5,
+    twoHouses: 5,
+    threeHouses: 9,
+    corporation: 15,
+  },
+  completeGroupBaseRentMultiplier: 1.5,
+  tierCosts: {
+    small:    { houseCost: 60,  corporationCost: 180 },
+    medium:   { houseCost: 100, corporationCost: 300 },
+    large:    { houseCost: 150, corporationCost: 450 },
+    national: { houseCost: 200, corporationCost: 600 },
+  },
+  mortgageRate: 0.5,
+  matchLimits: {
+    rankedMinutes: 35,
+    maxRounds: 30,
+  },
+};
+function getTierCosts(tier) { return ECONOMY_CONFIG.tierCosts[tier] || ECONOMY_CONFIG.tierCosts.small; }
+function getMortgageValue(sp) { return Math.round(sp.price * ECONOMY_CONFIG.mortgageRate); }
+
 
 
 const CHANCE_CARDS = [
@@ -3848,6 +4102,29 @@ function saveSettings() {
 }
 
 /* ===== DAY / NIGHT ENVIRONMENT ===== */
+let lobbyMusicStarted = false;
+function maybeStartLobbyMusic() {
+  if (lobbyMusicStarted) return;
+  lobbyMusicStarted = true;
+  audioManager.resetVictoryLock();
+  if (gameSettings.musicEnabled) audioManager.playMusic('lobbyTheme');
+}
+let tensionActive = false;
+function checkTensionMusic(room) {
+  if (!room || room.winnerId) return;
+  const active = room.players.filter(p => !p.bankrupt);
+  const anyCritical = active.some(p => p.money < 150);
+  const nearEnd = active.length <= 2 && active.some(p => p.money < 300);
+  const shouldTension = anyCritical || nearEnd;
+  if (shouldTension && !tensionActive) {
+    tensionActive = true;
+    if (gameSettings.musicEnabled) audioManager.playMusic('gameTensionTheme');
+  } else if (!shouldTension && tensionActive) {
+    tensionActive = false;
+    lastEnvRound = null; // force updateEnvironment to re-trigger the correct day/night theme
+  }
+}
+
 function getTimeOfDay(roundNumber) {
   return Math.floor((Math.max(roundNumber, 1) - 1) / 3) % 2 === 0 ? 'day' : 'night';
 }
@@ -3859,13 +4136,17 @@ function updateEnvironment(roundNumber) {
   const prevRound = lastEnvRound;
   lastEnvRound = roundNumber;
   const newTod = getTimeOfDay(roundNumber);
-  if (prevRound === null) { environment.timeOfDay = newTod; environment.previousTimeOfDay = newTod; return; }
+  if (prevRound === null) {
+    environment.timeOfDay = newTod; environment.previousTimeOfDay = newTod;
+    if (gameSettings.musicEnabled && !currentRoom.winnerId) audioManager.playMusic(newTod === 'day' ? 'gameDayTheme' : 'gameNightTheme');
+    return;
+  }
   if (newTod !== environment.timeOfDay) {
     environment.previousTimeOfDay = environment.timeOfDay;
     environment.timeOfDay = newTod;
     environment.isTransitioning = true;
     showEnvToast(newTod);
-    if (gameSettings.musicEnabled) audioManager.playMusic(newTod === 'day' ? 'dayTheme' : 'nightTheme');
+    if (gameSettings.musicEnabled) audioManager.playMusic(newTod === 'day' ? 'gameDayTheme' : 'gameNightTheme');
     setTimeout(() => { environment.isTransitioning = false; render(); }, 2000);
   }
 }
@@ -3887,6 +4168,11 @@ const SOUND_ASSETS = {
   buttonClick: 'button-click.mp3', cardFlip: 'card-flip.mp3', bonusUnlocked: 'bonus-unlocked.mp3',
   dayTheme: 'day-theme.mp3', nightTheme: 'night-theme.mp3', victoryTheme: 'victory-theme.mp3',
   rentStart: 'rent-start.mp3', moneyTransfer: 'money-transfer.mp3', rentReceived: 'rent-received.mp3', bigRent: 'big-rent.mp3',
+  lobbyTheme: 'day-theme.mp3',
+  gameDayTheme: 'game-day-theme.mp3', gameNightTheme: 'game-night-theme.mp3', gameTensionTheme: 'game-tension-theme.mp3',
+};
+const MUSIC_DUCK_AMOUNT = {
+  diceRoll: 0.20, companyPurchase: 0.35, rentStart: 0.40, corporationVictory: 0.55, cardFlip: 0.25,
 };
 const AudioManager = (function () {
   const sfxCache = {};
@@ -3895,6 +4181,10 @@ const AudioManager = (function () {
   let musicKey = null;
   let unlocked = false;
   const pendingMusic = { key: null };
+  let duckLevel = 0; // 0 = no duck, up to 1 = fully ducked
+  let duckRestoreTimer = null;
+  let victoryLocked = false;
+  let wasPlayingBeforeHidden = false;
 
   function getSfxAudio(key) {
     if (failedAssets.has(key)) return null;
@@ -3906,9 +4196,33 @@ const AudioManager = (function () {
     return sfxCache[key];
   }
 
+  function applyMusicVolume() {
+    if (!musicEl) return;
+    musicEl.volume = Math.max(0, gameSettings.musicVolume * (1 - duckLevel));
+  }
+
+  function duck(amount, restoreMs) {
+    if (!musicEl || !gameSettings.musicEnabled) return;
+    duckLevel = Math.max(duckLevel, amount);
+    applyMusicVolume();
+    if (duckRestoreTimer) clearTimeout(duckRestoreTimer);
+    duckRestoreTimer = setTimeout(() => {
+      const steps = 10, stepMs = (restoreMs || 650) / steps;
+      let i = 0;
+      const startDuck = duckLevel;
+      const restoreInterval = setInterval(() => {
+        i++;
+        duckLevel = Math.max(0, startDuck * (1 - i / steps));
+        applyMusicVolume();
+        if (i >= steps) { duckLevel = 0; applyMusicVolume(); clearInterval(restoreInterval); }
+      }, stepMs);
+    }, 60);
+  }
+
   function playSfx(key) {
     if (!gameSettings.sfxEnabled) return;
     if (!SOUND_ASSETS[key]) return;
+    if (MUSIC_DUCK_AMOUNT[key]) duck(MUSIC_DUCK_AMOUNT[key], 650);
     try {
       const a = getSfxAudio(key);
       if (!a) return;
@@ -3919,20 +4233,23 @@ const AudioManager = (function () {
     } catch (e) {}
   }
 
-  function playMusic(key) {
+  function playMusic(key, opts) {
+    opts = opts || {};
+    if (victoryLocked && key !== 'victoryTheme') return;
+    if (key === 'victoryTheme') victoryLocked = true;
     if (!SOUND_ASSETS[key]) return;
     if (!gameSettings.musicEnabled) { musicKey = key; return; }
     if (!unlocked) { pendingMusic.key = key; musicKey = key; return; }
     if (musicKey === key && musicEl && !musicEl.paused) return;
     const newEl = new Audio(SOUND_ASSETS[key]);
-    newEl.loop = true;
+    newEl.loop = opts.loop !== false;
     newEl.volume = 0;
     newEl.addEventListener('error', () => {}, { once: true });
     const oldEl = musicEl;
-    musicEl = newEl; musicKey = key;
+    musicEl = newEl; musicKey = key; duckLevel = 0;
     const p = newEl.play();
     if (p && p.catch) p.catch(() => {});
-    const steps = 24, dur = 1000, stepMs = dur / steps;
+    const steps = 24, dur = 1200, stepMs = dur / steps;
     let i = 0;
     const fade = setInterval(() => {
       i++;
@@ -3951,10 +4268,12 @@ const AudioManager = (function () {
     musicKey = null;
   }
 
+  function resetVictoryLock() { victoryLocked = false; }
+
   function setSfxVolume(v) { gameSettings.sfxVolume = v; saveSettings(); }
   function setMusicVolume(v) {
     gameSettings.musicVolume = v; saveSettings();
-    if (musicEl) musicEl.volume = v;
+    applyMusicVolume();
   }
   function setMuted(type, muted) {
     if (type === 'sfx') gameSettings.sfxEnabled = !muted;
@@ -3972,7 +4291,19 @@ const AudioManager = (function () {
   }
   ['click', 'touchstart', 'keydown'].forEach(evt => document.addEventListener(evt, unlock, { once: true }));
 
-  return { playSfx, playMusic, stopMusic, setSfxVolume, setMusicVolume, setMuted };
+  document.addEventListener('visibilitychange', () => {
+    if (!musicEl) return;
+    if (document.hidden) {
+      wasPlayingBeforeHidden = !musicEl.paused;
+      duck(0.85, 400);
+    } else if (wasPlayingBeforeHidden && gameSettings.musicEnabled) {
+      if (duckRestoreTimer) clearTimeout(duckRestoreTimer);
+      duckLevel = 0;
+      applyMusicVolume();
+    }
+  });
+
+  return { playSfx, playMusic, stopMusic, setSfxVolume, setMusicVolume, setMuted, duck, resetVictoryLock };
 })();
 const audioManager = AudioManager;
 
@@ -3996,7 +4327,7 @@ async function saveRoom(roomState) {
 }
 
 function newPlayer(name, token, isHost) {
-  return { id: myId, name, token, color: TOKEN_COLORS[TOKENS.indexOf(token)], money: 1500, position: 0, jailTurns: 0, bankrupt: false, isHost };
+  return { id: myId, name, token, color: TOKEN_COLORS[TOKENS.indexOf(token)], money: ECONOMY_CONFIG.startingCash, position: 0, jailTurns: 0, bankrupt: false, isHost };
 }
 
 async function createRoom(name, avatarToken) {
@@ -4037,6 +4368,7 @@ async function startGame() {
   const room = await getRoom(currentRoom.roomCode);
   if (!room || room.players.length < 2) return;
   room.started = true;
+  room.gameStartedAt = Date.now();
   room.log.push('\u0422\u043e\u0433\u043b\u043e\u043e\u043c \u044d\u0445\u044d\u043b\u043b\u044d\u044d! ' + room.players[0].name + '-\u0438\u0439\u043d \u044d\u044d\u043b\u0436.');
   await saveRoom(room);
   currentRoom = room; view = 'game'; render();
@@ -4117,7 +4449,9 @@ function ownsFullGroup(room, ownerId, idx) {
 function houseLevel(room, idx) { return (room.houses && room.houses[idx]) || 0; }
 function buildLevelLabel(level) { return level >= 4 ? '\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : level + ' \u0431\u0430\u0439\u0448\u0438\u043d'; }
 function buildCost(sp, room) {
-  const base = Math.round(sp.price * 0.5 / 10) * 10;
+  const costs = getTierCosts(sp.tier);
+  const currentLevel = room ? houseLevel(room, sp.id) : 0;
+  const base = (currentLevel + 1 >= 4) ? costs.corporationCost : costs.houseCost;
   if (!room) return base;
   const mult = getActiveMultiplier(room, sp, 'buildingCost');
   return Math.round(base * mult / 10) * 10;
@@ -4128,11 +4462,12 @@ function calculateRentBreakdown(room, sp, idx, ownerId) {
   const baseRent = sp.rent;
   let buildingBonus = 0, sectorBonus = 0, sectorBonusPct = 0;
   if (level > 0) {
-    const multipliers = [1, 2, 4, 6, 10];
-    buildingBonus = sp.rent * (multipliers[level] - 1);
+    const m = ECONOMY_CONFIG.rentMultipliers;
+    const multipliers = [m.noBuilding, m.oneHouse, m.twoHouses, m.threeHouses, m.corporation];
+    buildingBonus = Math.round(sp.rent * (multipliers[level] - 1));
   } else {
     const fullGroup = ownsFullGroup(room, ownerId, idx);
-    if (fullGroup) { sectorBonus = sp.rent; sectorBonusPct = 100; }
+    if (fullGroup) { sectorBonus = Math.round(sp.rent * (ECONOMY_CONFIG.completeGroupBaseRentMultiplier - 1)); sectorBonusPct = Math.round((ECONOMY_CONFIG.completeGroupBaseRentMultiplier - 1) * 100); }
   }
   const preMarket = baseRent + buildingBonus + sectorBonus;
   const marketMultiplier = getActiveMultiplier(room, sp, 'income');
@@ -4297,9 +4632,19 @@ async function rollDice() {
   room.diceRollId = Date.now() + Math.random();
   const oldPos = player.position;
   const newPos = (oldPos + sum) % BOARD_CONFIG.length;
-  const passedGo = newPos < oldPos;
+  const wrapped = newPos < oldPos;
+  const landedOnStart = wrapped && newPos === 0;
+  const passedThroughOnly = wrapped && newPos !== 0;
   room.animPath = { playerId: player.id, from: oldPos, steps: sum, id: Date.now() + Math.random() };
-  if (passedGo) { player.money += 200; pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u20ae200 \u0430\u0432\u043b\u0430\u0430.`); recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: 200, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u0431\u043e\u043d\u0443\u0441' }); }
+  if (landedOnStart) {
+    player.money += ECONOMY_CONFIG.landOnStartReward;
+    pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436 \u20ae${ECONOMY_CONFIG.landOnStartReward} \u0430\u0432\u043b\u0430\u0430.`);
+    recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: ECONOMY_CONFIG.landOnStartReward, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436 \u0448\u0430\u0433\u043d\u0430\u043b' });
+  } else if (passedThroughOnly) {
+    player.money += ECONOMY_CONFIG.passStartReward;
+    pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u20ae${ECONOMY_CONFIG.passStartReward} \u0430\u0432\u043b\u0430\u0430.`);
+    recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: ECONOMY_CONFIG.passStartReward, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u0431\u043e\u043d\u0443\u0441' });
+  }
   player.position = newPos;
   room.hasRolled = true;
   pushLog(room, `${player.name} \ud83c\udfb2${d1}+${d2}=${sum}, ${BOARD_CONFIG[newPos].name} \u0434\u044d\u044d\u0440 \u043e\u0447\u0438\u0432.`);
@@ -4361,7 +4706,27 @@ async function endTurn() {
   room.turnCount = (room.turnCount || 0) + 1;
   if (room.turnCount % room.players.length === 0) { tickMarketEffects(room); ensureRoundCandles(room); }
   pushLog(room, `\u2014 ${room.players[next].name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u2014`);
+  checkMatchTimeLimit(room);
   await saveRoom(room); currentRoom = room; render();
+}
+function checkMatchTimeLimit(room) {
+  if (room.winnerId) return;
+  const roundN = Math.floor((room.turnCount || 0) / room.players.length) + 1;
+  const elapsedMin = room.gameStartedAt ? (Date.now() - room.gameStartedAt) / 60000 : 0;
+  const timeUp = elapsedMin >= ECONOMY_CONFIG.matchLimits.rankedMinutes;
+  const roundsUp = roundN > ECONOMY_CONFIG.matchLimits.maxRounds;
+  if (!timeUp && !roundsUp) return;
+  const active = room.players.filter(p => !p.bankrupt);
+  if (active.length === 0) return;
+  const ranked = active.map(p => ({ p, worth: netWorth(room, p) })).sort((a, b) => {
+    if (b.worth !== a.worth) return b.worth - a.worth;
+    if (b.p.money !== a.p.money) return b.p.money - a.p.money;
+    const corpCountA = Object.keys(room.propOwner).filter(idx => room.propOwner[idx] === a.p.id && houseLevel(room, idx) >= 4).length;
+    const corpCountB = Object.keys(room.propOwner).filter(idx => room.propOwner[idx] === b.p.id && houseLevel(room, idx) >= 4).length;
+    return corpCountB - corpCountA;
+  });
+  room.winnerId = ranked[0].p.id;
+  pushLog(room, `${timeUp ? '\u0425\u0443\u0433\u0430\u0446\u0430\u0430' : '\u04ae\u0435\u0438\u0439\u043d \u0445\u044f\u0437\u0433\u0430\u0430\u0440'} \u0434\u0443\u0443\u0441\u043b\u0430\u0430. \u041d\u0438\u0439\u0442 \u0445\u04e9\u0440\u04e9\u043d\u0433\u04e9\u04e9\u0440 ${ranked[0].p.name} \u044f\u043b\u043b\u0430\u0430!`);
 }
 
 let roomChannel = null;
@@ -4920,13 +5285,22 @@ function flashMoneyFloat(delta) {
   setTimeout(() => el.remove(), 1000);
 }
 
+function buildingInvestment(sp, level) {
+  const costs = getTierCosts(sp.tier);
+  if (level <= 0) return 0;
+  if (level >= 4) return costs.houseCost * 3 + costs.corporationCost;
+  return costs.houseCost * level;
+}
+function buildingResaleValue(sp, level) { return Math.round(buildingInvestment(sp, level) * ECONOMY_CONFIG.mortgageRate); }
+
 function netWorth(room, player) {
   let worth = player.money;
   Object.keys(room.propOwner).forEach(idx => {
     if (room.propOwner[idx] === player.id) {
       const sp = BOARD_CONFIG[idx]; worth += sp.price;
       const level = houseLevel(room, idx);
-      if (level > 0) worth += buildCost(sp, room) * level;
+      if (level > 0) worth += buildingInvestment(sp, level);
+      if (room.mortgaged && room.mortgaged[idx]) worth -= getMortgageValue(sp);
     }
   });
   return worth;
@@ -5160,20 +5534,22 @@ function render() {
   document.body.classList.toggle('view-game', view === 'game');
   if (currentRoom) { /* card popup now handled by maybeShowCardModal in the render() dispatcher */ }
   if (authState.isLoading) { app.innerHTML = renderAuthLoading(); return; }
-  if (view === 'auth') { app.innerHTML = renderAuthGate(); attachAuthGateEvents(); return; }
-  if (view === 'auth-signup') { app.innerHTML = renderAuthSignup(); attachAuthSignupEvents(); return; }
-  if (view === 'auth-signin') { app.innerHTML = renderAuthSignin(); attachAuthSigninEvents(); return; }
-  if (view === 'auth-reset') { app.innerHTML = renderAuthReset(); attachAuthResetEvents(); return; }
-  if (view === 'profile') { app.innerHTML = renderProfile(); attachProfileEvents(); return; }
-  if (view === 'landing') { app.innerHTML = renderLanding(); attachLandingEvents(); return; }
-  if (view === 'waiting') { app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
+  if (view === 'auth') { maybeStartLobbyMusic(); app.innerHTML = renderAuthGate(); attachAuthGateEvents(); return; }
+  if (view === 'auth-signup') { maybeStartLobbyMusic(); app.innerHTML = renderAuthSignup(); attachAuthSignupEvents(); return; }
+  if (view === 'auth-signin') { maybeStartLobbyMusic(); app.innerHTML = renderAuthSignin(); attachAuthSigninEvents(); return; }
+  if (view === 'auth-reset') { maybeStartLobbyMusic(); app.innerHTML = renderAuthReset(); attachAuthResetEvents(); return; }
+  if (view === 'profile') { maybeStartLobbyMusic(); app.innerHTML = renderProfile(); attachProfileEvents(); return; }
+  if (view === 'landing') { maybeStartLobbyMusic(); app.innerHTML = renderLanding(); attachLandingEvents(); return; }
+  if (view === 'waiting') { maybeStartLobbyMusic(); app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
   if (view === 'game') {
+    lobbyMusicStarted = false;
     if (currentRoom) {
       maybeTriggerGameResults(currentRoom);
       if (!gameResults.isOpen) {
         maybeTriggerMoveAnimation(currentRoom); maybeTriggerDiceAnimation(currentRoom); maybeTriggerBuildAnimation(currentRoom);
         maybeTriggerRentCinematic(currentRoom);
         updateEnvironment(Math.floor((currentRoom.turnCount || 0) / currentRoom.players.length) + 1);
+        checkTensionMusic(currentRoom);
       }
       if (isMobileView && !mobileCamInitialized && cameraState.mode === 'overview') {
         mobileCamInitialized = true;
@@ -5342,6 +5718,28 @@ function attachAuthResetEvents() {
   };
 }
 
+/* ===== TITLE / RANK ===== */
+function getPlayerTitle(level) {
+  if (level >= 71) return '\u042d\u0437\u044d\u043d\u0442 \u0433\u04af\u0440\u043d\u0438\u0439 \u044d\u0437\u044d\u043d';
+  if (level >= 51) return '\u0422\u044d\u0440\u0431\u0443\u043c\u0442\u0430\u043d';
+  if (level >= 41) return '\u0421\u0430\u044f\u0442\u0430\u043d';
+  if (level >= 31) return '\u041c\u0430\u0433\u043d\u0430\u0442';
+  if (level >= 21) return '\u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u043e\u0440\u0443\u0443\u043b\u0430\u0433\u0447';
+  if (level >= 11) return '\u0417\u0430\u0445\u0438\u0440\u0430\u043b';
+  if (level >= 6) return '\u0411\u0438\u0437\u043d\u0435\u0441 \u044d\u0440\u0445\u044d\u043b\u044d\u0433\u0447';
+  return '\u0428\u0438\u043d\u044d \u043d\u0430\u0439\u043c\u0430\u0430\u0447\u0438\u043d';
+}
+function getRankTier(mmr) {
+  if (mmr >= 2000) return { key: 'grandmaster', label: 'Grandmaster', color: '#ef4444' };
+  if (mmr >= 1700) return { key: 'master', label: 'Master', color: '#a855f7' };
+  if (mmr >= 1500) return { key: 'diamond', label: 'Diamond', color: '#7dd3fc' };
+  if (mmr >= 1300) return { key: 'platinum', label: 'Platinum', color: '#5eead4' };
+  if (mmr >= 1100) return { key: 'gold', label: 'Gold', color: '#f5c94f' };
+  if (mmr >= 900) return { key: 'silver', label: 'Silver', color: '#c7ccd6' };
+  return { key: 'bronze', label: 'Bronze', color: '#c98a4b' };
+}
+function xpForLevel(level) { return (level - 1) * 200; }
+
 function renderProfile() {
   if (authState.isGuest || !authState.user) {
     return `<div class="screen">
@@ -5356,13 +5754,30 @@ function renderProfile() {
   }
   const p = authState.profile || {};
   const s = authState._stats || {};
+  const level = s.level || 1;
+  const xp = s.xp || 0;
+  const mmr = s.mmr || 1000;
+  const title = getPlayerTitle(level);
+  const rank = getRankTier(mmr);
+  const xpBase = xpForLevel(level), xpNext = xpForLevel(level + 1);
+  const xpPct = Math.min(100, Math.round(((xp - xpBase) / (xpNext - xpBase)) * 100));
+  const winRate = s.games_played > 0 ? Math.round((s.games_won || 0) / s.games_played * 100) : 0;
   return `<div class="screen">
     <div class="eyebrow">\u041f\u0440\u043e\u0444\u0430\u0439\u043b</div>
     <div class="landing-card" style="text-align:center;">
       <div style="font-size:48px; margin-bottom:8px;">${p.avatar || '\ud83d\udc2b'}</div>
       <div class="seal-title" style="font-size:20px;">${p.display_name || authState.user.email}</div>
+      <div class="profile-title-badge">${title}</div>
+      <div class="profile-level-row">
+        <span class="profile-level-num">LV.${level}</span>
+        <div class="profile-xp-bar"><div class="profile-xp-fill" style="width:${xpPct}%"></div></div>
+        <span class="profile-xp-label">${xp - xpBase}/${xpNext - xpBase} XP</span>
+      </div>
+      <div class="profile-rank-badge" style="--rank-color:${rank.color}">
+        <span class="prb-tier">${rank.label}</span><span class="prb-mmr">${mmr} MMR</span>
+      </div>
       <div class="detail-row"><span>\u041d\u0438\u0439\u0442 \u0442\u043e\u0433\u043b\u043e\u043b\u0442</span><span>${s.games_played || 0}</span></div>
-      <div class="detail-row"><span>\u042f\u043b\u0430\u043b\u0442</span><span>${s.games_won || 0}</span></div>
+      <div class="detail-row"><span>\u042f\u043b\u0430\u043b\u0442 (${winRate}%)</span><span>${s.games_won || 0}</span></div>
       <div class="detail-row"><span>\u0425\u0430\u043c\u0433\u0438\u0439\u043d \u04e9\u043d\u0434\u04e9\u0440 \u0445\u04e9\u0440\u04e9\u043d\u0433\u04e9</span><span>\u20ae${fmt(s.highest_wealth || 0)}</span></div>
       <div class="detail-row"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0441\u0430\u043d \u043a\u043e\u043c\u043f\u0430\u043d\u0438</span><span>${s.companies_purchased || 0}</span></div>
       <div class="detail-row"><span>\u0411\u0430\u0439\u0433\u0443\u0443\u043b\u0441\u0430\u043d \u043a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438</span><span>${s.corporations_built || 0}</span></div>
@@ -5379,6 +5794,65 @@ function attachProfileEvents() {
   if (authState.user && !authState._stats) {
     fetchStatistics(authState.user.id).then(s => { authState._stats = s || {}; render(); });
   }
+}
+
+function renderMatchmakingModal() {
+  if (!mmState.isOpen) return '';
+  const modeLabels = { casual_1v1: '\u042d\u041d\u0413\u0418\u0419\u041d 1v1', ranked_1v1: 'RANKED 1v1', casual_4p: '\u042d\u041d\u0413\u0418\u0419\u041d 4 \u0422\u041e\u0413\u041b\u041e\u0413\u0427', ranked_4p: 'RANKED 4 \u0422\u041e\u0413\u041b\u041e\u0413\u0427' };
+  let body = '';
+  if (mmState.stage === 'idle' || mmState.stage === 'error') {
+    body = `<div class="mm-mode-select">
+      ${mmState.error ? `<div class="error-msg">${mmState.error}</div>` : ''}
+      <button class="btn btn-primary mm-mode-btn" data-mode="ranked_1v1">\u2694\ufe0f RANKED 1v1</button>
+      <button class="btn btn-secondary mm-mode-btn" data-mode="casual_1v1">\ud83c\udfae \u042d\u041d\u0413\u0418\u0419\u041d 1v1</button>
+      <button class="btn btn-secondary mm-mode-btn" disabled title="\u0423\u0434\u0430\u0445\u0433\u04af\u0439">\u2694\ufe0f RANKED 4 \u0422\u041e\u0413\u041b\u041e\u0413\u0427 (\u0423\u0434\u0430\u0445\u0433\u04af\u0439)</button>
+    </div>`;
+  } else if (mmState.stage === 'searching') {
+    const elapsed = mmState.searchStartedAt ? Math.floor((Date.now() - mmState.searchStartedAt) / 1000) : 0;
+    const s = authState._stats || {};
+    body = `<div class="mm-searching">
+      <div class="mm-radar">
+        <span class="mm-radar-ring mm-r1"></span><span class="mm-radar-ring mm-r2"></span><span class="mm-radar-ring mm-r3"></span>
+        <span class="mm-radar-scan"></span>
+        <span class="mm-radar-avatar">${(authState.profile && authState.profile.avatar) || '\ud83d\udc2b'}</span>
+      </div>
+      <div class="mm-search-mode">${modeLabels[mmState.mode]}</div>
+      <div class="mm-search-text">\u04e8\u0440\u0441\u04e9\u043b\u0434\u04e9\u0433\u0447 \u0445\u0430\u0439\u0436 \u0431\u0430\u0439\u043d\u0430...</div>
+      <div class="mm-search-time">${elapsed}\u0441</div>
+      <div class="mm-search-mmr">${(getRankTier(s.mmr || 1000)).label} \u00b7 ${s.mmr || 1000} MMR</div>
+      <button class="btn btn-secondary" id="mmCancelBtn">\u25c6 \u0425\u0410\u0419\u041b\u0422 \u0426\u0423\u0426\u041b\u0410\u0425</button>
+    </div>`;
+  } else if (mmState.stage === 'found') {
+    const remain = mmState.acceptDeadline ? Math.max(0, Math.ceil((mmState.acceptDeadline - Date.now()) / 1000)) : 0;
+    const s = authState._stats || {};
+    body = `<div class="mm-found">
+      <div class="mm-found-title">\u2756 \u04e8\u0420\u0421\u04e8\u041b\u0414\u04e8\u0413\u0427 \u041e\u041b\u0414\u041b\u041e\u041e! \u2756</div>
+      <div class="mm-vs-row">
+        <div class="mm-vs-side"><span class="mm-vs-avatar">${(authState.profile && authState.profile.avatar) || '\ud83d\udc2b'}</span><div class="mm-vs-name">${myName || '\u0422\u0430'}</div><div class="mm-vs-sub">LV.${s.level || 1} \u00b7 ${s.mmr || 1000}</div></div>
+        <div class="mm-vs-mark">VS</div>
+        <div class="mm-vs-side"><span class="mm-vs-avatar">${mmState.opponent.avatar}</span><div class="mm-vs-name">${mmState.opponent.name}</div><div class="mm-vs-sub">LV.${mmState.opponent.level} \u00b7 ${mmState.opponent.mmr}</div></div>
+      </div>
+      <div class="mm-countdown">${remain}\u0441</div>
+      ${mmState.myAccepted
+        ? `<div class="mm-waiting-accept">\u0422\u0430 \u0431\u044d\u043b\u044d\u043d \u0431\u043e\u043b\u043b\u043e\u043e. \u04e8\u0440\u0441\u04e9\u043b\u0434\u04e9\u0433\u0447\u0438\u0439\u0433 \u0445\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430...</div>`
+        : `<div class="mm-accept-row"><button class="btn btn-primary" id="mmAcceptBtn">\u2713 \u0411\u042d\u041b\u042d\u041d</button><button class="btn btn-secondary" id="mmDeclineBtn">\u2715 \u0422\u0410\u0422\u0413\u0410\u041b\u0417\u0410\u0425</button></div>`}
+    </div>`;
+  }
+  return `<div class="mm-modal-backdrop" id="mmModalBackdrop">
+    <div class="mm-modal">
+      ${mmState.stage === 'idle' || mmState.stage === 'error' ? `<button class="wc-close-btn" id="mmCloseBtn">\u2715</button>` : ''}
+      <div class="mm-modal-title">\u25c8 \u041c\u0410\u0422\u0427\u041c\u0415\u0419\u041a\u0418\u041d\u0413 \u25c8</div>
+      ${body}
+    </div>
+  </div>`;
+}
+function attachMatchmakingEvents() {
+  if (!mmState.isOpen) return;
+  const closeBtn = document.getElementById('mmCloseBtn'); if (closeBtn) closeBtn.onclick = closeMatchmakingModal;
+  document.querySelectorAll('.mm-mode-btn[data-mode]').forEach(btn => { btn.onclick = () => startMatchmaking(btn.dataset.mode); });
+  const cancelBtn = document.getElementById('mmCancelBtn'); if (cancelBtn) cancelBtn.onclick = cancelMatchmaking;
+  const acceptBtn = document.getElementById('mmAcceptBtn'); if (acceptBtn) acceptBtn.onclick = acceptMatch;
+  const declineBtn = document.getElementById('mmDeclineBtn'); if (declineBtn) declineBtn.onclick = declineMatch;
 }
 
 function renderLanding() {
@@ -5444,6 +5918,7 @@ function renderLanding() {
           </div>
 
           <button class="lp-cta" id="createBtn"><span class="lp-cta-icon">\u265a</span> \u0428\u0418\u041d\u042d \u04e8\u0420\u04e8\u04e8 \u04ae\u04ae\u0421\u0413\u042d\u0425</button>
+          <button class="lp-mm-btn" id="findOpponentBtn"><span class="lp-cta-icon">\u2694\ufe0f</span> \u04e8\u0420\u0421\u04e8\u041b\u0414\u04e8\u0413\u0427 \u0425\u0410\u0419\u0425</button>
 
           <div class="lp-or"><span></span>\u042d\u0421\u0412\u042d\u041b<span></span></div>
 
@@ -5456,6 +5931,7 @@ function renderLanding() {
         </div>
       </div>
     </div>
+    ${renderMatchmakingModal()}
   </div>`;
 }
 function attachLandingEvents() {
@@ -5486,6 +5962,11 @@ function attachLandingEvents() {
   const signupLink = document.getElementById('landingSignupLink'); if (signupLink) signupLink.onclick = (e) => { e.preventDefault(); authFormState = { loading: false, error: '', info: '' }; view = 'auth-signup'; render(); };
   const signupLink2 = document.getElementById('landingSignupLink2'); if (signupLink2) signupLink2.onclick = (e) => { e.preventDefault(); authFormState = { loading: false, error: '', info: '' }; view = 'auth-signup'; render(); };
   const signinLink = document.getElementById('landingSigninLink'); if (signinLink) signinLink.onclick = (e) => { e.preventDefault(); authFormState = { loading: false, error: '', info: '' }; view = 'auth-signin'; render(); };
+  const findOpponentBtn = document.getElementById('findOpponentBtn'); if (findOpponentBtn) findOpponentBtn.onclick = openMatchmakingModal;
+  attachMatchmakingEvents();
+  if (authState.user && !authState._stats) {
+    fetchStatistics(authState.user.id).then(s => { authState._stats = s || {}; if (mmState.isOpen) render(); });
+  }
 }
 function renderWaiting() {
   const room = currentRoom;
@@ -5706,7 +6187,9 @@ function renderOwnedCompaniesPanel(room) {
     const sp = BOARD_CONFIG[idx];
     const level = houseLevel(room, idx);
     const full = ownsFullGroup(room, myId, idx);
-    const rentShown = level > 0 ? sp.rent * [1,2,4,6,10][level] : (full ? sp.rent * 2 : sp.rent);
+    const rm = ECONOMY_CONFIG.rentMultipliers;
+    const multipliers = [rm.noBuilding, rm.oneHouse, rm.twoHouses, rm.threeHouses, rm.corporation];
+    const rentShown = level > 0 ? Math.round(sp.rent * multipliers[level]) : (full ? Math.round(sp.rent * ECONOMY_CONFIG.completeGroupBaseRentMultiplier) : sp.rent);
     const pct = Math.round((level / 4) * 100);
     const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
     return `<div class="sb-company-card" data-idx="${idx}" style="--grp-color:${GROUP_COLORS[sp.colorGroup] || 'var(--emerald)'};">
@@ -6442,12 +6925,16 @@ function renderBuyModal(room) {
   const sp = BOARD_CONFIG[room.pendingAction.spaceIndex];
   const me = room.players.find(p => p.id === myId);
   const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
-  const houseCost = buildCost(sp, room);
-  const corpCost = buildCost(sp, room);
+  const tierCosts = getTierCosts(sp.tier);
+  const houseCost = tierCosts.houseCost;
+  const corpCost = tierCosts.corporationCost;
   const groupColor = GROUP_COLORS[sp.colorGroup] || 'var(--gold)';
   const canAfford = me.money >= sp.price;
   const remaining = me.money - sp.price;
   const shortBy = sp.price - me.money;
+  const m = ECONOMY_CONFIG.rentMultipliers;
+  const mortgageVal = getMortgageValue(sp);
+  const groupBonusPct = Math.round((ECONOMY_CONFIG.completeGroupBaseRentMultiplier - 1) * 100);
   root.innerHTML = `<div class="buy-modal-backdrop">
     <div class="buy-modal">
       <div class="buy-modal-visual" style="--grp:${groupColor};">
@@ -6459,9 +6946,17 @@ function renderBuyModal(room) {
         <div class="buy-modal-name">${sp.name}</div>
         <div class="buy-modal-stats">
           <div class="bm-stat"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u043d \u0430\u0432\u0430\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(sp.price)}</b></div>
-          <div class="bm-stat"><span>\u0421\u0443\u0443\u0440\u044c \u043e\u0440\u043b\u043e\u0433\u043e (\u0442\u04af\u0440\u044d\u044d\u0441)</span><b>\u20ae${fmt(sp.rent)}</b></div>
+          <div class="bm-stat"><span>\u0411\u0430\u0440\u0438\u043b\u0433\u0430\u0433\u04af\u0439 \u0442\u04af\u0440\u044d\u044d\u0441</span><b>\u20ae${fmt(sp.rent)}</b></div>
           <div class="bm-stat"><span>\u0411\u0430\u0439\u0448\u0438\u043d \u0431\u0430\u0440\u0438\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(houseCost)}</b></div>
           <div class="bm-stat"><span>\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446 \u0431\u043e\u043b\u0433\u043e\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(corpCost)}</b></div>
+          <div class="bm-stat"><span>\u0411\u0430\u0440\u044c\u0446\u0430\u0430\u043d\u044b \u04af\u043d\u044d</span><b>\u20ae${fmt(mortgageVal)}</b></div>
+          <div class="bm-stat"><span>\u04e8\u043d\u0433\u0438\u0439\u043d \u0431\u04af\u043b\u044d\u0433\u0438\u0439\u043d \u0431\u043e\u043d\u0443\u0441</span><b>+${groupBonusPct}%</b></div>
+        </div>
+        <div class="bm-rent-table">
+          <div class="bm-rent-row"><span>1 \u0431\u0430\u0439\u0448\u0438\u043d</span><b>\u20ae${fmt(Math.round(sp.rent * m.oneHouse))}</b></div>
+          <div class="bm-rent-row"><span>2 \u0431\u0430\u0439\u0448\u0438\u043d</span><b>\u20ae${fmt(Math.round(sp.rent * m.twoHouses))}</b></div>
+          <div class="bm-rent-row"><span>3 \u0431\u0430\u0439\u0448\u0438\u043d</span><b>\u20ae${fmt(Math.round(sp.rent * m.threeHouses))}</b></div>
+          <div class="bm-rent-row bm-rent-corp"><span>\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438</span><b>\u20ae${fmt(Math.round(sp.rent * m.corporation))}</b></div>
         </div>
         <div class="buy-modal-money-row">
           <div class="bm-money"><span>\u0422\u0430\u043d\u044b \u043e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u043c\u04e9\u043d\u0433\u04e9</span><b>\u20ae${fmt(me.money)}</b></div>
@@ -6553,13 +7048,108 @@ function computePlayerWealth(room, player) {
     const sp = BOARD_CONFIG[idx];
     companyValue += sp.price; companyCount++;
     const level = houseLevel(room, idx);
-    if (level >= 4) { corporationValue += buildCost(sp, room) * 4; corpCount++; }
-    else if (level > 0) { houseValue += buildCost(sp, room) * level; houseCount += level; }
-    if (room.mortgaged && room.mortgaged[idx]) mortgageDebt += Math.round(sp.price * 0.5);
+    if (level >= 4) { corporationValue += buildingResaleValue(sp, level); corpCount++; }
+    else if (level > 0) { houseValue += buildingResaleValue(sp, level); houseCount += level; }
+    if (room.mortgaged && room.mortgaged[idx]) mortgageDebt += getMortgageValue(sp);
   });
   const total = player.money + companyValue + houseValue + corporationValue - mortgageDebt;
   return { playerId: player.id, cash: player.money, companyValue, houseValue, corporationValue, mortgageDebt, total, companyCount, corpCount, houseCount };
 }
+
+/* ===== ECONOMY BALANCE SIMULATION (dev tool: run in browser console as runEconomySimulation(1000)) ===== */
+function runEconomySimulation(numGames) {
+  numGames = numGames || 1000;
+  const properties = BOARD_CONFIG.filter(t => t.type === 'property');
+  const results = { durations: [], rounds: [], bankruptcies: 0, winnerWealth: [], companyProfit: {}, groupWinRate: {}, unpurchased: {} };
+  properties.forEach(sp => { results.companyProfit[sp.id] = 0; results.unpurchased[sp.id] = 0; });
+  ['A', 'B', 'C', 'D'].forEach(g => { results.groupWinRate[g] = 0; });
+
+  for (let g = 0; g < numGames; g++) {
+    const numPlayers = 2 + Math.floor(Math.random() * 3); // 2-4
+    const players = Array.from({ length: numPlayers }, (_, i) => ({ id: i, money: ECONOMY_CONFIG.startingCash, position: 0, bankrupt: false }));
+    const propOwner = {}; const houses = {};
+    let turnCount = 0; const maxTurns = ECONOMY_CONFIG.matchLimits.maxRounds * numPlayers;
+    let winnerId = null;
+
+    function ownsFullGroupSim(pid, sp) {
+      return properties.filter(p => p.colorGroup === sp.colorGroup).every(p => propOwner[p.id] === pid);
+    }
+    function rentFor(sp, ownerId) {
+      const lvl = houses[sp.id] || 0;
+      const m = ECONOMY_CONFIG.rentMultipliers;
+      if (lvl > 0) { const mm = [m.noBuilding, m.oneHouse, m.twoHouses, m.threeHouses, m.corporation]; return Math.round(sp.rent * mm[lvl]); }
+      if (ownsFullGroupSim(ownerId, sp)) return Math.round(sp.rent * ECONOMY_CONFIG.completeGroupBaseRentMultiplier);
+      return sp.rent;
+    }
+
+    while (turnCount < maxTurns) {
+      const active = players.filter(p => !p.bankrupt);
+      if (active.length <= 1) { winnerId = active[0] ? active[0].id : null; break; }
+      const cur = players[turnCount % numPlayers];
+      if (!cur.bankrupt) {
+        const roll = 2 + Math.floor(Math.random() * 11);
+        const old = cur.position;
+        cur.position = (old + roll) % properties.length === 0 ? 0 : (old + roll) % BOARD_CONFIG.length;
+        if (cur.position < old) cur.money += (cur.position === 0) ? ECONOMY_CONFIG.landOnStartReward : ECONOMY_CONFIG.passStartReward;
+        const sp = properties.find(p => p.id === cur.position);
+        if (sp) {
+          const owner = propOwner[sp.id];
+          if (owner === undefined) {
+            if (cur.money >= sp.price && Math.random() > 0.15) { cur.money -= sp.price; propOwner[sp.id] = cur.id; }
+          } else if (owner === cur.id) {
+            const lvl = houses[sp.id] || 0;
+            const costs = getTierCosts(sp.tier);
+            const cost = lvl + 1 >= 4 ? costs.corporationCost : costs.houseCost;
+            if (lvl < 4 && ownsFullGroupSim(cur.id, sp) && cur.money >= cost && Math.random() > 0.35) { cur.money -= cost; houses[sp.id] = lvl + 1; }
+          } else {
+            const rent = rentFor(sp, owner);
+            cur.money -= rent;
+            const ownerP = players.find(p => p.id === owner);
+            ownerP.money += rent;
+            results.companyProfit[sp.id] += rent;
+            if (cur.money < 0) { cur.bankrupt = true; results.bankruptcies++; properties.forEach(p => { if (propOwner[p.id] === cur.id) { delete propOwner[p.id]; delete houses[p.id]; } }); }
+          }
+        }
+      }
+      turnCount++;
+    }
+    if (!winnerId) {
+      const active = players.filter(p => !p.bankrupt);
+      const worths = active.map(p => {
+        let w = p.money;
+        properties.forEach(sp => { if (propOwner[sp.id] === p.id) { w += sp.price; const lvl = houses[sp.id] || 0; if (lvl > 0) w += buildingInvestment(sp, lvl) * ECONOMY_CONFIG.mortgageRate; } });
+        return { id: p.id, w };
+      }).sort((a, b) => b.w - a.w);
+      winnerId = worths.length > 0 ? worths[0].id : null;
+    }
+    const finalWinner = players.find(p => p.id === winnerId);
+    if (finalWinner) {
+      let w = finalWinner.money;
+      properties.forEach(sp => { if (propOwner[sp.id] === finalWinner.id) w += sp.price; });
+      results.winnerWealth.push(w);
+    }
+    results.durations.push(turnCount);
+    results.rounds.push(Math.ceil(turnCount / numPlayers));
+    properties.forEach(sp => { if (propOwner[sp.id] === undefined) results.unpurchased[sp.id] = (results.unpurchased[sp.id] || 0) + 1; });
+  }
+
+  const avg = arr => arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+  const bestCompany = Object.entries(results.companyProfit).sort((a, b) => b[1] - a[1])[0];
+  const worstCompany = Object.entries(results.unpurchased).sort((a, b) => b[1] - a[1])[0];
+  const summary = {
+    games: numGames,
+    avgRounds: avg(results.rounds).toFixed(1),
+    avgTurnsPerGame: avg(results.durations).toFixed(1),
+    estAvgMinutes: (avg(results.rounds) * 0.9).toFixed(1) + ' (\u0442\u0430\u0430\u043c\u0430\u0433, \u0440\u0430\u0443\u043d\u0434 \u0431\u04af\u0440\u0438\u0434 ~0.9\u043c\u0438\u043d)',
+    bankruptcyRatePct: ((results.bankruptcies / (numGames * 3)) * 100).toFixed(1) + '% (\u0442\u0430\u0430\u043c\u0430\u0433, \u0434\u0443\u043d\u0434\u0430\u0436 3 \u0442\u043e\u0433\u043b\u043e\u0433\u0447/\u0442\u043e\u0433\u043b\u043e\u043b\u0442)',
+    avgWinnerWealth: fmt(avg(results.winnerWealth)),
+    mostProfitableCompany: bestCompany ? BOARD_CONFIG[bestCompany[0]].name + ' (\u20ae' + fmt(bestCompany[1] / numGames) + '/\u0442\u043e\u0433\u043b\u043e\u043b\u0442)' : 'N/A',
+    leastPurchasedCompany: worstCompany ? BOARD_CONFIG[worstCompany[0]].name + ' (' + Math.round(worstCompany[1] / numGames * 100) + '% \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u0430\u0432\u0430\u0430\u0433\u04af\u0439)' : 'N/A',
+  };
+  console.table(summary);
+  return summary;
+}
+window.runEconomySimulation = runEconomySimulation;
 
 function computeRankings(room) {
   const rows = room.players.map(p => computePlayerWealth(room, p));
@@ -6579,7 +7169,25 @@ function maybeTriggerGameResults(room) {
   const rankings = computeRankings(room);
   gameResults = { isOpen: true, stage: 'counting', rankings, winnerId: room.winnerId };
   if (gameSettings.musicEnabled) audioManager.playMusic('victoryTheme');
+  if (room.rankedGameId && authState.user) grantRankedReward(room, rankings);
   runResultsSequence();
+}
+async function grantRankedReward(room, rankings) {
+  try {
+    const myRankRow = rankings.find(r => r.playerId === myId);
+    if (!myRankRow) return;
+    const placement = rankings.findIndex(r => r.playerId === myId) + 1;
+    const { data, error } = await supabaseClient.rpc('grant_game_reward', {
+      p_game_id: room.rankedGameId, p_placement: placement,
+      p_companies_purchased: myRankRow.companyCount || 0,
+      p_houses_built: myRankRow.houseCount || 0,
+      p_corporations_built: myRankRow.corpCount || 0,
+      p_left_early: false,
+    });
+    if (!error && data && data.length > 0 && authState._stats) {
+      authState._stats.level = data[0].new_level; authState._stats.xp = data[0].new_xp; authState._stats.mmr = data[0].new_mmr;
+    }
+  } catch (e) {}
 }
 
 async function runResultsSequence() {
@@ -6632,6 +7240,7 @@ async function confirmReplay() {
   cameraState = { mode: 'overview', x: 0, y: 0, scale: 1, targetTileId: null, isMoving: false };
   buildingAnim = null; buildingAnimationActive = false;
   rentCinematicActive = false; rentCinematicTxn = null; rentCinematicStage = 'appear'; lastRentTxnId = null; lastSeenResolvedCardId = null;
+  lastEnvRound = null; tensionActive = false; audioManager.resetVictoryLock();
   knownLevels = {}; levelsInitialized = false; seenBuildings = new Set(); seenUpgrades = new Set();
   render();
 }
@@ -6796,17 +7405,31 @@ function showCellDetail(idx) {
   const isMortgaged = Boolean(room.mortgaged && room.mortgaged[idx]);
   let bodyHtml = '';
   if (sp.type === 'property') {
-    const effectiveRent = level > 0 ? sp.rent*[1,2,4,6,10][level] : (fullGroup ? sp.rent*2 : sp.rent);
+    const rm = ECONOMY_CONFIG.rentMultipliers;
+    const multipliers = [rm.noBuilding, rm.oneHouse, rm.twoHouses, rm.threeHouses, rm.corporation];
+    const effectiveRent = level > 0 ? Math.round(sp.rent * multipliers[level]) : (fullGroup ? Math.round(sp.rent * ECONOMY_CONFIG.completeGroupBaseRentMultiplier) : sp.rent);
     const fileName = BUILDING_FILE_MAP[sp.buildingType] || sp.buildingType;
     const groupColor = GROUP_COLORS[sp.colorGroup] || 'var(--gold)';
+    const tierCosts = getTierCosts(sp.tier);
+    const groupBonusPct = Math.round((ECONOMY_CONFIG.completeGroupBaseRentMultiplier - 1) * 100);
+    const marketMult = getActiveMultiplier(room, sp, 'income');
     bodyHtml = `
       <div class="detail-thumb-row">
         <div class="detail-thumb" style="--grp:${groupColor};"><img src="${fileName}.png" alt="" onerror="this.style.display='none'"></div>
         <div class="detail-group-chip" style="background:${groupColor};"></div>
       </div>
       <div class="detail-row"><span>\u04ae\u043d\u044d</span><span>\u20ae${fmt(sp.price)}</span></div>
-      <div class="detail-row"><span>\u0421\u0443\u0443\u0440\u044c \u0442\u04af\u0440\u044d\u044d\u0441</span><span>\u20ae${fmt(sp.rent)}</span></div>
       <div class="detail-row"><span>\u041e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u0442\u04af\u0440\u044d\u044d\u0441</span><span>\u20ae${fmt(effectiveRent)}</span></div>
+      <div class="detail-row"><span>\u0411\u0430\u0440\u0438\u043b\u0433\u0430\u0433\u04af\u0439 \u0442\u04af\u0440\u044d\u044d\u0441</span><span>\u20ae${fmt(sp.rent)}</span></div>
+      <div class="detail-row"><span>1 \u0431\u0430\u0439\u0448\u0438\u043d</span><span>\u20ae${fmt(Math.round(sp.rent * rm.oneHouse))}</span></div>
+      <div class="detail-row"><span>2 \u0431\u0430\u0439\u0448\u0438\u043d</span><span>\u20ae${fmt(Math.round(sp.rent * rm.twoHouses))}</span></div>
+      <div class="detail-row"><span>3 \u0431\u0430\u0439\u0448\u0438\u043d</span><span>\u20ae${fmt(Math.round(sp.rent * rm.threeHouses))}</span></div>
+      <div class="detail-row"><span>\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438</span><span>\u20ae${fmt(Math.round(sp.rent * rm.corporation))}</span></div>
+      <div class="detail-row"><span>\u0411\u0430\u0439\u0448\u0438\u043d \u0431\u0430\u0440\u0438\u0445 \u04af\u043d\u044d</span><span>\u20ae${fmt(tierCosts.houseCost)}</span></div>
+      <div class="detail-row"><span>\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446 \u0431\u043e\u043b\u0433\u043e\u0445 \u04af\u043d\u044d</span><span>\u20ae${fmt(tierCosts.corporationCost)}</span></div>
+      <div class="detail-row"><span>\u0411\u0430\u0440\u044c\u0446\u0430\u0430\u043d\u044b \u04af\u043d\u044d</span><span>\u20ae${fmt(getMortgageValue(sp))}</span></div>
+      <div class="detail-row"><span>\u04e8\u043d\u0433\u0438\u0439\u043d \u0431\u04af\u043b\u044d\u0433\u0438\u0439\u043d \u0431\u043e\u043d\u0443\u0441</span><span>+${groupBonusPct}%</span></div>
+      ${marketMult !== 1 ? `<div class="detail-row"><span>\u0417\u0430\u0445 \u0437\u044d\u044d\u043b\u0438\u0439\u043d \u043d\u04e9\u043b\u04e9\u04e9</span><span>\u00d7${marketMult.toFixed(2)}</span></div>` : ''}
       <div class="detail-row"><span>\u042d\u0437\u044d\u043c\u0448\u0438\u0433\u0447</span><span>${owner ? owner.token+' '+owner.name : '\u0425\u044d\u043d \u0447 \u0431\u0438\u0448'}</span></div>
       <div class="detail-row"><span>Upgrade</span><span>${level >= 4 ? '\ud83c\udfe6 \u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : level > 0 ? `LV.${level}` : '\u2014'}</span></div>
       <div class="detail-row"><span>\u0411\u0430\u0440\u044c\u0446\u0430\u0430</span><span>${isMortgaged ? '\ud83d\udd12 \u0411\u0430\u0440\u044c\u0446\u0430\u0430\u043b\u0441\u0430\u043d' : '\u0423\u0433\u0443\u0439'}</span></div>`;
