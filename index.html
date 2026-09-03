@@ -5204,12 +5204,13 @@ async function runBuildingAnimation(tileId, playerId, type) {
 
     buildingAnim.stage = 'facade'; render();
     playConstructionSound('facade');
-    if (isLocal) { audioManager.playSfx('buildingRise'); vibrate([25, 30, 40]); }
+    if (isLocal) { audioManager.playSfx(type === 'purchase' ? 'companyPurchase' : 'buildingRise'); vibrate([25, 30, 40]); }
     await new Promise(r => setTimeout(r, (type === 'corp' ? 900 : 700) * t));
 
     buildingAnim.stage = 'ceremony'; render();
     playConstructionSound('ceremony');
     if (type === 'corp') { playFanfareSound(); showCorpNotice(); audioManager.playSfx('corporationVictory'); vibrate([50, 40, 80]); }
+    else if (isLocal && type === 'purchase') { showCompanyBuiltNotice(tileId); }
     else if (isLocal) { showHouseBuiltNotice(tileId, level); }
     await new Promise(r => setTimeout(r, (type === 'corp' ? 900 : 700) * t));
 
@@ -5248,6 +5249,16 @@ function playConstructionSound(stage) {
     else fire(cfg.freq, 0);
   } catch (e) {}
 }
+function showCompanyBuiltNotice(tileId) {
+  const tile = BOARD_CONFIG[tileId];
+  const root = document.getElementById('card-popup-root');
+  if (!root || !tile) return;
+  const el = document.createElement('div');
+  el.className = 'passgo-toast building-built-toast';
+  el.innerHTML = `<div class="bbt-title">\u041a\u041e\u041c\u041f\u0410\u041d\u0418 \u0411\u0410\u0419\u0413\u0423\u0423\u041b\u0410\u0413\u0414\u041b\u0410\u0410</div><div class="bbt-name">${tile.name}</div><div class="bbt-rent">\u0421\u0443\u0443\u0440\u044c \u0442\u04af\u0440\u044d\u044d\u0441: \u20ae${fmt(tile.rent)}</div>`;
+  root.appendChild(el);
+  setTimeout(() => { el.remove(); }, 2800);
+}
 function showHouseBuiltNotice(tileId, level) {
   const tile = BOARD_CONFIG[tileId];
   const root = document.getElementById('card-popup-root');
@@ -5261,28 +5272,40 @@ function showHouseBuiltNotice(tileId, level) {
   setTimeout(() => { el.remove(); }, 2800);
 }
 
+let knownOwners = {};
 function maybeTriggerBuildAnimation(room) {
   if (!room) return;
   const currentLevels = {};
+  const currentOwners = {};
   BOARD_CONFIG.forEach(tile => {
     if (tile.type !== 'property') return;
-    const lvl = houseLevel(room, tile.id);
-    currentLevels[tile.id] = lvl;
+    currentLevels[tile.id] = houseLevel(room, tile.id);
+    currentOwners[tile.id] = room.propOwner[tile.id] || null;
   });
-  if (!levelsInitialized) { knownLevels = currentLevels; levelsInitialized = true; return; }
-  if (buildingAnimationActive) { knownLevels = currentLevels; return; }
+  if (!levelsInitialized) { knownLevels = currentLevels; knownOwners = currentOwners; levelsInitialized = true; return; }
+  if (buildingAnimationActive) { knownLevels = currentLevels; knownOwners = currentOwners; return; }
   for (const idx in currentLevels) {
     const prev = knownLevels[idx] || 0;
     const now = currentLevels[idx];
     if (now > prev) {
       const owner = room.propOwner[idx] ? room.players.find(p => p.id === room.propOwner[idx]) : null;
       const type = now >= 4 ? 'corp' : 'house';
-      knownLevels = currentLevels;
+      knownLevels = currentLevels; knownOwners = currentOwners;
       runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, type);
       return;
     }
   }
-  knownLevels = currentLevels;
+  for (const idx in currentOwners) {
+    const prevOwner = knownOwners[idx] || null;
+    const nowOwner = currentOwners[idx];
+    if (!prevOwner && nowOwner) {
+      knownLevels = currentLevels; knownOwners = currentOwners;
+      const owner = room.players.find(p => p.id === nowOwner);
+      runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, 'purchase');
+      return;
+    }
+  }
+  knownLevels = currentLevels; knownOwners = currentOwners;
 }
 
 let movingPlayerId = null;
@@ -5482,6 +5505,28 @@ function renderBuildingConstructionOverlay(tile, idx, owner, anim, room) {
     `<span class="gold-mote" style="--dx:${p.dx}px; --dy:${p.dy}px; --rot:${p.rot}deg; --delay:${p.delay * 0.5}ms;"></span>`).join('') : '';
   const revealPct = { siteprep: 0, foundation: 18, frame: 55, facade: 88, ceremony: 100, completed: 100 }[stage] || 0;
   const clipStyle = `clip-path: inset(${100 - revealPct}% 0 0 0);`;
+
+  if (anim.type === 'purchase') {
+    const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
+    const w = tile.buildingWidth * 1.5;
+    const bx = tile.buildingX - w / 2;
+    const by = tile.buildingY - w / 2;
+    const leftPct = (bx / 1672 * 100).toFixed(2);
+    const topPct = (by / 941 * 100).toFixed(2);
+    const widthPct = (w / 1672 * 100).toFixed(2);
+    const heightPct = (w / 941 * 100).toFixed(2);
+    const showBuilding = stage === 'frame' || stage === 'facade' || stage === 'ceremony';
+    return `<div class="construction-fx" style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%;">
+      <span class="construction-ground-marker ${stage==='siteprep'?'active':''}"></span>
+      <span class="construction-contact-shadow" style="opacity:${Math.min(1, revealPct/60)};"></span>
+      ${stage === 'siteprep' ? `<span class="tile-prep-glow"></span>` : ''}
+      ${dustHtml}
+      ${stage === 'foundation' || stage === 'frame' ? `<span class="hammer-icon"></span>` : ''}
+      ${showBuilding ? `<img class="house-rising-img ${stage === 'ceremony' ? 'stage-settled' : 'stage-rising'}" src="${fileName}.png" alt="" onerror="this.style.display='none'" style="${clipStyle}">` : ''}
+      ${stage === 'ceremony' ? `<span class="player-flag" style="--flag-color:${flagColor};"></span><span class="build-flash"></span>` : ''}
+      ${goldParticlesHtml}
+    </div>`;
+  }
 
   if (anim.type === 'corp') {
     const w = 60;
@@ -6752,8 +6797,9 @@ function renderGame() {
     let constructionHtml = '';
     if (owner && tile.buildingType) {
       const ownerIdx = room.players.findIndex(p => p.id === owner.id);
-      buildingsToRender.push({ tile, level, idx, depth: tile.depth });
       const isConstructing = buildingAnim && buildingAnim.tileId === idx && buildingAnim.stage !== 'completed';
+      const isPurchaseConstructing = isConstructing && buildingAnim.type === 'purchase';
+      if (!isPurchaseConstructing) buildingsToRender.push({ tile, level, idx, depth: tile.depth });
       if (isConstructing) {
         constructionHtml = renderBuildingConstructionOverlay(tile, idx, owner, buildingAnim, room);
       } else {
