@@ -782,7 +782,7 @@
   .env-night .env-moonlight,
   .env-night .env-streetlights { opacity: 1; }
   .env-night ~ .board-overlay .tile text { fill: #eaf5ef; stroke: rgba(10,10,30,0.9); }
-  .env-night ~ .tile-building-badge .badge-ring { box-shadow: 0 0 10px 2px rgba(120,200,255,0.5); border-color: #9fd8ff; }
+  .env-night ~ .tile-building-badge .badge-ring { box-shadow: 0 0 10px 2px rgba(120,200,255,0.5); }
   .env-night ~ .upgrade-icon .upgrade-glow-ring { filter: brightness(1.4); }
   .board-viewport { position: relative; }
   .board-viewport::after {
@@ -857,7 +857,7 @@
     position: absolute; inset: -2px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.55) 60%, transparent 78%);
-    border: 1.5px solid var(--steppe-gold);
+    border: none;
     box-shadow: 0 2px 4px rgba(0,0,0,0.4);
     z-index: 0;
   }
@@ -873,7 +873,7 @@
     pointer-events: none;
   }
   .tile-building-badge.badge-expanded { transform: scale(2.1); z-index: 8; }
-  .tile-building-badge:hover .badge-ring { border-color: #ffd64d; box-shadow: 0 0 8px #ffd64d; }
+  .tile-building-badge:hover .badge-ring { box-shadow: 0 0 8px #ffd64d; }
   .building-flag-icon { position: absolute; top: -6px; right: -4px; font-size: clamp(7px, 1.2vw, 10px); z-index: 2; }
   .badge-debug-id {
     position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
