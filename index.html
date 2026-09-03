@@ -654,7 +654,8 @@
     padding-bottom: env(safe-area-inset-bottom); animation: bottomSheetUp 0.28s ease;
   }
   .mobile-chat-handle { width: 40px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.25); margin: 10px auto 4px; flex-shrink: 0; }
-  .mobile-qc-grid, .mobile-emoji-grid { display: flex; flex-direction: column; gap: 8px; }
+  .mobile-qc-grid, .mobile-emoji-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .mobile-qc-grid .qc-item { font-size: 13px !important; padding: 10px 12px; width: 100%; box-sizing: border-box; }
   .mobile-emoji-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 6px 0; }
   .mobile-emoji-grid .emoji-picker-btn { font-size: 28px; padding: 10px; }
 
@@ -746,7 +747,7 @@
     max-height: 260px; overflow-y: auto;
   }
   .quick-chat-popover { display: flex; flex-direction: column; gap: 6px; width: 220px; }
-  .qc-item { text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(245,202,85,0.2); border-radius: 8px; padding: 7px 10px; color: var(--sb-text, #e8e0c8); font-size: 12px; cursor: pointer; }
+  .qc-item { text-align: left; background: rgba(255,255,255,0.05); border: 1px solid rgba(245,202,85,0.2); border-radius: 8px; padding: 7px 10px; color: var(--sb-text, #e8e0c8); font-size: 12px !important; line-height: 1.35; white-space: normal; word-break: break-word; cursor: pointer; }
   .qc-item:hover { background: rgba(245,202,85,0.12); }
   .emoji-picker-popover { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 180px; }
   .emoji-picker-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(245,202,85,0.2); border-radius: 8px; font-size: 20px; padding: 6px; cursor: pointer; }
@@ -1960,8 +1961,8 @@ async function startRankedGameFromMatch() {
   const myAvatar = TOKENS[myAvatarIndex] || TOKENS[0];
   const oppAvatar = TOKENS.find(t => t !== myAvatar) || TOKENS[1];
   const isHostByIdOrder = myStableId < oppId; // deterministic host assignment, same on both clients
-  const mePlayer = { id: myStableId, name: myName || 'Тоглогч', token: myAvatar, color: TOKEN_COLORS[TOKENS.indexOf(myAvatar)], money: 1500, position: 0, jailTurns: 0, bankrupt: false, isHost: isHostByIdOrder };
-  const oppPlayer = { id: oppId, name: mmState.opponent.name, token: oppAvatar, color: TOKEN_COLORS[TOKENS.indexOf(oppAvatar)], money: 1500, position: 0, jailTurns: 0, bankrupt: false, isHost: !isHostByIdOrder };
+  const mePlayer = { id: myStableId, name: myName || 'Тоглогч', token: myAvatar, color: TOKEN_COLORS[TOKENS.indexOf(myAvatar)], money: ECONOMY_CONFIG.startingCash, position: 0, jailTurns: 0, bankrupt: false, isHost: isHostByIdOrder };
+  const oppPlayer = { id: oppId, name: mmState.opponent.name, token: oppAvatar, color: TOKEN_COLORS[TOKENS.indexOf(oppAvatar)], money: ECONOMY_CONFIG.startingCash, position: 0, jailTurns: 0, bankrupt: false, isHost: !isHostByIdOrder };
   const players = isHostByIdOrder ? [mePlayer, oppPlayer] : [oppPlayer, mePlayer];
   const room = {
     roomCode: shortCode, started: true, gameStartedAt: Date.now(), rankedGameId: mmState.gameId, rankedMode: mmState.mode,
@@ -4128,7 +4129,7 @@ const BOARD_CONFIG = [
 ];
 
 const ECONOMY_CONFIG = {
-  startingCash: 1500,
+  startingCash: 2500,
   passStartReward: 80,
   landOnStartReward: 120,
   rentMultipliers: {
@@ -6719,7 +6720,9 @@ function renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, rolling
 
   let centerHtml;
   if (pending && room.pendingAction.type === 'buy') {
-    centerHtml = `<button class="mad-roll-btn mad-alt-btn" id="mobileBuyBtn"><span class="mad-alt-icon">\ud83d\udcb0</span><span>\u0410\u0412\u0410\u0425</span></button>`;
+    const spBuy = BOARD_CONFIG[room.pendingAction.spaceIndex];
+    const canAffordBuy = me && spBuy && me.money >= spBuy.price;
+    centerHtml = `<button class="mad-roll-btn mad-alt-btn" id="mobileBuyBtn" ${canAffordBuy ? '' : 'disabled'}><span class="mad-alt-icon">\ud83d\udcb0</span><span>\u0410\u0412\u0410\u0425</span></button>`;
   } else if (pending && room.pendingAction.type === 'build') {
     centerHtml = `<button class="mad-roll-btn mad-alt-btn" id="mobileBuildBtn"><span class="mad-alt-icon">\ud83c\udfd7\ufe0f</span><span>\u0411\u0410\u0420\u0418\u0425</span></button>`;
   } else {
@@ -7617,7 +7620,7 @@ function maybeShowBuyModal(room) {
   const root = document.getElementById('buy-modal-root');
   if (!root) return;
   const shouldShow = room && room.pendingAction && room.pendingAction.type === 'buy'
-    && room.pendingAction.playerId === myId && !isAnimatingMovement && !buildingAnimationActive;
+    && room.pendingAction.playerId === myId && !isAnimatingMovement && !buildingAnimationActive && !isMobileView;
   if (!shouldShow) {
     if (buyModalOpen) {
       root.innerHTML = ''; buyModalOpen = false; buyModalKey = null;
@@ -7948,7 +7951,7 @@ async function confirmReplay() {
   if (!confirm('\u0428\u0438\u043d\u044d\u044d\u0440 \u0442\u043e\u0433\u043b\u043e\u0445 \u0443\u0443? \u041e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u044b\u043d \u04af\u0440 \u0434\u04af\u043d \u0430\u043b\u0433\u0430\u0433\u0434\u0430\u043d\u0430.')) return;
   const room = await getRoom(currentRoom.roomCode);
   if (!room) return;
-  room.players.forEach(p => { p.money = 1500; p.position = 0; p.jailTurns = 0; p.bankrupt = false; p.statistics = { rentPaid: 0, rentReceived: 0, highestRentPaid: 0, highestRentReceived: 0, rentTransactions: 0 }; });
+  room.players.forEach(p => { p.money = ECONOMY_CONFIG.startingCash; p.position = 0; p.jailTurns = 0; p.bankrupt = false; p.statistics = { rentPaid: 0, rentReceived: 0, highestRentPaid: 0, highestRentReceived: 0, rentTransactions: 0 }; });
   room.propOwner = {}; room.houses = {}; room.activeMarketEffects = []; room.mortgaged = {};
   room.decks = null; ensureDecks(room);
   room.currentPlayerIndex = 0; room.hasRolled = false; room.lastDice = null;
