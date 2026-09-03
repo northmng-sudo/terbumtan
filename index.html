@@ -4214,10 +4214,10 @@ const SOUND_ASSETS = {
   companyPurchase: 'company-purchase.mp3', buildingRise: 'building-rise.mp3',
   corporationVictory: 'corporation-victory.mp3', auctionTick: 'auction-tick.mp3',
   buttonClick: 'button-click.mp3', cardFlip: 'card-flip.mp3', bonusUnlocked: 'bonus-unlocked.mp3',
-  dayTheme: 'day-theme.mp3', nightTheme: 'night-theme.mp3', victoryTheme: 'victory-theme.mp3',
+  dayTheme: 'bg-music.mp3', nightTheme: 'bg-music.mp3', victoryTheme: 'bg-music.mp3',
   rentStart: 'rent-start.mp3', moneyTransfer: 'money-transfer.mp3', rentReceived: 'rent-received.mp3', bigRent: 'big-rent.mp3',
-  lobbyTheme: 'day-theme.mp3',
-  gameDayTheme: 'game-day-theme.mp3', gameNightTheme: 'game-night-theme.mp3', gameTensionTheme: 'game-tension-theme.mp3',
+  lobbyTheme: 'bg-music.mp3',
+  gameDayTheme: 'bg-music.mp3', gameNightTheme: 'bg-music.mp3', gameTensionTheme: 'bg-music.mp3',
 };
 const MUSIC_DUCK_AMOUNT = {
   diceRoll: 0.20, companyPurchase: 0.35, rentStart: 0.40, corporationVictory: 0.55, cardFlip: 0.25,
@@ -4289,6 +4289,7 @@ const AudioManager = (function () {
     if (!gameSettings.musicEnabled) { musicKey = key; return; }
     if (!unlocked) { pendingMusic.key = key; musicKey = key; return; }
     if (musicKey === key && musicEl && !musicEl.paused) return;
+    if (musicEl && !musicEl.paused && SOUND_ASSETS[musicKey] === SOUND_ASSETS[key]) { musicKey = key; return; }
     const newEl = new Audio(SOUND_ASSETS[key]);
     newEl.loop = opts.loop !== false;
     newEl.volume = 0;
