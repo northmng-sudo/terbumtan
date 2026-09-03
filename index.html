@@ -793,6 +793,20 @@
   .chat-input-row input { flex: 1; background: rgba(0,0,0,0.25); border: 1px solid rgba(245,202,85,0.3); border-radius: 18px; padding: 8px 12px; color: var(--sb-text, #e8e0c8); font-size: 12.5px; }
   .chat-input-row button { width: 34px; height: 34px; border-radius: 50%; background: var(--gold); border: none; font-size: 14px; cursor: pointer; }
 
+  .chat-avatar-clickable, .chat-name-clickable { cursor: pointer; }
+  .chat-name-clickable:hover { text-decoration: underline; }
+  .chat-avatar-clickable:hover { filter: brightness(1.2); }
+
+  .player-menu-backdrop { position: fixed; inset: 0; z-index: 80; background: rgba(2,10,8,0.7); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .player-menu {
+    width: min(90vw, 300px); background: linear-gradient(160deg, var(--panel-light, rgba(14,61,47,0.97)), var(--panel, rgba(5,30,24,0.98)));
+    border: 2px solid var(--gold); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .player-menu-head { display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--gold-light, #ffe8a3); font-size: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(245,202,85,0.25); margin-bottom: 4px; }
+  .player-menu-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(245,202,85,0.25); border-radius: 10px; padding: 10px 12px; color: var(--sb-text, #e8e0c8); font-size: 13px; text-align: left; cursor: pointer; }
+  .player-menu-item:hover { background: rgba(245,202,85,0.12); }
+  .player-menu-cancel { text-align: center; color: var(--sb-muted, #9AA6BE); margin-top: 4px; }
+
   @media (max-width: 768px) {
     .chat-widget-anchor { display: none; }
   }
@@ -4616,6 +4630,8 @@ let chatOpen = false;
 let chatActiveTab = 'chat'; // 'chat' | 'history'
 let chatUnreadCount = 0;
 let mobileChatTab = 'chat'; // 'chat' | 'quick' | 'emoji'
+let playerMenuOpenFor = null; // playerId
+let reportModalFor = null; // playerId
 let speechBubbles = {}; // playerId -> {text, expiresAt}
 let activeReactions = {}; // playerId -> {emoji, expiresAt}
 let contextualSuggestion = null; // { eventKey, expiresAt }
@@ -6492,6 +6508,8 @@ function renderMobileChatPanel(room) {
         <button id="chatSendBtn">\u27a4</button>
       </div>` : ''}
     </div>
+    ${renderPlayerMenu(room)}
+    ${renderReportModal()}
   </div>`;
 }
 function renderMobileHUD(room, currentPlayer) {
@@ -6530,14 +6548,46 @@ function renderMessageList(room) {
   return msgs.map(m => {
     const p = room.players.find(pl => pl.id === m.senderId);
     if (m.type === 'system') return `<div class="chat-sys-msg">${m.content}</div>`;
+    const clickable = p && m.senderId !== myId;
     return `<div class="chat-msg-row ${m.senderId === myId ? 'own' : ''}">
-      <span class="chat-msg-avatar" style="--ring-color:${p ? p.color : '#999'}">${p ? p.token : '?'}</span>
+      <span class="chat-msg-avatar ${clickable ? 'chat-avatar-clickable' : ''}" ${clickable ? `data-player-menu="${p.id}"` : ''} style="--ring-color:${p ? p.color : '#999'}">${p ? p.token : '?'}</span>
       <div class="chat-msg-body">
-        <div class="chat-msg-head"><span class="chat-msg-name">${p ? p.name : '?'}</span><span class="chat-msg-time">${timeAgo(m.createdAt)}</span></div>
+        <div class="chat-msg-head"><span class="chat-msg-name ${clickable ? 'chat-name-clickable' : ''}" ${clickable ? `data-player-menu="${p.id}"` : ''}>${p ? p.name : '?'}</span><span class="chat-msg-time">${timeAgo(m.createdAt)}</span></div>
         <div class="chat-msg-text ${m.type === 'emoji' ? 'chat-msg-emoji' : ''}">${m.content}</div>
       </div>
     </div>`;
   }).join('');
+}
+function renderPlayerMenu(room) {
+  if (!playerMenuOpenFor) return '';
+  const p = room.players.find(pl => pl.id === playerMenuOpenFor);
+  if (!p) return '';
+  const isMuted = mutedPlayerIds.has(p.id);
+  return `<div class="player-menu-backdrop" id="playerMenuBackdrop">
+    <div class="player-menu">
+      <div class="player-menu-head"><span class="chat-msg-avatar" style="--ring-color:${p.color}">${p.token}</span> ${p.name}</div>
+      <button class="player-menu-item" id="pmMuteBtn">${isMuted ? '\ud83d\udd0a \u0414\u0443\u0443\u0433 \u0430\u0441\u0430\u0430\u0445 (Unmute)' : '\ud83d\udd07 \u0414\u0443\u0443\u0433 \u0445\u0430\u0430\u0445 (Mute)'}</button>
+      <button class="player-menu-item" id="pmReportBtn">\u26a0\ufe0f \u0422\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0439\u0433 \u043c\u044d\u0434\u044d\u044d\u043b\u044d\u0445</button>
+      <button class="player-menu-item player-menu-cancel" id="pmCancelBtn">\u0411\u043e\u043b\u0438\u0445</button>
+    </div>
+  </div>`;
+}
+function renderReportModal() {
+  if (!reportModalFor) return '';
+  const reasons = [
+    { id: 'abuse', label: '\u0414\u043e\u0440\u043e\u043c\u0436\u0438\u043b\u0441\u043e\u043d \u04af\u0433' },
+    { id: 'spam', label: '\u0421\u043f\u0430\u043c' },
+    { id: 'name', label: '\u0417\u043e\u0445\u0438\u0441\u0433\u04af\u0439 \u043d\u044d\u0440' },
+    { id: 'cheat', label: '\u0425\u0443\u0443\u0440\u0430\u043d \u043c\u044d\u0445\u043b\u044d\u043b\u0442' },
+    { id: 'other', label: '\u0411\u0443\u0441\u0430\u0434' },
+  ];
+  return `<div class="player-menu-backdrop" id="reportModalBackdrop">
+    <div class="player-menu report-menu">
+      <div class="player-menu-head">\u0428\u0430\u043b\u0442\u0433\u0430\u0430\u043d\u0430\u0430 \u0441\u043e\u043d\u0433\u043e\u043d\u043e \u0443\u0443</div>
+      ${reasons.map(r => `<button class="player-menu-item" data-reason="${r.id}">${r.label}</button>`).join('')}
+      <button class="player-menu-item player-menu-cancel" id="reportCancelBtn">\u0426\u0443\u0446\u043b\u0430\u0445</button>
+    </div>
+  </div>`;
 }
 function renderContextualPopup() {
   if (!contextualSuggestion || !gameSettings.reactionsEnabled) return '';
@@ -6574,6 +6624,8 @@ function renderChatWidget(room) {
       </div>` : ''}
     </div>` : ''}
     <button class="chat-toggle-btn" id="chatToggleBtn">\ud83d\udcac${unread}</button>
+    ${renderPlayerMenu(room)}
+    ${renderReportModal()}
   </div>`;
 }
 function renderActivityTimelineList(room) {
@@ -6584,6 +6636,30 @@ function renderActivityTimelineList(room) {
 
 let quickChatOpen = false;
 let emojiPickerOpen = false;
+
+function togglePlayerMute(playerId) {
+  if (mutedPlayerIds.has(playerId)) mutedPlayerIds.delete(playerId); else mutedPlayerIds.add(playerId);
+  saveMutedIds();
+  playerMenuOpenFor = null;
+  render();
+}
+function submitReport(playerId, reasonId) {
+  try {
+    const reports = JSON.parse(localStorage.getItem('ikhKhorongoReports') || '[]');
+    reports.push({ reportedPlayerId: playerId, roomCode: currentRoom ? currentRoom.roomCode : null, reasonId, at: Date.now() });
+    localStorage.setItem('ikhKhorongoReports', JSON.stringify(reports.slice(-50)));
+  } catch (e) {}
+  reportModalFor = null; playerMenuOpenFor = null;
+  const root = document.getElementById('card-popup-root');
+  if (root) {
+    const el = document.createElement('div');
+    el.className = 'passgo-toast';
+    el.textContent = '\u041c\u044d\u0434\u044d\u044d\u043b\u044d\u043b \u0438\u043b\u0433\u044d\u044d\u0433\u0434\u043b\u044d\u044d';
+    root.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
+  render();
+}
 
 function attachChatEvents() {
   const toggleBtn = document.getElementById('chatToggleBtn');
@@ -6605,6 +6681,14 @@ function attachChatEvents() {
   const mobileCloseBtn = document.getElementById('mobileChatCloseBtn'); if (mobileCloseBtn) mobileCloseBtn.onclick = () => { chatOpen = false; render(); };
   const mobileBackdrop = document.getElementById('mobileChatBackdrop'); if (mobileBackdrop) mobileBackdrop.onclick = (e) => { if (e.target === mobileBackdrop) { chatOpen = false; render(); } };
   document.querySelectorAll('.chat-tab-btn[data-mtab]').forEach(btn => { btn.onclick = () => { mobileChatTab = btn.dataset.mtab; render(); setTimeout(scrollChatToBottom, 30); }; });
+  document.querySelectorAll('[data-player-menu]').forEach(el => { el.onclick = () => { playerMenuOpenFor = el.dataset.playerMenu; render(); }; });
+  const pmBackdrop = document.getElementById('playerMenuBackdrop'); if (pmBackdrop) pmBackdrop.onclick = (e) => { if (e.target === pmBackdrop) { playerMenuOpenFor = null; render(); } };
+  const pmCancel = document.getElementById('pmCancelBtn'); if (pmCancel) pmCancel.onclick = () => { playerMenuOpenFor = null; render(); };
+  const pmMute = document.getElementById('pmMuteBtn'); if (pmMute) pmMute.onclick = () => togglePlayerMute(playerMenuOpenFor);
+  const pmReport = document.getElementById('pmReportBtn'); if (pmReport) pmReport.onclick = () => { reportModalFor = playerMenuOpenFor; playerMenuOpenFor = null; render(); };
+  const reportBackdrop = document.getElementById('reportModalBackdrop'); if (reportBackdrop) reportBackdrop.onclick = (e) => { if (e.target === reportBackdrop) { reportModalFor = null; render(); } };
+  const reportCancel = document.getElementById('reportCancelBtn'); if (reportCancel) reportCancel.onclick = () => { reportModalFor = null; render(); };
+  document.querySelectorAll('.report-menu .player-menu-item[data-reason]').forEach(btn => { btn.onclick = () => submitReport(reportModalFor, btn.dataset.reason); });
 }
 function scrollChatToBottom() {
   const el = document.getElementById('chatScrollBody');
