@@ -311,6 +311,27 @@
   .divider { text-align: center; color: #5c6a86; font-size: 10.5px; margin: 24px 0; letter-spacing: 1.5px; text-transform: uppercase; }
   .error-msg { color: #E28E7D; font-size: 13px; margin-top: 8px; min-height: 16px; text-align: center; }
   .wait-list { margin: 18px 0; }
+
+  .token-select-section { margin: 18px 0; }
+  .tss-title { font-size: 11px; letter-spacing: 2px; color: var(--gold-light, #ffe8a3); font-weight: 800; margin-bottom: 10px; text-align: center; }
+  .token-select-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .token-select-card {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.04); border: 1.5px solid rgba(245,202,85,0.25); border-radius: 10px;
+    padding: 10px 4px; cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .token-select-card:hover:not(:disabled) { border-color: rgba(245,202,85,0.55); transform: translateY(-2px); }
+  .token-select-card.selected { border-color: var(--gold); background: rgba(245,202,85,0.12); transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
+  .token-select-card.taken { opacity: 0.4; cursor: not-allowed; }
+  .tsc-visual { width: 34px; height: 34px; color: var(--gold-light, #e8c468); }
+  .tsc-visual .token-glyph, .tsc-visual .token-asset-img { width: 100%; height: 100%; }
+  .tsc-name { font-size: 9px; text-align: center; color: var(--sb-text, #e8e0c8); line-height: 1.15; }
+  .tsc-taken-badge {
+    position: absolute; top: -6px; right: -6px; font-size: 8px; font-weight: 800; color: #fff;
+    background: var(--ring, #999); border-radius: 8px; padding: 2px 5px; white-space: nowrap;
+  }
+  .tsc-selected-tag { font-size: 8px; font-weight: 800; color: var(--gold, #f5ca55); }
+  @media (max-width: 480px) { .token-select-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; } .tsc-visual { width: 26px; height: 26px; } }
   .wait-player { display: flex; align-items: center; gap: 12px; background: var(--night-indigo); border: 1px solid var(--slate-line); border-radius: 10px; padding: 11px 14px; margin-bottom: 8px; animation: popIn 0.25s ease; }
   .wait-token {
     font-size: 26px; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -546,7 +567,7 @@
     .tile text { font-size: 15px !important; }
     .tile .tile-price { font-size: 12px !important; }
     .tile-building-badge { transform: scale(1.35); }
-    .ptoken { width: clamp(15px, 3vw, 24px) !important; height: clamp(15px, 3vw, 24px) !important; font-size: clamp(11px, 2vw, 16px) !important; }
+    .ptoken { width: clamp(20px, 4.2vw, 32px) !important; height: clamp(20px, 4.2vw, 32px) !important; }
     .sb-dice-btn { padding: 18px; font-size: 17px; }
     .sb-endturn-btn { padding: 13px; font-size: 14px; }
     .sb-panel-title { font-size: 13px; }
@@ -1005,9 +1026,9 @@
   .badge-ring {
     position: absolute; inset: -2px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.55) 60%, transparent 78%);
+    background: transparent;
     border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    box-shadow: none;
     z-index: 0;
   }
   .tile-building-badge img {
@@ -1264,12 +1285,12 @@
       inset 0 -2px 4px rgba(92, 57, 9, 0.16);
   }
   .dynamic-label-plate.dlp-soft {
-    background: linear-gradient(145deg, rgba(255, 250, 231, 0.32), rgba(238, 220, 178, 0.28));
-    border: 1px solid rgba(167, 119, 30, 0.22);
+    background: transparent;
+    border: none;
     box-shadow: none;
-    backdrop-filter: blur(0.5px);
+    backdrop-filter: none;
   }
-  .dlp-soft .business-name, .dlp-soft .business-price { text-shadow: 0 1px 3px rgba(255,255,255,0.9), 0 0 6px rgba(255,255,255,0.7); }
+  .dlp-soft .business-name, .dlp-soft .business-price { text-shadow: 0 1px 3px rgba(255,255,255,0.95), 0 0 8px rgba(255,255,255,0.85), 0 0 2px rgba(255,255,255,1); }
   .dlp-inner {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     width: 92%; height: 92%;
@@ -1316,19 +1337,75 @@
 
   .ptoken {
     position: absolute;
-    display: grid; place-items: center;
-    width: clamp(18px, 2.6vw, 32px); height: clamp(18px, 2.6vw, 32px);
-    font-size: clamp(12px, 1.8vw, 20px);
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--token-ring, var(--steppe-gold)) 55%, white 45%) 0%, var(--night-indigo-deep) 78%);
-    border: 4px solid #241a0d;
-    box-shadow: inset -3px -3px 4px rgba(0,0,0,0.55), inset 3px 3px 4px rgba(255,255,255,0.3), 0 5px 8px rgba(0,0,0,0.55);
-    filter: drop-shadow(0 6px 5px rgba(0,0,0,0.4));
-    transform: translate(-50%, -50%) scale(var(--token-scale, 0.85));
-    transform-origin: center center;
+    width: clamp(22px, 3.4vw, 40px); height: clamp(22px, 3.4vw, 40px);
+    transform: translate(-50%, -78%) scale(var(--token-scale, 0.85));
+    transform-origin: center bottom;
+    pointer-events: auto;
+    cursor: default;
   }
+  .token-contact-shadow {
+    position: absolute; bottom: -8%; left: 50%; transform: translateX(-50%);
+    width: 78%; height: 26%; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 55%, transparent 78%);
+    filter: blur(0.5px);
+  }
+  .token-base {
+    position: relative; display: block;
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5));
+  }
+  .token-asset-img { width: 100%; height: 100%; display: block; object-fit: contain; }
+  .token-number {
+    position: absolute; bottom: -6%; right: -6%;
+    width: 40%; height: 40%; min-width: 11px; min-height: 11px;
+    border-radius: 50%; background: #0a0805; border: 1.5px solid var(--token-ring, #e8c468);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44%; font-weight: 800; color: #fdf5e0; line-height: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .token-turn-indicator {
+    position: absolute; top: -62%; left: 50%; transform: translateX(-50%);
+    color: var(--gold, #f5ca55); font-size: 55%; text-shadow: 0 0 4px rgba(245,202,85,0.9);
+    animation: turnIndicatorBounce 0.9s ease-in-out infinite;
+  }
+  .ptoken.token-current-turn .token-base { animation: tokenGlowPulse 1.4s ease-in-out infinite; }
+  .ptoken.token-idle .token-base { animation: tokenIdleBreathe 2.6s ease-in-out infinite; animation-delay: var(--idle-delay, 0s); }
+  @keyframes tokenIdleBreathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
+  @keyframes tokenGlowPulse {
+    0%,100% { filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 4px color-mix(in srgb, var(--token-ring, #e8c468) 60%, transparent)); }
+    50% { filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 10px color-mix(in srgb, var(--token-ring, #e8c468) 90%, transparent)); }
+  }
+  @keyframes turnIndicatorBounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } }
   .ptoken.token-hop { animation: tokenHop 0.26s cubic-bezier(.33,.1,.4,1); }
   .ptoken.token-hop-reduced { animation: tokenHopReduced 0.15s ease; }
+  @media (prefers-reduced-motion: reduce) { .ptoken.token-idle .token-base { animation: none; } .ptoken.token-current-turn .token-base { animation: none; } .token-turn-indicator { animation: none; } }
+
+  .ptoken.token-rent-pay .token-base { animation: tokenSwayBack 0.9s ease-in-out; }
+  .ptoken.token-rent-receive .token-base { animation: tokenProudLift 0.9s ease-in-out; }
+  @keyframes tokenSwayBack { 0%,100% { transform: rotate(0deg) translateX(0); } 30% { transform: rotate(-8deg) translateX(-3px); } 60% { transform: rotate(4deg) translateX(1px); } }
+  @keyframes tokenProudLift { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
+  .ptoken.token-rent-receive .token-base::after {
+    content: ''; position: absolute; inset: -30% -30% 0 -30%; border-radius: 50% 50% 0 0;
+    background: linear-gradient(0deg, rgba(245,202,85,0.65), transparent 70%);
+    animation: tokenGoldRise 0.9s ease-out; pointer-events: none;
+  }
+  @keyframes tokenGoldRise { 0% { opacity: 0; transform: translateY(20%); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-40%); } }
+  .token-money-indicator {
+    position: absolute; top: -55%; left: 50%; transform: translateX(-50%);
+    font-size: 90%; font-weight: 900; text-shadow: 0 0 4px rgba(0,0,0,0.6);
+    animation: moneyIndicatorFloat 0.9s ease-out forwards;
+  }
+  .token-money-neg { color: #ff6b6b; }
+  .token-money-pos { color: #4ade80; }
+  @keyframes moneyIndicatorFloat { 0% { opacity: 0; transform: translateX(-50%) translateY(6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-16px); } }
+  .ptoken.token-bankrupt-fade { animation: tokenBankruptFade 1.5s ease-in forwards; }
+  @keyframes tokenBankruptFade {
+    0% { opacity: 1; filter: grayscale(0); }
+    60% { opacity: 0.5; filter: grayscale(0.8); }
+    100% { opacity: 0; filter: grayscale(1); transform: translate(-50%, -60%) scale(var(--token-scale, 0.85)); }
+  }
+  .ptoken.token-bankrupt-fade .token-base { animation: tokenRingGraydown 1.5s ease-in forwards; }
+  @keyframes tokenRingGraydown { to { filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)) grayscale(1); } }
 
   .speech-bubble {
     position: absolute; transform: translate(-50%, -100%);
@@ -1856,15 +1933,16 @@
   @keyframes upgradeBounce { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1.25); opacity: 1; } 75% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
   @keyframes particleRise { 0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(-50%, -140%) scale(0.2); opacity: 0; } }
   @keyframes tokenHop {
-    0%   { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(1); }
-    45%  { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(-24px) scale(1.08); }
-    80%  { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(0.90) scaleX(1.06); }
-    100% { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(1); }
+    0%   { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(1); }
+    45%  { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(-22px) scale(1.06); }
+    72%  { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(0.9) scaleX(1.06); }
+    86%  { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(1.06) scaleX(0.97); }
+    100% { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(0) scaleY(1); }
   }
   @keyframes tokenHopReduced {
-    0%   { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0); }
-    50%  { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(-8px); }
-    100% { transform: translate(-50%, -50%) scale(var(--token-scale, 0.85)) translateY(0); }
+    0%   { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(0); }
+    50%  { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(-6px); }
+    100% { transform: translate(-50%, -78%) scale(var(--token-scale, 0.85)) translateY(0); }
   }
   @keyframes passGoPop {
     0%   { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.8); }
@@ -2127,8 +2205,43 @@ async function initAuth() {
   });
 }
 
-const TOKENS = ['\ud83d\udc2b','\ud83d\udc0e','\ud83e\udd85','\ud83d\udc3a'];
-const TOKEN_COLORS = ['#D4A24E','#A63D2F','#7A9B63','#5A7EA6'];
+const PLAYER_COLORS = [
+  { id: 'ruby', name: '\u0411\u0430\u0434\u043c\u0430\u0430\u0440\u0430\u0433', color: '#E53935' },
+  { id: 'sapphire', name: '\u0418\u043d\u0434\u0440\u0430\u043d\u0438\u043b', color: '#1E88E5' },
+  { id: 'emerald', name: '\u041c\u0430\u0440\u0433\u0430\u0434', color: '#00A86B' },
+  { id: 'gold', name: '\u0410\u043b\u0442', color: '#F5B700' },
+  { id: 'amethyst', name: '\u041d\u043e\u043c\u0438\u043d \u044f\u0433\u0430\u0430\u043d', color: '#8E44AD' },
+  { id: 'cyan', name: '\u041e\u044e\u0443', color: '#00BCD4' },
+  { id: 'orange', name: '\u0425\u0443\u0432', color: '#F57C00' },
+  { id: 'silver', name: '\u041c\u04e9\u043d\u0433\u04e9', color: '#B0BEC5' },
+];
+const TOKEN_COLORS = PLAYER_COLORS.map(c => c.color);
+
+const TOKEN_TYPES = [
+  { id: 'mongol_horse', name: '\u041c\u043e\u043d\u0433\u043e\u043b \u043c\u043e\u0440\u044c', asset: 'mongol-horse.png',
+    svg: '<path d="M20 78 L24 55 Q18 50 20 42 Q16 30 26 20 Q34 12 46 14 L58 10 Q64 8 66 14 Q68 20 62 22 L56 26 Q62 30 60 38 L66 42 Q70 44 68 48 L60 46 L58 60 L64 78 L56 78 L50 62 L44 78 L36 78 L38 58 L28 58 L26 78 Z" fill="currentColor"/>' },
+  { id: 'eagle', name: '\u0411\u04af\u0440\u0433\u044d\u0434', asset: 'eagle.png',
+    svg: '<path d="M50 14 Q54 22 50 30 L78 24 Q82 26 76 32 L54 38 Q60 44 58 52 L72 66 Q76 70 70 72 L52 62 Q52 72 56 82 L44 82 Q48 72 48 62 L30 72 Q24 70 28 66 L42 52 Q40 44 46 38 L24 32 Q18 26 22 24 L50 30 Q46 22 50 14 Z" fill="currentColor"/>' },
+  { id: 'wolf', name: '\u0427\u043e\u043d\u043e', asset: 'wolf.png',
+    svg: '<path d="M50 16 L62 28 L80 24 L72 40 L82 52 L66 50 L68 66 L54 56 L50 82 L46 56 L32 66 L34 50 L18 52 L28 40 L20 24 L38 28 Z" fill="currentColor"/><circle cx="42" cy="40" r="3" fill="#0a0a0a"/><circle cx="58" cy="40" r="3" fill="#0a0a0a"/>' },
+  { id: 'golden_crown', name: '\u0410\u043b\u0442\u0430\u043d \u0442\u0438\u0442\u044d\u043c', asset: 'golden-crown.png',
+    svg: '<path d="M20 70 L24 36 L38 52 L50 26 L62 52 L76 36 L80 70 Z" fill="currentColor"/><rect x="18" y="70" width="64" height="12" rx="2" fill="currentColor"/><circle cx="50" cy="24" r="5" fill="currentColor"/><circle cx="22" cy="34" r="4" fill="currentColor"/><circle cx="78" cy="34" r="4" fill="currentColor"/>' },
+  { id: 'treasure_key', name: '\u042d\u0440\u0434\u044d\u043d\u044d\u0441\u0438\u0439\u043d \u0442\u04af\u043b\u0445\u04af\u04af\u0440', asset: 'treasure-key.png',
+    svg: '<circle cx="32" cy="32" r="18" fill="none" stroke="currentColor" stroke-width="9"/><rect x="46" y="46" width="10" height="42" fill="currentColor" transform="rotate(45 51 67)"/><rect x="62" y="62" width="14" height="9" fill="currentColor" transform="rotate(45 69 66)"/><rect x="72" y="72" width="12" height="9" fill="currentColor" transform="rotate(45 78 76)"/>' },
+  { id: 'business_briefcase', name: '\u0411\u0438\u0437\u043d\u0435\u0441\u0438\u0439\u043d \u0446\u04af\u043d\u0445', asset: 'business-briefcase.png',
+    svg: '<rect x="16" y="38" width="68" height="42" rx="6" fill="currentColor"/><path d="M38 38 L38 26 Q38 20 44 20 L56 20 Q62 20 62 26 L62 38" fill="none" stroke="currentColor" stroke-width="7"/><rect x="44" y="54" width="12" height="10" rx="2" fill="#0a0a0a"/>' },
+  { id: 'skyscraper', name: '\u0422\u044d\u043d\u0433\u044d\u0440 \u0431\u0430\u0433\u0430\u043d\u0430\u0434\u0441\u0430\u043d \u0431\u0430\u0440\u0438\u043b\u0433\u0430', asset: 'skyscraper.png',
+    svg: '<rect x="30" y="12" width="16" height="70" fill="currentColor"/><rect x="50" y="28" width="20" height="54" fill="currentColor"/><rect x="14" y="50" width="14" height="32" fill="currentColor"/><rect x="34" y="20" width="3" height="5" fill="#0a0a0a"/><rect x="40" y="20" width="3" height="5" fill="#0a0a0a"/><rect x="34" y="30" width="3" height="5" fill="#0a0a0a"/><rect x="40" y="30" width="3" height="5" fill="#0a0a0a"/><rect x="55" y="36" width="3" height="5" fill="#0a0a0a"/><rect x="62" y="36" width="3" height="5" fill="#0a0a0a"/><rect x="55" y="46" width="3" height="5" fill="#0a0a0a"/><rect x="62" y="46" width="3" height="5" fill="#0a0a0a"/>' },
+  { id: 'luxury_car', name: '\u0422\u0430\u043d\u0441\u0430\u0433 \u0430\u0432\u0442\u043e\u043c\u0430\u0448\u0438\u043d', asset: 'luxury-car.png',
+    svg: '<path d="M14 62 Q14 48 26 46 L34 32 Q38 26 46 26 L62 26 Q70 26 74 32 L82 46 Q90 48 90 62 L90 66 L14 66 Z" fill="currentColor"/><circle cx="30" cy="68" r="9" fill="#0a0a0a"/><circle cx="74" cy="68" r="9" fill="#0a0a0a"/><path d="M40 30 L38 44 L66 44 L64 30 Z" fill="#0a0a0a" opacity="0.35"/>' },
+];
+function getTokenType(id) { return TOKEN_TYPES.find(t => t.id === id) || TOKEN_TYPES[0]; }
+function getPlayerColorInfo(colorHex) { return PLAYER_COLORS.find(c => c.color === colorHex) || PLAYER_COLORS[0]; }
+const TOKENS = TOKEN_TYPES.map(t => t.id);
+function renderTokenGlyph(tokenId, extraClass) {
+  const tt = getTokenType(tokenId);
+  return `<img class="token-asset-img ${extraClass||''}" src="${tt.asset}" alt="${tt.name}">`;
+}
 const GROUP_COLORS = {
   agriculture: '#8BC34A', commerce: '#2196F3', real_estate: '#2E7D32', logistics: '#FF9800',
   energy: '#E53935', technology: '#D81B9A', finance: '#7C4DFF', mining: '#4A3B2A',
@@ -5096,13 +5209,16 @@ function suggestContextualReaction(eventKey, uniqueId) {
 }
 
 let knownBankruptIds = new Set();
+let bankruptFadeUntil = {};
 function watchBankruptcies(room) {
   if (!room) return;
   room.players.forEach(p => {
     if (p.bankrupt && !knownBankruptIds.has(p.id)) {
       knownBankruptIds.add(p.id);
+      bankruptFadeUntil[p.id] = Date.now() + 1600;
       if (gameSettings.reactionsEnabled) suggestContextualReaction('bankruptcy', 'bankrupt-' + p.id);
       showDirectorBanner(`${p.name} \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u043e\u0441 \u0445\u0430\u0441\u0430\u0433\u0434\u043b\u0430\u0430`, { dedupeKey: 'bankrupt-banner-' + p.id });
+      setTimeout(() => { render(); }, 1650);
     }
   });
 }
@@ -6951,14 +7067,49 @@ function renderWaiting() {
         <button class="invite-btn invite-copy" id="copyInviteBtn">\ud83d\udd17 \u041b\u0438\u043d\u043a \u0445\u0443\u0443\u043b\u0431\u0430\u0440\u043b\u0430\u0445</button>
       </div>
       <div class="wait-list">
-        ${room.players.map(p => `<div class="wait-player"><span class="wait-token" style="--token-color:${p.color}">${p.token}</span> <span>${p.name}</span> ${p.isHost?'<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">\u044d\u0437\u044d\u043d</span>':''}</div>`).join('')}
+        ${room.players.map(p => `<div class="wait-player"><span class="wait-token" style="--token-color:${p.color}">${renderTokenGlyph(p.token)}</span> <span>${p.name}</span> ${p.isHost?'<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">\u044d\u0437\u044d\u043d</span>':''}</div>`).join('')}
       </div>
+      ${renderTokenSelectGrid(room)}
       ${isHost
         ? `<button class="btn btn-primary" id="startBtn" ${room.players.length<2?'disabled':''}>\u0422\u043e\u0433\u043b\u043e\u043e\u043c \u044d\u0445\u043b\u04af\u04af\u043b\u044d\u0445</button>`
         : `<div class="waiting-note"><span class="pulse-dot"></span>\u0425\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430...</div>`}
     </div>
   </div>`;
 }
+function renderTokenSelectGrid(room) {
+  const me = room.players.find(p => p.id === myId);
+  if (!me) return '';
+  const takenByOther = {}; // tokenId -> playerName
+  room.players.forEach(p => { if (p.id !== myId) takenByOther[p.token] = p; });
+  return `<div class="token-select-section">
+    <div class="tss-title">\u25c8 TOKEN \u0421\u041e\u041d\u0413\u041e\u0425 \u25c8</div>
+    <div class="token-select-grid">
+      ${TOKEN_TYPES.map(tt => {
+        const takenPlayer = takenByOther[tt.id];
+        const isMine = me.token === tt.id;
+        const isDisabled = !!takenPlayer && !isMine;
+        return `<button class="token-select-card ${isMine ? 'selected' : ''} ${isDisabled ? 'taken' : ''}" data-token-select="${tt.id}" ${isDisabled ? 'disabled' : ''} title="${tt.name}">
+          <span class="tsc-visual">${renderTokenGlyph(tt.id)}</span>
+          <span class="tsc-name">${tt.name}</span>
+          ${takenPlayer ? `<span class="tsc-taken-badge" style="--ring:${takenPlayer.color}">${takenPlayer.name}</span>` : ''}
+          ${isMine ? `<span class="tsc-selected-tag">\u0421\u043e\u043d\u0433\u043e\u0433\u0434\u0441\u043e\u043d</span>` : ''}
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+async function selectPlayerToken(tokenId) {
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room) return;
+  const me = room.players.find(p => p.id === myId);
+  if (!me) return;
+  const takenByOther = room.players.some(p => p.id !== myId && p.token === tokenId);
+  if (takenByOther) { currentRoom = room; render(); return; }
+  me.token = tokenId;
+  me.color = TOKEN_COLORS[TOKENS.indexOf(tokenId)];
+  await saveRoom(room); currentRoom = room; render();
+}
+
 function attachWaitingEvents() {
   const btn = document.getElementById('startBtn'); if (btn) btn.onclick = startGame;
   const copyBtn = document.getElementById('copyInviteBtn');
@@ -6970,6 +7121,9 @@ function attachWaitingEvents() {
       setTimeout(() => { copyBtn.textContent = '\ud83d\udd17 \u041b\u0438\u043d\u043a \u0445\u0443\u0443\u043b\u0431\u0430\u0440\u043b\u0430\u0445'; }, 1600);
     } catch (e) {}
   };
+  document.querySelectorAll('.token-select-card[data-token-select]').forEach(btn => {
+    btn.onclick = () => selectPlayerToken(btn.dataset.tokenSelect);
+  });
 }
 
 function timeAgoLabel(logIndexFromEnd) {
@@ -7013,7 +7167,7 @@ function renderMobileHUD(room, currentPlayer) {
         ${room.players.map(p => {
           const isCurrent = p.id === currentPlayer.id;
           return `<div class="mhud-player-card ${isCurrent ? 'mhud-current' : ''}" style="--ring-color:${p.color}">
-            <span class="mhud-avatar">${p.token}</span>
+            <span class="mhud-avatar">${renderTokenGlyph(p.token)}</span>
             <div class="mhud-pinfo"><div class="mhud-pname">${p.name}</div><div class="mhud-pmoney">\u20ae${fmt(p.money)}</div></div>
           </div>`;
         }).join('')}
@@ -7056,7 +7210,7 @@ function renderPlayerMenu(room) {
   const isMuted = mutedPlayerIds.has(p.id);
   return `<div class="player-menu-backdrop" id="playerMenuBackdrop">
     <div class="player-menu">
-      <div class="player-menu-head"><span class="chat-msg-avatar" style="--ring-color:${p.color}">${p.token}</span> ${p.name}</div>
+      <div class="player-menu-head"><span class="chat-msg-avatar" style="--ring-color:${p.color}">${renderTokenGlyph(p.token)}</span> ${p.name}</div>
       <button class="player-menu-item" id="pmMuteBtn">${isMuted ? '\ud83d\udd0a \u0414\u0443\u0443\u0433 \u0430\u0441\u0430\u0430\u0445 (Unmute)' : '\ud83d\udd07 \u0414\u0443\u0443\u0433 \u0445\u0430\u0430\u0445 (Mute)'}</button>
       <button class="player-menu-item" id="pmReportBtn">\u26a0\ufe0f \u0422\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0439\u0433 \u043c\u044d\u0434\u044d\u044d\u043b\u044d\u0445</button>
       <button class="player-menu-item player-menu-cancel" id="pmCancelBtn">\u0411\u043e\u043b\u0438\u0445</button>
@@ -7257,7 +7411,7 @@ function renderTurnStatusHeader(room, currentPlayer) {
   return `<div class="sb-header">
     <div class="sb-round-badge">\u04ae\u0415 ${roundN}</div>
     <div class="sb-header-mid">
-      <span class="sb-header-avatar" style="--ring-color:${currentPlayer.color}">${currentPlayer.token}<span class="sb-live-dot"></span></span>
+      <span class="sb-header-avatar" style="--ring-color:${currentPlayer.color}">${renderTokenGlyph(currentPlayer.token)}<span class="sb-live-dot"></span></span>
       <span class="sb-header-name">${currentPlayer.name}-\u0418\u0419\u041d \u042d\u042d\u041b\u0416</span>
     </div>
     <div class="sb-header-icons">
@@ -7277,7 +7431,7 @@ function renderPlayersPanel(room, currentPlayer) {
     return `<div class="sb-player-card ${isCurrent ? 'sb-player-current' : ''} ${p.bankrupt ? 'sb-player-bankrupt' : ''}" style="--pcolor:${p.color}">
       ${isCurrent ? '<span class="sb-crown">\ud83d\udc51</span>' : ''}
       <div class="sb-player-top">
-        <span class="sb-player-avatar" style="--ring-color:${p.color}">${p.token}</span>
+        <span class="sb-player-avatar" style="--ring-color:${p.color}">${renderTokenGlyph(p.token)}</span>
         <span class="sb-player-name">${p.name}${p.id === myId ? ' <em>(\u0442\u0430)</em>' : ''}</span>
         <span class="sb-player-props">\ud83c\udfe2${ownedCount}</span>
         <span class="sb-player-money">\u20ae${fmt(p.money)}</span>
@@ -7388,7 +7542,7 @@ function renderWealthRankingPanel(room) {
   const medalClass = ['sb-rank-gold', 'sb-rank-silver', 'sb-rank-bronze', ''];
   const cards = ranked.map((p, i) => `<div class="sb-rank-card ${medalClass[i] || ''} ${p.bankrupt ? 'sb-player-bankrupt' : ''}">
     <span class="sb-rank-medal">${medalIcons[i] || (i+1)}</span>
-    <span class="sb-rank-avatar" style="--ring-color:${p.color}">${p.token}</span>
+    <span class="sb-rank-avatar" style="--ring-color:${p.color}">${renderTokenGlyph(p.token)}</span>
     <span class="sb-rank-name">${p.name}</span>
     <span class="sb-rank-worth">\u20ae${fmt(netWorth(room, p))}</span>
   </div>`).join('');
@@ -7563,7 +7717,7 @@ function renderRentCinematic(room, txn) {
     <div class="results-backdrop"></div>
     <div class="rent-cinematic-inner">
       <div class="rent-side rent-side-payer ${rentCinematicStage==='flying'?'rent-shake':''}">
-        <span class="rent-avatar rent-avatar-payer" style="--ring-color:${payer.color}">${payer.token}</span>
+        <span class="rent-avatar rent-avatar-payer" style="--ring-color:${payer.color}">${renderTokenGlyph(payer.token)}</span>
         <div class="rent-pname">${payer.name}</div>
         <div class="rent-balance rent-balance-payer">${showResult ? `<span class="count-value" data-count-from="${txn.payerBalanceBefore}" data-count-to="${txn.payerBalanceAfter}">\u20ae${fmt(txn.payerBalanceBefore)}</span>` : `\u20ae${fmt(txn.payerBalanceBefore)}`}</div>
         ${showFlow ? `<div class="rent-delta rent-delta-neg">\u2212\u20ae${fmt(b.total)}</div>` : ''}
@@ -7583,7 +7737,7 @@ function renderRentCinematic(room, txn) {
       </div>
 
       <div class="rent-side rent-side-owner ${rentCinematicStage==='received'?'rent-bounce':''}">
-        <span class="rent-avatar rent-avatar-owner" style="--ring-color:${owner.color}">${owner.token}</span>
+        <span class="rent-avatar rent-avatar-owner" style="--ring-color:${owner.color}">${renderTokenGlyph(owner.token)}</span>
         <div class="rent-pname">${owner.name}</div>
         <div class="rent-balance rent-balance-owner">${showResult ? `<span class="count-value" data-count-from="${txn.ownerBalanceBefore}" data-count-to="${txn.ownerBalanceAfter}">\u20ae${fmt(txn.ownerBalanceBefore)}</span>` : `\u20ae${fmt(txn.ownerBalanceBefore)}`}</div>
         ${showResult ? `<div class="rent-delta rent-delta-pos">+\u20ae${fmt(b.total)}</div><span class="rent-owner-crown">\ud83d\udc51</span>` : ''}
@@ -7617,7 +7771,7 @@ function renderGameResultsCinematic(room) {
         ${rankings.map(r => {
           const p = room.players.find(pp => pp.id === r.playerId);
           return `<div class="results-count-row">
-            <span class="results-avatar" style="--ring-color:${p.color}">${p.token}</span>
+            <span class="results-avatar" style="--ring-color:${p.color}">${renderTokenGlyph(p.token)}</span>
             <span class="results-pname">${p.name}</span>
             <div class="results-count-nums">
               <span class="cnt-item"><span class="count-value" data-target="${r.cash}">0</span><em>\u0431\u044d\u043b\u044d\u043d</em></span>
@@ -7636,7 +7790,7 @@ function renderGameResultsCinematic(room) {
           const p = room.players.find(pp => pp.id === r.playerId);
           const myProps = Object.keys(room.propOwner).filter(idx => room.propOwner[idx] === p.id).map(Number);
           return `<div class="results-player-block">
-            <div class="results-player-block-head" style="--ring-color:${p.color}"><span class="results-avatar">${p.token}</span> ${p.name}</div>
+            <div class="results-player-block-head" style="--ring-color:${p.color}"><span class="results-avatar">${renderTokenGlyph(p.token)}</span> ${p.name}</div>
             <div class="results-company-grid">
               ${myProps.length === 0 ? `<div class="results-empty">\u041a\u043e\u043c\u043f\u0430\u043d\u0438 \u044d\u0437\u044d\u043c\u0448\u0438\u0433\u04af\u0439</div>` : myProps.map(idx => {
                 const sp = BOARD_CONFIG[idx];
@@ -7668,7 +7822,7 @@ function renderGameResultsCinematic(room) {
         ${room.players.map(p => {
           const hist = (room.wealthHistory && room.wealthHistory[p.id]) || [];
           return `<div class="results-player-chart">
-            <div class="results-player-chart-head" style="--ring-color:${p.color}">${p.token} ${p.name}</div>
+            <div class="results-player-chart-head" style="--ring-color:${p.color}">${renderTokenGlyph(p.token)} ${p.name}</div>
             ${renderCandlestickSVG(hist, { width: 560, height: 130, playerColor: p.color })}
           </div>`;
         }).join('')}
@@ -7684,7 +7838,7 @@ function renderGameResultsCinematic(room) {
           const rank = i + 1;
           return `<div class="podium-block podium-rank-${rank}">
             <span class="podium-medal">${medalIcons[i]}</span>
-            <span class="podium-avatar" style="--ring-color:${p.color}">${p.token}</span>
+            <span class="podium-avatar" style="--ring-color:${p.color}">${renderTokenGlyph(p.token)}</span>
             <span class="podium-name">${p.name}</span>
             <span class="podium-total">\u20ae${fmt(r.total)}</span>
             <div class="podium-stand"></div>
@@ -7842,19 +7996,47 @@ function renderGame() {
   const upgradesHtml = upgradesToRender.map(u => u.__rawHtml || renderUpgradeIcons(u.tile, u.level, u.idx, u.ownerIdx)).join('');
 
   const clampPct = v => Math.min(97, Math.max(3, v));
-  const tokenOffsets = [[-14,-8],[14,-8],[-14,10],[14,10]];
-  const tokensHtml = room.players.filter(p => !p.bankrupt).map(p => {
+  const TOKEN_SLOT_OFFSETS = {
+    1: [[0, 0]],
+    2: [[-0.18, 0], [0.18, 0]],
+    3: [[-0.2, 0.12], [0.2, 0.12], [0, -0.16]],
+    4: [[-0.18, 0.14], [0.18, 0.14], [-0.18, -0.14], [0.18, -0.14]],
+    5: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [0, -0.16]],
+    6: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [-0.12, -0.16], [0.12, -0.16]],
+    7: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [-0.18, -0.16], [0, -0.16], [0.18, -0.16]],
+    8: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [-0.24, -0.16], [-0.08, -0.16], [0.08, -0.16], [0.24, -0.16]],
+  };
+  const TILE_REF_W = 110, TILE_REF_H = 62; // approximate average tile pixel size, for fractional slot math
+  const tokensHtml = room.players.filter(p => !p.bankrupt || (bankruptFadeUntil[p.id] && bankruptFadeUntil[p.id] > Date.now())).map((p, pIdx) => {
     const pos = displayPos(room, p);
     const tile = BOARD_CONFIG[pos];
     const sameTile = room.players.filter(o => !o.bankrupt && displayPos(room, o) === pos).sort((a,b) => a.id.localeCompare(b.id));
     const slot = Math.max(0, sameTile.findIndex(o => o.id === p.id));
-    const off = tokenOffsets[slot % 4];
-    const left = clampPct((tile.tokenX + off[0]) / 1672 * 100);
-    const top = clampPct((tile.tokenY + off[1]) / 941 * 100);
+    const groupSize = sameTile.length;
+    const offsets = TOKEN_SLOT_OFFSETS[Math.min(8, groupSize)] || TOKEN_SLOT_OFFSETS[1];
+    const off = offsets[slot % offsets.length];
+    const left = clampPct((tile.tokenX + off[0] * TILE_REF_W) / 1672 * 100);
+    const top = clampPct((tile.tokenY + off[1] * TILE_REF_H) / 941 * 100);
     const isMover = isAnimatingMovement && movingPlayerId === p.id;
-    const scale = tile.tokenScale || 0.85;
-    return `<div class="ptoken ${isMover ? (reducedMotion ? 'token-hop-reduced' : 'token-hop') : ''}"
-      style="left:${left}%; top:${top}%; --token-ring:${p.color}; --token-scale:${scale}; z-index:${isMover ? 20 : 10 + Math.round(tile.tokenY / 20)};">${p.token}</div>`;
+    const isCurrentTurn = room.players[room.currentPlayerIndex] && room.players[room.currentPlayerIndex].id === p.id;
+    const isLocal = p.id === myId;
+    const groupScale = groupSize > 1 ? 0.82 : 1;
+    const baseScale = (tile.tokenScale || 0.85) * groupScale * (isCurrentTurn ? 1.1 : 1);
+    const playerNum = room.players.findIndex(pl => pl.id === p.id) + 1;
+    const isRentPayer = rentCinematicActive && rentCinematicTxn && rentCinematicTxn.payerId === p.id;
+    const isRentOwner = rentCinematicActive && rentCinematicTxn && rentCinematicTxn.ownerId === p.id;
+    const rentClass = isRentPayer && (rentCinematicStage === 'flying') ? 'token-rent-pay' : (isRentOwner && (rentCinematicStage === 'received' || rentCinematicStage === 'done')) ? 'token-rent-receive' : '';
+    const rentIndicator = isRentPayer && rentCinematicStage === 'flying' ? `<span class="token-money-indicator token-money-neg">\u2212</span>`
+      : isRentOwner && (rentCinematicStage === 'received') ? `<span class="token-money-indicator token-money-pos">+</span>` : '';
+    const isBankruptFading = p.bankrupt && bankruptFadeUntil[p.id] && bankruptFadeUntil[p.id] > Date.now();
+    return `<div class="ptoken ${isMover ? (reducedMotion ? 'token-hop-reduced' : 'token-hop') : (reducedMotion ? '' : 'token-idle')} ${isCurrentTurn ? 'token-current-turn' : ''} ${isLocal ? 'token-local' : ''} ${rentClass} ${isBankruptFading ? 'token-bankrupt-fade' : ''}"
+      data-player-id="${p.id}" title="${p.name}"
+      style="left:${left}%; top:${top}%; --token-ring:${p.color}; --token-scale:${baseScale}; --idle-delay:${(pIdx*0.35).toFixed(2)}s; z-index:${isMover ? 40 : isLocal ? 25 : 10 + Math.round(tile.tokenY / 20)};">
+      <span class="token-contact-shadow"></span>
+      <span class="token-base">${renderTokenGlyph(p.token)}<span class="token-number">${playerNum}</span></span>
+      ${isCurrentTurn ? '<span class="token-turn-indicator">\u25bc</span>' : ''}
+      ${rentIndicator}
+    </div>`;
   }).join('');
 
   const bubbleSuppressed = buildingAnimationActive || buyModalOpen || cardModalOpen || rentCinematicActive;
@@ -8401,9 +8583,9 @@ function renderFinalShowdownOverlay() {
   const [a, b] = finalShowdownState.players;
   return `<div class="fsd-overlay ${finalShowdownState.stage}">
     <button class="fsd-skip-btn" id="fsdSkipBtn">\u041e\u0442\u043e\u0445</button>
-    <div class="fsd-side"><span class="fsd-avatar" style="--ring:${a.color}">${a.token}</span><div class="fsd-name">${a.name}</div><div class="fsd-worth">\u20ae${fmt(a.worth)}</div><div class="fsd-sub">${a.companies} \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u00b7 ${a.corps} \u043a\u043e\u0440\u043f</div></div>
+    <div class="fsd-side"><span class="fsd-avatar" style="--ring:${a.color}">${renderTokenGlyph(a.token)}</span><div class="fsd-name">${a.name}</div><div class="fsd-worth">\u20ae${fmt(a.worth)}</div><div class="fsd-sub">${a.companies} \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u00b7 ${a.corps} \u043a\u043e\u0440\u043f</div></div>
     <div class="fsd-mid"><div class="fsd-title">FINAL<br>SHOWDOWN</div></div>
-    <div class="fsd-side"><span class="fsd-avatar" style="--ring:${b.color}">${b.token}</span><div class="fsd-name">${b.name}</div><div class="fsd-worth">\u20ae${fmt(b.worth)}</div><div class="fsd-sub">${b.companies} \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u00b7 ${b.corps} \u043a\u043e\u0440\u043f</div></div>
+    <div class="fsd-side"><span class="fsd-avatar" style="--ring:${b.color}">${renderTokenGlyph(b.token)}</span><div class="fsd-name">${b.name}</div><div class="fsd-worth">\u20ae${fmt(b.worth)}</div><div class="fsd-sub">${b.companies} \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u00b7 ${b.corps} \u043a\u043e\u0440\u043f</div></div>
   </div>`;
 }
 
@@ -8636,7 +8818,7 @@ function renderWealthChartModal(room) {
   const lowAll = hist.length > 0 ? Math.min(...hist.map(c => c.low)) : netWorth;
   const arrow = totalChange > 0 ? '\u25b2' : (totalChange < 0 ? '\u25bc' : '\u2013');
 
-  const tabsHtml = players.map(p => `<button class="wc-tab ${p.id === player.id ? 'active' : ''}" data-player-tab="${p.id}" style="--ring-color:${p.color}">${p.token} ${p.name}</button>`).join('');
+  const tabsHtml = players.map(p => `<button class="wc-tab ${p.id === player.id ? 'active' : ''}" data-player-tab="${p.id}" style="--ring-color:${p.color}">${renderTokenGlyph(p.token)} ${p.name}</button>`).join('');
   const tfHtml = ['1','5','10','all'].map(tf => `<button class="wc-tf-btn ${wealthModalTimeframe === tf ? 'active' : ''}" data-tf="${tf}">${tf === 'all' ? '\u0411\u04ae\u0413\u0414' : tf + ' \u04ae\u0415'}</button>`).join('');
 
   const tableHtml = wealthModalTableView ? `
@@ -8651,7 +8833,7 @@ function renderWealthChartModal(room) {
       <button class="wc-close-btn" id="wealthModalClose" aria-label="\u0425\u0430\u0430\u0445">\u2715</button>
       <div class="wc-tabs">${tabsHtml}</div>
       <div class="wc-header">
-        <span class="wc-header-avatar" style="--ring-color:${player.color}">${player.token}</span>
+        <span class="wc-header-avatar" style="--ring-color:${player.color}">${renderTokenGlyph(player.token)}</span>
         <div>
           <div class="wc-header-name">${player.name} \u2014 \u041d\u0418\u0419\u0422 \u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8</div>
           <div class="wc-header-value">\u20ae${fmt(netWorth)}</div>
@@ -8856,6 +9038,20 @@ function attachGameEvents() {
   attachChatEvents();
   attachLabelCalibEvents();
   const fsdSkip = document.getElementById('fsdSkipBtn'); if (fsdSkip) fsdSkip.onclick = skipFinalShowdown;
+  document.querySelectorAll('.ptoken[data-player-id]').forEach(el => {
+    el.onclick = (e) => {
+      e.stopPropagation();
+      const pid = el.dataset.playerId;
+      const room = currentRoom;
+      if (!room) return;
+      const p = room.players.find(pl => pl.id === pid);
+      if (!p) return;
+      const pos = displayPos(room, p);
+      const sameTile = room.players.filter(o => !o.bankrupt && displayPos(room, o) === pos);
+      const names = sameTile.map(o => o.name).join(', ');
+      showDirectorBanner(names, { force: true, dedupeKey: 'tokentap-' + Date.now() });
+    };
+  });
   const withClickFx = (fn) => (...args) => { audioManager.playSfx('buttonClick'); vibrate(15); return fn(...args); };
   const roll = document.getElementById('rollBtn'); if (roll) roll.onclick = withClickFx(rollDice);
   const end = document.getElementById('endTurnBtn'); if (end) end.onclick = withClickFx(endTurn);
