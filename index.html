@@ -5033,7 +5033,7 @@ async function joinRoom(code, name, avatarToken) {
   const room = await getRoom(code);
   if (!room) { errorMsg = '\u0418\u0439\u043c \u04e9\u0440\u04e9\u04e9 \u043e\u043b\u0434\u0441\u043e\u043d\u0433\u04af\u0439.'; render(); return; }
   const storedId = getStoredPlayerId(code);
-  const existingById = storedId ? room.players.find(p => p.id === storedId) : null;
+  const existingById = storedId ? room.players.find(p => p.id === storedId && p.name === name) : null;
   const existing = existingById || room.players.find(p => p.name === name);
   if (existing) {
     myId = existing.id; storePlayerId(code, myId); currentRoom = room; view = room.started ? 'game' : 'waiting';
@@ -5046,13 +5046,14 @@ async function joinRoom(code, name, avatarToken) {
   const player = newPlayer(name, freeToken, false);
   myId = player.id;
   storePlayerId(code, myId);
-  const { data, error } = await supabaseClient.rpc('join_room', { p_room_code: code, p_player: player });
-  if (error || !data) { errorMsg = '\u041d\u044d\u0433\u0434\u044d\u0445\u044d\u0434 \u0430\u043b\u0434\u0430\u0430 \u0433\u0430\u0440\u0447\u043b\u0430\u0430, \u0434\u0430\u0445\u0438\u043d \u043e\u0440\u043e\u043b\u0434\u043e\u043d\u043e \u0443\u0443.'; render(); return; }
-  currentRoom = data; view = 'waiting'; startPolling(); render();
-  try {
-    const fresh = await getRoom(code);
-    if (fresh) { pushChatMessage(fresh, null, 'system', `${name} \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u043d\u044d\u0433\u0434\u043b\u044d\u044d`); await saveRoom(fresh); currentRoom = fresh; render(); }
-  } catch (e) {}
+  const fresh = await getRoom(code);
+  if (!fresh) { errorMsg = '\u041d\u044d\u0433\u0434\u044d\u0445\u044d\u0434 \u0430\u043b\u0434\u0430\u0430 \u0433\u0430\u0440\u0447\u043b\u0430\u0430, \u0434\u0430\u0445\u0438\u043d \u043e\u0440\u043e\u043b\u0434\u043e\u043d\u043e \u0443\u0443.'; render(); return; }
+  if (fresh.started) { errorMsg = '\u042d\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043e\u043c \u0430\u043b\u044c \u0445\u044d\u0434\u0438\u0439\u043d \u044d\u0445\u044d\u043b\u0441\u044d\u043d \u0431\u0430\u0439\u043d\u0430.'; render(); return; }
+  if (fresh.players.some(p => p.id === player.id) || fresh.players.length >= 4) { currentRoom = fresh; view = 'waiting'; startPolling(); render(); return; }
+  fresh.players.push(player);
+  pushChatMessage(fresh, null, 'system', `${name} \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u043d\u044d\u0433\u0434\u043b\u044d\u044d`);
+  await saveRoom(fresh);
+  currentRoom = fresh; view = 'waiting'; startPolling(); render();
 }
 
 async function startGame() {
@@ -7040,6 +7041,19 @@ function renderLanding() {
     ${renderMatchmakingModal()}
   </div>`;
 }
+async function tryAutoResumeSession(roomCode) {
+  const storedId = getStoredPlayerId(roomCode);
+  if (!storedId) return false;
+  const room = await getRoom(roomCode);
+  if (!room) { return false; }
+  const existing = room.players.find(p => p.id === storedId);
+  if (!existing) { return false; }
+  myId = existing.id; myName = existing.name;
+  currentRoom = room; view = room.started ? 'game' : 'waiting';
+  startPolling(); render();
+  return true;
+}
+
 let autoRejoinAttempted = false;
 function attachLandingEvents() {
   wireQuickMuteAndSettings();
@@ -7047,8 +7061,7 @@ function attachLandingEvents() {
     autoRejoinAttempted = true;
     const urlRoom = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
     if (urlRoom && getStoredPlayerId(urlRoom)) {
-      const fallbackName = myName || (authState.profile && authState.profile.display_name) || '\u0422\u043e\u0433\u043b\u043e\u0433\u0447';
-      joinRoom(urlRoom, fallbackName, TOKENS[myAvatarIndex]);
+      tryAutoResumeSession(urlRoom).then(resumed => { if (!resumed) attachLandingEvents(); });
       return;
     }
   }
