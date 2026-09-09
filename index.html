@@ -1716,6 +1716,8 @@
   .settings-toggle.on { background: var(--steppe-gold); color: #241a0d; }
   .settings-slider { width: 130px; accent-color: var(--steppe-gold); }
   .detail-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13.5px; }
+  .detail-owner-cell { display: inline-flex; align-items: center; gap: 5px; }
+  .detail-owner-token { width: 16px; height: 16px; display: inline-block; }
   .detail-row:last-of-type { border-bottom: none; }
   .detail-row span:first-child { color: #9AA6BE; }
   .detail-row span:last-child { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--steppe-gold); }
@@ -9005,7 +9007,7 @@ function showCellDetail(idx) {
       <div class="detail-row"><span>\u0411\u0430\u0440\u044c\u0446\u0430\u0430\u043d\u044b \u04af\u043d\u044d</span><span>\u20ae${fmt(getMortgageValue(sp))}</span></div>
       <div class="detail-row"><span>\u04e8\u043d\u0433\u0438\u0439\u043d \u0431\u04af\u043b\u044d\u0433\u0438\u0439\u043d \u0431\u043e\u043d\u0443\u0441</span><span>+${groupBonusPct}%</span></div>
       ${marketMult !== 1 ? `<div class="detail-row"><span>\u0417\u0430\u0445 \u0437\u044d\u044d\u043b\u0438\u0439\u043d \u043d\u04e9\u043b\u04e9\u04e9</span><span>\u00d7${marketMult.toFixed(2)}</span></div>` : ''}
-      <div class="detail-row"><span>\u042d\u0437\u044d\u043c\u0448\u0438\u0433\u0447</span><span>${owner ? owner.token+' '+owner.name : '\u0425\u044d\u043d \u0447 \u0431\u0438\u0448'}</span></div>
+      <div class="detail-row"><span>\u042d\u0437\u044d\u043c\u0448\u0438\u0433\u0447</span><span class="detail-owner-cell">${owner ? renderTokenGlyph(owner.token, 'detail-owner-token') + ' ' + owner.name : '\u0425\u044d\u043d \u0447 \u0431\u0438\u0448'}</span></div>
       <div class="detail-row"><span>Upgrade</span><span>${level >= 4 ? '\ud83c\udfe6 \u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446' : level > 0 ? `LV.${level}` : '\u2014'}</span></div>
       <div class="detail-row"><span>\u0411\u0430\u0440\u044c\u0446\u0430\u0430</span><span>${isMortgaged ? '\ud83d\udd12 \u0411\u0430\u0440\u044c\u0446\u0430\u0430\u043b\u0441\u0430\u043d' : '\u0423\u0433\u0443\u0439'}</span></div>`;
   } else if (sp.type === 'tax') {
