@@ -1276,12 +1276,12 @@
     color: #172019;
     transform-origin: center center;
   }
-  .dlp-icon { font-size: clamp(6px, 0.9vw, 15px); line-height: 1; margin-bottom: 1px; }
+  .dlp-icon { font-size: clamp(5px, 0.75vw, 12px); line-height: 1; margin-bottom: 1px; opacity: 0.85; }
   .business-name {
     max-width: 100%;
-    font-size: clamp(6px, 0.72vw, 13px);
-    line-height: 1.05;
-    font-weight: 800;
+    font-size: clamp(5.5px, 0.62vw, 11px);
+    line-height: 1.08;
+    font-weight: 700;
     text-align: center;
     overflow-wrap: normal;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -1289,7 +1289,7 @@
   }
   .business-price {
     margin-top: 1px;
-    font-size: clamp(5px, 0.52vw, 10px);
+    font-size: clamp(4.5px, 0.46vw, 9px);
     line-height: 1;
     font-weight: 700;
     color: #5c3909;
@@ -7780,11 +7780,15 @@ function renderGame() {
     const level = tile.type === 'property' ? houseLevel(room, idx) : 0;
     const isCorner = CORNER_IDS.includes(idx);
     const pts = tile.polygon.map(p => p.join(',')).join(' ');
-    const lines = wrapLabel(shortLabel(tile.name), isCorner ? 10 : 8);
+    const showSvgText = tile.type !== 'property';
+    const lines = showSvgText ? wrapLabel(shortLabel(tile.name), isCorner ? 10 : 8) : [];
     const fontSize = isCorner ? 15 : 12.5;
-    let tspans = `<tspan x="${tile.labelX}" dy="${lines.length > 1 ? '-0.55em' : '0.3em'}">${lines[0]}</tspan>`;
-    if (lines[1]) tspans += `<tspan x="${tile.labelX}" dy="1.05em">${lines[1]}</tspan>`;
-    if (tile.price) tspans += `<tspan class="tile-price" x="${tile.labelX}" dy="1.15em" font-size="${fontSize*0.78}">\u20ae${fmt(tile.price)}</tspan>`;
+    let tspans = '';
+    if (showSvgText) {
+      tspans = `<tspan x="${tile.labelX}" dy="${lines.length > 1 ? '-0.55em' : '0.3em'}">${lines[0]}</tspan>`;
+      if (lines[1]) tspans += `<tspan x="${tile.labelX}" dy="1.05em">${lines[1]}</tspan>`;
+      if (tile.price) tspans += `<tspan class="tile-price" x="${tile.labelX}" dy="1.15em" font-size="${fontSize*0.78}">\u20ae${fmt(tile.price)}</tspan>`;
+    }
     const vs = getTileVisualState(tile, room, currentPlayer, me);
     const ownerStyle = owner ? `--owner-color:${owner.color}; --owner-fill:${hexToRgba(owner.color,0.28)};` : '';
     const stateClasses = tileStateClasses(vs);
@@ -7796,7 +7800,7 @@ function renderGame() {
       <polygon class="tile-hit-area" points="${pts}" vector-effect="non-scaling-stroke"></polygon>
       <polygon class="tile-surface" points="${pts}" vector-effect="non-scaling-stroke"></polygon>
       ${''}
-      <text x="${tile.labelX}" y="${tile.labelY}" text-anchor="middle" font-size="${fontSize}" transform="rotate(${tile.labelRotation} ${tile.labelX} ${tile.labelY})">${tspans}</text>
+      ${showSvgText ? `<text x="${tile.labelX}" y="${tile.labelY}" text-anchor="middle" font-size="${fontSize}" transform="rotate(${tile.labelRotation} ${tile.labelX} ${tile.labelY})">${tspans}</text>` : ''}
       ${owner ? `<circle class="owner-dot" cx="${tile.labelX + 22}" cy="${tile.labelY - 22}" r="9" fill="${owner.color}" stroke="#18382d" stroke-width="1.5"></circle>` : ''}
       ${vs.mortgaged ? `<g class="mortgage-lock" transform="translate(${tile.labelX},${tile.labelY + 20})"><rect x="-7" y="-2" width="14" height="10" rx="2" fill="#2b3440" stroke="#c8ccd6" stroke-width="1"></rect><path d="M -4 -2 L -4 -6 A 4 4 0 0 1 4 -6 L 4 -2" fill="none" stroke="#c8ccd6" stroke-width="1.6"></path></g>` : ''}
       ${debugMode ? `<text x="${tile.labelX}" y="${tile.labelY + 34}" text-anchor="middle" font-size="6.5" fill="#fff" stroke="#000" stroke-width="0.3" paint-order="stroke">${idx}: ${debugStateLabel}</text>` : ''}
