@@ -321,6 +321,16 @@
   .room-code-box { text-align: center; margin: 20px 0; padding: 18px 10px; border: 1.5px dashed var(--steppe-gold); border-radius: 12px; background: rgba(212,162,78,0.05); position: relative; }
   .room-code-box::before { content: '\26FA'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--night-indigo-deep); padding: 0 8px; font-size: 16px; }
   .room-code { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: var(--steppe-gold); }
+  .invite-row { display: flex; gap: 8px; margin: 14px 0; }
+  .invite-btn {
+    flex: 1; text-align: center; padding: 10px 8px; border-radius: 10px; font-size: 12px; font-weight: 700;
+    text-decoration: none; cursor: pointer; border: 1.5px solid rgba(245,202,85,0.3); color: var(--sb-text, #e8e0c8);
+    background: rgba(255,255,255,0.05);
+  }
+  .invite-whatsapp { border-color: #25D366; color: #25D366; }
+  .invite-messenger { border-color: #0084FF; color: #6cb2ff; }
+  .invite-copy { border-color: var(--gold); color: var(--gold-light, #ffe8a3); }
+  .invite-btn:hover { filter: brightness(1.15); }
 
   /* Game screen */
   .game-wrap { max-width: 1900px; margin: 0 auto; padding: 12px; }
@@ -1240,6 +1250,63 @@
   .board-viewport.debug .tile .tile-surface { fill: rgba(255,0,0,0.28) !important; stroke: #ff2b2b !important; stroke-width: 1.5 !important; }
   .board-viewport.debug .debug-poly { display: block; }
 
+  .dynamic-label-plate {
+    position: absolute;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 3;
+    background: linear-gradient(145deg, rgba(255, 250, 231, 0.99), rgba(238, 220, 178, 0.99));
+    border: 1px solid rgba(167, 119, 30, 0.5);
+    border-radius: clamp(2px, 0.3vw, 6px);
+    box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, 0.8),
+      inset 0 -2px 4px rgba(92, 57, 9, 0.16);
+  }
+  .dlp-inner {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 92%; height: 92%;
+    color: #172019;
+    transform-origin: center center;
+  }
+  .dlp-icon { font-size: clamp(6px, 0.9vw, 15px); line-height: 1; margin-bottom: 1px; }
+  .business-name {
+    max-width: 100%;
+    font-size: clamp(6px, 0.72vw, 13px);
+    line-height: 1.05;
+    font-weight: 800;
+    text-align: center;
+    overflow-wrap: normal;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    padding: 0 2px;
+  }
+  .business-price {
+    margin-top: 1px;
+    font-size: clamp(5px, 0.52vw, 10px);
+    line-height: 1;
+    font-weight: 700;
+    color: #5c3909;
+  }
+  .dlp-calib-outline {
+    position: absolute; inset: 0; border: 1px dashed rgba(255,0,0,0.7); pointer-events: none;
+  }
+  .label-calib-panel {
+    position: absolute; top: 10px; left: 10px; z-index: 60;
+    background: rgba(4,26,22,0.95); border: 1.5px solid var(--gold); border-radius: 10px;
+    padding: 10px; width: 220px; font-size: 11px; color: var(--sb-text, #e8e0c8);
+  }
+  .lcp-title { font-weight: 800; margin-bottom: 6px; color: var(--gold-light, #ffe8a3); }
+  .lcp-select { width: 100%; margin-bottom: 8px; font-size: 10.5px; }
+  .lcp-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .lcp-row button { width: 22px; height: 22px; background: rgba(255,255,255,0.08); border: 1px solid rgba(245,202,85,0.3); color: var(--sb-text, #e8e0c8); border-radius: 4px; cursor: pointer; }
+  .lcp-reset { width: 100%; margin-top: 6px; padding: 5px; background: rgba(232,93,93,0.15); border: 1px solid rgba(232,93,93,0.4); color: #ff9a9a; border-radius: 6px; cursor: pointer; }
+  .lcp-hint { margin-top: 8px; font-size: 8.5px; color: var(--sb-muted, #9AA6BE); word-break: break-all; max-height: 60px; overflow-y: auto; }
+  @media (max-width: 768px) {
+    .dlp-icon { display: none; }
+    .business-name { font-size: clamp(5px, 1.6vw, 9px); }
+    .business-price { font-size: clamp(4px, 1.2vw, 7px); }
+  }
+
   .ptoken {
     position: absolute;
     display: grid; place-items: center;
@@ -1370,6 +1437,8 @@
   .buy-modal-visual img { width: 100%; max-width: 220px; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(0,0,0,0.5)); }
   .buy-modal-info { flex: 1; padding: 22px 22px 24px; display: flex; flex-direction: column; }
   .buy-modal-eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--emerald-light); font-weight: 800; }
+  .buy-modal-desc { font-size: 11.5px; color: var(--sb-muted, #9AA6BE); line-height: 1.4; margin: 4px 0 10px; }
+  .bm-discount-note { font-size: 11.5px; font-weight: 800; color: #ff9a5a; background: rgba(255,154,90,0.12); border: 1px solid rgba(255,154,90,0.35); border-radius: 8px; padding: 5px 10px; margin-bottom: 8px; display: inline-block; }
   .buy-modal-name { font-size: 22px; font-weight: 800; color: var(--sb-text); margin: 4px 0 14px; line-height: 1.2; }
   .buy-modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-bottom: 14px; }
   .bm-stat { display: flex; flex-direction: column; gap: 2px; }
@@ -2053,7 +2122,34 @@ async function initAuth() {
 
 const TOKENS = ['\ud83d\udc2b','\ud83d\udc0e','\ud83e\udd85','\ud83d\udc3a'];
 const TOKEN_COLORS = ['#D4A24E','#A63D2F','#7A9B63','#5A7EA6'];
-const GROUP_COLORS = { A: 'var(--grp-A)', B: 'var(--grp-B)', C: 'var(--grp-C)', D: 'var(--grp-D)' };
+const GROUP_COLORS = {
+  agriculture: '#8BC34A', commerce: '#2196F3', real_estate: '#2E7D32', logistics: '#FF9800',
+  energy: '#E53935', technology: '#D81B9A', finance: '#7C4DFF', mining: '#4A3B2A',
+};
+const SECTOR_INFO = {
+  agriculture:  { name: 'Хөдөө аж ахуй, хүнс',        icon: '\ud83c\udf3e', bonusName: 'Тогтвортой нийлүүлэлт',  bonusDesc: '"ЭХЛЭЛ" нүдийг давах шагнал дээр \u20ae20 нэмэгдэнэ (тойрогт 1 удаа).' },
+  commerce:     { name: 'Худалдаа, үйлчилгээ',        icon: '\ud83d\udecd\ufe0f', bonusName: 'Бөөний хөнгөлөлт',       bonusDesc: 'Дараагийн 1 бизнесээ 10% хямд авна (тойрогт 1 удаа).' },
+  real_estate:  { name: 'Барилга, үл хөдлөх хөрөнгө', icon: '\ud83c\udfd7\ufe0f', bonusName: 'Барилгын хөнгөлөлт',      bonusDesc: 'Энэ салбарын барилгын зардал 15% буурна.' },
+  logistics:    { name: 'Тээвэр, логистик',           icon: '\ud83d\ude9a', bonusName: 'Хурдан хүргэлт',          bonusDesc: 'Тойрогт 1 удаа шоогоо дахин хаяна (сонголтоор).' },
+  energy:       { name: 'Эрчим хүч, шатахуун',        icon: '\u26a1', bonusName: 'Эрчим хүчний орлого',    bonusDesc: 'Энэ салбарын түрээс 10% нэмэгдэнэ.' },
+  technology:   { name: 'Харилцаа холбоо, технологи', icon: '\ud83d\udce1', bonusName: 'Мэдээллийн давуу тал',   bonusDesc: 'Зах зээлийн карт татахдаа 2-оос 1-ийг сонгоно.' },
+  finance:      { name: 'Банк, санхүү',               icon: '\ud83c\udfe6', bonusName: 'Хүүгийн орлого',         bonusDesc: '3 үе тутам бэлэн мөнгөний 5% (дээд тал \u20ae50) орлого авна.' },
+  mining:       { name: 'Уул уурхай, хүнд үйлдвэр',   icon: '\u26cf\ufe0f', bonusName: 'Экспортын өсөлт',        bonusDesc: 'Энэ салбарын корпорацийн түрээс 20% нэмэгдэнэ.' },
+};
+const DEV_LEVEL_NAMES = {
+  agriculture:  ['Тариалангийн талбай', 'Жижиг ферм', 'Өргөтгөсөн аж ахуй', 'Том цогцолбор', 'Хүнсний корпораци'],
+  commerce:     ['Худалдааны талбай', 'Дэлгүүр', 'Супермаркет', 'Худалдааны төв', 'Худалдааны корпораци'],
+  real_estate:  ['Хөрсний эрх', 'Барилгын эхлэл', 'Өргөтгөсөн байгууламж', 'Том цогцолбор', 'Үл хөдлөхийн корпораци'],
+  logistics:    ['Зогсоолын талбай', 'Жижиг агуулах', 'Терминал', 'Том сүлжээ', 'Логистикийн корпораци'],
+  energy:       ['Хайгуулын талбай', 'Жижиг станц', 'Өргөтгөсөн станц', 'Том парк', 'Эрчим хүчний корпораци'],
+  technology:   ['Технологийн талбай', 'Startup оффис', 'Дата лаборатори', 'Технологийн кампус', 'Технологийн корпораци'],
+  finance:      ['Газрын эрх', 'Банкны салбар', 'Төв оффис', 'Санхүүгийн цамхаг', 'Банкны корпораци'],
+  mining:       ['Хайгуулын талбай', 'Жижиг олборлолтын талбай', 'Уурхайн цогцолбор', 'Баяжуулах үйлдвэртэй уурхай', 'Уул уурхайн корпораци'],
+};
+function getDevLevelName(sp, level) {
+  const names = DEV_LEVEL_NAMES[sp.sector] || DEV_LEVEL_NAMES.commerce;
+  return names[Math.max(0, Math.min(4, level))];
+}
 
 const BOARD_CONFIG = [
   {
@@ -2102,10 +2198,10 @@ const BOARD_CONFIG = [
   {
     "id": 1,
     "type": "property",
-    "name": "АПУ",
+    "name": "Органик ферм",
     "price": 100,
     "rent": 20,
-    "colorGroup": "A",
+    "colorGroup": "agriculture",
     "polygon": [
       [
         747.1,
@@ -2127,7 +2223,7 @@ const BOARD_CONFIG = [
     "labelX": 712.8,
     "labelY": 766.2,
     "labelRotation": -33.4,
-    "buildingType": "factory",
+    "buildingType": "agriculture",
     "buildingX": 704.3,
     "buildingY": 750.7,
     "buildingWidth": 59.9,
@@ -2172,15 +2268,21 @@ const BOARD_CONFIG = [
     "tokenY": 784.7,
     "tokenDepth": 785,
     "tokenScale": 0.95,
-    "tier": "small"
+    "tier": "small",
+    "legacyId": 1,
+    "legacyName": "АПУ",
+    "sector": "agriculture",
+    "sectorName": "Хөдөө аж ахуй, хүнс",
+    "description": "Цэвэр экологийн бүтээгдэхүүн үйлдвэрлэдэг фермийн аж ахуй.",
+    "shortName": "Органик ферм"
   },
   {
     "id": 2,
     "type": "property",
-    "name": "Мобиком",
-    "price": 110,
-    "rent": 22,
-    "colorGroup": "A",
+    "name": "Сүүний үйлдвэр",
+    "price": 120,
+    "rent": 24,
+    "colorGroup": "agriculture",
     "polygon": [
       [
         667.0,
@@ -2202,7 +2304,7 @@ const BOARD_CONFIG = [
     "labelX": 631.7,
     "labelY": 710.5,
     "labelRotation": -32.3,
-    "buildingType": "telecom",
+    "buildingType": "agriculture",
     "buildingX": 626.0,
     "buildingY": 695.7,
     "buildingWidth": 58.8,
@@ -2247,15 +2349,21 @@ const BOARD_CONFIG = [
     "tokenY": 725.7,
     "tokenDepth": 726,
     "tokenScale": 0.95,
-    "tier": "small"
+    "tier": "small",
+    "legacyId": 2,
+    "legacyName": "Мобиком",
+    "sector": "agriculture",
+    "sectorName": "Хөдөө аж ахуй, хүнс",
+    "description": "Орчин үеийн сүүн бүтээгдэхүүний боловсруулах үйлдвэр.",
+    "shortName": "Сүүний үйлдвэр"
   },
   {
     "id": 3,
     "type": "property",
-    "name": "Дижитал Концепт",
-    "price": 120,
-    "rent": 25,
-    "colorGroup": "A",
+    "name": "Хүнсний цогцолбор",
+    "price": 140,
+    "rent": 28,
+    "colorGroup": "agriculture",
     "polygon": [
       [
         587.4,
@@ -2277,7 +2385,7 @@ const BOARD_CONFIG = [
     "labelX": 550.9,
     "labelY": 655.3,
     "labelRotation": -31.3,
-    "buildingType": "technology",
+    "buildingType": "agriculture",
     "buildingX": 546.9,
     "buildingY": 642.5,
     "buildingWidth": 58.1,
@@ -2322,15 +2430,21 @@ const BOARD_CONFIG = [
     "tokenY": 666.2,
     "tokenDepth": 666,
     "tokenScale": 0.95,
-    "tier": "small"
+    "tier": "small",
+    "legacyId": 3,
+    "legacyName": "Дижитал Концепт",
+    "sector": "agriculture",
+    "sectorName": "Хөдөө аж ахуй, хүнс",
+    "description": "Хүнсний олон төрлийн бүтээгдэхүүн үйлдвэрлэдэг том цогцолбор.",
+    "shortName": "Хүнсний цогцолбор"
   },
   {
     "id": 4,
     "type": "property",
-    "name": "Юнител",
-    "price": 135,
-    "rent": 28,
-    "colorGroup": "A",
+    "name": "Сүлжээ дэлгүүр",
+    "price": 160,
+    "rent": 32,
+    "colorGroup": "commerce",
     "polygon": [
       [
         510.1,
@@ -2352,7 +2466,7 @@ const BOARD_CONFIG = [
     "labelX": 472.4,
     "labelY": 602.1,
     "labelRotation": -30.1,
-    "buildingType": "telecom",
+    "buildingType": "retail",
     "buildingX": 469.3,
     "buildingY": 591.2,
     "buildingWidth": 56.6,
@@ -2397,15 +2511,21 @@ const BOARD_CONFIG = [
     "tokenY": 608.9,
     "tokenDepth": 609,
     "tokenScale": 0.95,
-    "tier": "small"
+    "tier": "small",
+    "legacyId": 4,
+    "legacyName": "Юнител",
+    "sector": "commerce",
+    "sectorName": "Худалдаа, үйлчилгээ",
+    "description": "Хот даяар салбартай жижиглэн худалдааны сүлжээ.",
+    "shortName": "Сүлжээ дэлгүүр"
   },
   {
     "id": 5,
     "type": "property",
-    "name": "ХасБанк",
-    "price": 150,
-    "rent": 32,
-    "colorGroup": "A",
+    "name": "Бөөний худалдааны төв",
+    "price": 180,
+    "rent": 36,
+    "colorGroup": "commerce",
     "polygon": [
       [
         436.4,
@@ -2427,7 +2547,7 @@ const BOARD_CONFIG = [
     "labelX": 397.3,
     "labelY": 551.0,
     "labelRotation": -28.9,
-    "buildingType": "bank",
+    "buildingType": "retail",
     "buildingX": 394.6,
     "buildingY": 541.5,
     "buildingWidth": 54.3,
@@ -2472,7 +2592,13 @@ const BOARD_CONFIG = [
     "tokenY": 554.6,
     "tokenDepth": 555,
     "tokenScale": 0.95,
-    "tier": "small"
+    "tier": "small",
+    "legacyId": 5,
+    "legacyName": "ХасБанк",
+    "sector": "commerce",
+    "sectorName": "Худалдаа, үйлчилгээ",
+    "description": "Бөөний ханшаар бараа нийлүүлдэг том худалдааны төв.",
+    "shortName": "Бөөний төв"
   },
   {
     "id": 6,
@@ -2510,10 +2636,10 @@ const BOARD_CONFIG = [
   {
     "id": 7,
     "type": "property",
-    "name": "Шунхлай",
-    "price": 160,
-    "rent": 35,
-    "colorGroup": "A",
+    "name": "Тансаг худалдааны төв",
+    "price": 200,
+    "rent": 40,
+    "colorGroup": "commerce",
     "polygon": [
       [
         186.1,
@@ -2580,7 +2706,13 @@ const BOARD_CONFIG = [
     "tokenY": 453.9,
     "tokenDepth": 454,
     "tokenScale": 0.95,
-    "tier": "small"
+    "tier": "small",
+    "legacyId": 7,
+    "legacyName": "Шунхлай",
+    "sector": "commerce",
+    "sectorName": "Худалдаа, үйлчилгээ",
+    "description": "Дээд зэрэглэлийн худалдааны нэр хүндтэй төв.",
+    "shortName": "Тансаг төв"
   },
   {
     "id": 8,
@@ -2628,10 +2760,10 @@ const BOARD_CONFIG = [
   {
     "id": 9,
     "type": "property",
-    "name": "Хан Алтай Ресурс",
-    "price": 180,
-    "rent": 36,
-    "colorGroup": "B",
+    "name": "Орон сууцны хотхон",
+    "price": 220,
+    "rent": 44,
+    "colorGroup": "real_estate",
     "polygon": [
       [
         229.1,
@@ -2653,7 +2785,7 @@ const BOARD_CONFIG = [
     "labelX": 296.4,
     "labelY": 312.8,
     "labelRotation": 34.6,
-    "buildingType": "mining",
+    "buildingType": "construction",
     "buildingX": 317.4,
     "buildingY": 308.7,
     "buildingWidth": 51.0,
@@ -2698,15 +2830,21 @@ const BOARD_CONFIG = [
     "tokenY": 307.2,
     "tokenDepth": 307,
     "tokenScale": 0.82,
-    "tier": "medium"
+    "tier": "medium",
+    "legacyId": 9,
+    "legacyName": "Хан Алтай Ресурс",
+    "sector": "real_estate",
+    "sectorName": "Барилга, үл хөдлөх хөрөнгө",
+    "description": "Орчин үеийн тав тухтай орон сууцны цогцолбор.",
+    "shortName": "Орон сууц"
   },
   {
     "id": 10,
     "type": "property",
-    "name": "Макс Групп",
-    "price": 200,
-    "rent": 40,
-    "colorGroup": "B",
+    "name": "Бизнесийн цамхаг",
+    "price": 240,
+    "rent": 48,
+    "colorGroup": "real_estate",
     "polygon": [
       [
         313.3,
@@ -2773,15 +2911,21 @@ const BOARD_CONFIG = [
     "tokenY": 267.4,
     "tokenDepth": 267,
     "tokenScale": 0.82,
-    "tier": "medium"
+    "tier": "medium",
+    "legacyId": 10,
+    "legacyName": "Макс Групп",
+    "sector": "real_estate",
+    "sectorName": "Барилга, үл хөдлөх хөрөнгө",
+    "description": "Оффис, компаниудад зориулсан цамхаг барилга.",
+    "shortName": "Бизнес цамхаг"
   },
   {
     "id": 11,
     "type": "property",
-    "name": "Премиум Нэксус",
-    "price": 220,
-    "rent": 45,
-    "colorGroup": "B",
+    "name": "Тансаг зэрэглэлийн хотхон",
+    "price": 260,
+    "rent": 52,
+    "colorGroup": "real_estate",
     "polygon": [
       [
         394.0,
@@ -2803,7 +2947,7 @@ const BOARD_CONFIG = [
     "labelX": 458.5,
     "labelY": 239.6,
     "labelRotation": 32.0,
-    "buildingType": "technology",
+    "buildingType": "construction",
     "buildingX": 478.9,
     "buildingY": 238.5,
     "buildingWidth": 48.5,
@@ -2848,15 +2992,21 @@ const BOARD_CONFIG = [
     "tokenY": 229.2,
     "tokenDepth": 229,
     "tokenScale": 0.82,
-    "tier": "medium"
+    "tier": "medium",
+    "legacyId": 11,
+    "legacyName": "Премиум Нэксус",
+    "sector": "real_estate",
+    "sectorName": "Барилга, үл хөдлөх хөрөнгө",
+    "description": "Хамгийн дээд зэрэглэлийн орон сууцны хотхон.",
+    "shortName": "Тансаг хотхон"
   },
   {
     "id": 12,
     "type": "property",
-    "name": "НИК",
-    "price": 240,
-    "rent": 50,
-    "colorGroup": "B",
+    "name": "Ачаа тээврийн төв",
+    "price": 280,
+    "rent": 56,
+    "colorGroup": "logistics",
     "polygon": [
       [
         469.8,
@@ -2923,15 +3073,21 @@ const BOARD_CONFIG = [
     "tokenY": 191.8,
     "tokenDepth": 192,
     "tokenScale": 0.82,
-    "tier": "medium"
+    "tier": "medium",
+    "legacyId": 12,
+    "legacyName": "НИК",
+    "sector": "logistics",
+    "sectorName": "Тээвэр, логистик",
+    "description": "Улс даяар ачаа тээвэрлэх үйлчилгээ үзүүлдэг төв.",
+    "shortName": "Ачаа төв"
   },
   {
     "id": 13,
     "type": "property",
-    "name": "Алтан Жолоо",
-    "price": 260,
-    "rent": 56,
-    "colorGroup": "B",
+    "name": "Логистикийн терминал",
+    "price": 300,
+    "rent": 60,
+    "colorGroup": "logistics",
     "polygon": [
       [
         545.3,
@@ -2953,7 +3109,7 @@ const BOARD_CONFIG = [
     "labelX": 607.4,
     "labelY": 171.6,
     "labelRotation": 29.5,
-    "buildingType": "fuel",
+    "buildingType": "factory",
     "buildingX": 625.6,
     "buildingY": 172.9,
     "buildingWidth": 46.1,
@@ -2998,7 +3154,13 @@ const BOARD_CONFIG = [
     "tokenY": 155.7,
     "tokenDepth": 156,
     "tokenScale": 0.82,
-    "tier": "medium"
+    "tier": "medium",
+    "legacyId": 13,
+    "legacyName": "Алтан Жолоо",
+    "sector": "logistics",
+    "sectorName": "Тээвэр, логистик",
+    "description": "Ачаа хүлээн авах, түгээх томоохон терминал.",
+    "shortName": "Логистик төв"
   },
   {
     "id": 14,
@@ -3037,10 +3199,10 @@ const BOARD_CONFIG = [
   {
     "id": 15,
     "type": "property",
-    "name": "Болдтөмөр",
-    "price": 280,
-    "rent": 60,
-    "colorGroup": "B",
+    "name": "Олон улсын тээврийн сүлжээ",
+    "price": 320,
+    "rent": 68,
+    "colorGroup": "logistics",
     "polygon": [
       [
         684.9,
@@ -3062,7 +3224,7 @@ const BOARD_CONFIG = [
     "labelX": 742.8,
     "labelY": 109.9,
     "labelRotation": 28.3,
-    "buildingType": "mining",
+    "buildingType": "factory",
     "buildingX": 758.0,
     "buildingY": 113.2,
     "buildingWidth": 42.6,
@@ -3107,7 +3269,13 @@ const BOARD_CONFIG = [
     "tokenY": 90.5,
     "tokenDepth": 91,
     "tokenScale": 0.7,
-    "tier": "medium"
+    "tier": "medium",
+    "legacyId": 15,
+    "legacyName": "Болдтөмөр",
+    "sector": "logistics",
+    "sectorName": "Тээвэр, логистик",
+    "description": "Хилийн чанадад ч ачаа тээвэрлэдэг сүлжээ.",
+    "shortName": "Тээврийн сүлжээ"
   },
   {
     "id": 16,
@@ -3155,10 +3323,10 @@ const BOARD_CONFIG = [
   {
     "id": 17,
     "type": "property",
-    "name": "Саусгоби Сэндс",
-    "price": 300,
-    "rent": 70,
-    "colorGroup": "C",
+    "name": "Шатахуун түгээх сүлжээ",
+    "price": 340,
+    "rent": 76,
+    "colorGroup": "energy",
     "polygon": [
       [
         964.6,
@@ -3180,7 +3348,7 @@ const BOARD_CONFIG = [
     "labelX": 930.9,
     "labelY": 109.7,
     "labelRotation": -28.5,
-    "buildingType": "mining",
+    "buildingType": "fuel",
     "buildingX": 915.7,
     "buildingY": 113.0,
     "buildingWidth": 42.6,
@@ -3225,15 +3393,21 @@ const BOARD_CONFIG = [
     "tokenY": 90.4,
     "tokenDepth": 90,
     "tokenScale": 0.7,
-    "tier": "large"
+    "tier": "large",
+    "legacyId": 17,
+    "legacyName": "Саусгоби Сэндс",
+    "sector": "energy",
+    "sectorName": "Эрчим хүч, шатахуун",
+    "description": "Улс орон даяар салбартай шатахуун түгээх станц.",
+    "shortName": "Шатахуун сүлжээ"
   },
   {
     "id": 18,
     "type": "property",
-    "name": "Говь ХК",
-    "price": 330,
-    "rent": 80,
-    "colorGroup": "C",
+    "name": "Нарны цахилгаан станц",
+    "price": 370,
+    "rent": 84,
+    "colorGroup": "energy",
     "polygon": [
       [
         1028.5,
@@ -3255,7 +3429,7 @@ const BOARD_CONFIG = [
     "labelX": 995.8,
     "labelY": 139.6,
     "labelRotation": -29.5,
-    "buildingType": "fashion",
+    "buildingType": "fuel",
     "buildingX": 979.2,
     "buildingY": 141.9,
     "buildingWidth": 43.5,
@@ -3300,15 +3474,21 @@ const BOARD_CONFIG = [
     "tokenY": 121.6,
     "tokenDepth": 122,
     "tokenScale": 0.7,
-    "tier": "large"
+    "tier": "large",
+    "legacyId": 18,
+    "legacyName": "Говь ХК",
+    "sector": "energy",
+    "sectorName": "Эрчим хүч, шатахуун",
+    "description": "Сэргээгдэх эрчим хүч үйлдвэрлэдэг нарны станц.",
+    "shortName": "Нарны станц"
   },
   {
     "id": 19,
     "type": "property",
-    "name": "Энержи Ресурс",
-    "price": 360,
-    "rent": 88,
-    "colorGroup": "C",
+    "name": "Салхин эрчим хүчний парк",
+    "price": 400,
+    "rent": 92,
+    "colorGroup": "energy",
     "polygon": [
       [
         1097.7,
@@ -3330,7 +3510,7 @@ const BOARD_CONFIG = [
     "labelX": 1064.4,
     "labelY": 170.8,
     "labelRotation": -29.7,
-    "buildingType": "mining",
+    "buildingType": "fuel",
     "buildingX": 1046.2,
     "buildingY": 172.1,
     "buildingWidth": 45.8,
@@ -3375,15 +3555,21 @@ const BOARD_CONFIG = [
     "tokenY": 154.9,
     "tokenDepth": 155,
     "tokenScale": 0.7,
-    "tier": "large"
+    "tier": "large",
+    "legacyId": 19,
+    "legacyName": "Энержи Ресурс",
+    "sector": "energy",
+    "sectorName": "Эрчим хүч, шатахуун",
+    "description": "Салхин турбинуудаас бүрдэх эрчим хүчний парк.",
+    "shortName": "Салхин парк"
   },
   {
     "id": 20,
     "type": "property",
-    "name": "ХХБанк",
-    "price": 385,
-    "rent": 96,
-    "colorGroup": "C",
+    "name": "Үүрэн холбооны сүлжээ",
+    "price": 420,
+    "rent": 100,
+    "colorGroup": "technology",
     "polygon": [
       [
         1169.1,
@@ -3405,7 +3591,7 @@ const BOARD_CONFIG = [
     "labelX": 1136.7,
     "labelY": 204.3,
     "labelRotation": -31.0,
-    "buildingType": "bank",
+    "buildingType": "telecom",
     "buildingX": 1117.2,
     "buildingY": 204.5,
     "buildingWidth": 47.3,
@@ -3450,15 +3636,21 @@ const BOARD_CONFIG = [
     "tokenY": 191.0,
     "tokenDepth": 191,
     "tokenScale": 0.7,
-    "tier": "large"
+    "tier": "large",
+    "legacyId": 20,
+    "legacyName": "ХХБанк",
+    "sector": "technology",
+    "sectorName": "Харилцаа холбоо, технологи",
+    "description": "Улс орон даяар хамрах хүрээтэй холбооны сүлжээ.",
+    "shortName": "Холбооны сүлжээ"
   },
   {
     "id": 21,
     "type": "property",
-    "name": "Голомт Банк",
-    "price": 400,
-    "rent": 102,
-    "colorGroup": "C",
+    "name": "Дата төв",
+    "price": 450,
+    "rent": 112,
+    "colorGroup": "technology",
     "polygon": [
       [
         1243.1,
@@ -3480,7 +3672,7 @@ const BOARD_CONFIG = [
     "labelX": 1212.1,
     "labelY": 238.2,
     "labelRotation": -31.8,
-    "buildingType": "bank",
+    "buildingType": "technology",
     "buildingX": 1191.7,
     "buildingY": 237.1,
     "buildingWidth": 48.1,
@@ -3525,7 +3717,13 @@ const BOARD_CONFIG = [
     "tokenY": 227.7,
     "tokenDepth": 228,
     "tokenScale": 0.7,
-    "tier": "large"
+    "tier": "large",
+    "legacyId": 21,
+    "legacyName": "Голомт Банк",
+    "sector": "technology",
+    "sectorName": "Харилцаа холбоо, технологи",
+    "description": "Мэдээллийн технологийн том хэмжээний дата төв.",
+    "shortName": "Дата төв"
   },
   {
     "id": 22,
@@ -3563,10 +3761,10 @@ const BOARD_CONFIG = [
   {
     "id": 23,
     "type": "property",
-    "name": "ХААН Банк",
-    "price": 420,
-    "rent": 110,
-    "colorGroup": "C",
+    "name": "Технологийн парк",
+    "price": 480,
+    "rent": 124,
+    "colorGroup": "technology",
     "polygon": [
       [
         1333.7,
@@ -3588,7 +3786,7 @@ const BOARD_CONFIG = [
     "labelX": 1372.2,
     "labelY": 312.1,
     "labelRotation": -34.4,
-    "buildingType": "bank",
+    "buildingType": "technology",
     "buildingX": 1351.2,
     "buildingY": 308.0,
     "buildingWidth": 51.1,
@@ -3633,7 +3831,13 @@ const BOARD_CONFIG = [
     "tokenY": 306.4,
     "tokenDepth": 306,
     "tokenScale": 0.82,
-    "tier": "large"
+    "tier": "large",
+    "legacyId": 23,
+    "legacyName": "ХААН Банк",
+    "sector": "technology",
+    "sectorName": "Харилцаа холбоо, технологи",
+    "description": "Инновацийн компаниудыг нэгтгэсэн технологийн парк.",
+    "shortName": "Технологийн парк"
   },
   {
     "id": 24,
@@ -3681,10 +3885,10 @@ const BOARD_CONFIG = [
   {
     "id": 25,
     "type": "property",
-    "name": "МАК",
-    "price": 450,
-    "rent": 122,
-    "colorGroup": "D",
+    "name": "Арилжааны банк",
+    "price": 500,
+    "rent": 132,
+    "colorGroup": "finance",
     "polygon": [
       [
         1371.6,
@@ -3706,7 +3910,7 @@ const BOARD_CONFIG = [
     "labelX": 1413.9,
     "labelY": 453.7,
     "labelRotation": 26.6,
-    "buildingType": "mining",
+    "buildingType": "bank",
     "buildingX": 1415.4,
     "buildingY": 444.6,
     "buildingWidth": 53.1,
@@ -3751,15 +3955,21 @@ const BOARD_CONFIG = [
     "tokenY": 453.1,
     "tokenDepth": 453,
     "tokenScale": 0.82,
-    "tier": "national"
+    "tier": "national",
+    "legacyId": 25,
+    "legacyName": "МАК",
+    "sector": "finance",
+    "sectorName": "Банк, санхүү",
+    "description": "Иргэд, бизнест зээл олгодог арилжааны банк.",
+    "shortName": "Арилжааны банк"
   },
   {
     "id": 26,
     "type": "property",
-    "name": "Оюутолгой",
-    "price": 480,
-    "rent": 132,
-    "colorGroup": "D",
+    "name": "Хөрөнгө оруулалтын сан",
+    "price": 540,
+    "rent": 146,
+    "colorGroup": "finance",
     "polygon": [
       [
         1304.1,
@@ -3781,7 +3991,7 @@ const BOARD_CONFIG = [
     "labelX": 1346.1,
     "labelY": 501.8,
     "labelRotation": 27.5,
-    "buildingType": "mining",
+    "buildingType": "bank",
     "buildingX": 1348.6,
     "buildingY": 493.3,
     "buildingWidth": 54.2,
@@ -3826,15 +4036,21 @@ const BOARD_CONFIG = [
     "tokenY": 503.0,
     "tokenDepth": 503,
     "tokenScale": 0.82,
-    "tier": "national"
+    "tier": "national",
+    "legacyId": 26,
+    "legacyName": "Оюутолгой",
+    "sector": "finance",
+    "sectorName": "Банк, санхүү",
+    "description": "Хөрөнгө оруулалтыг удирддаг санхүүгийн сан.",
+    "shortName": "Хөрөнгийн сан"
   },
   {
     "id": 27,
     "type": "property",
-    "name": "Скай Март",
-    "price": 510,
-    "rent": 142,
-    "colorGroup": "D",
+    "name": "Олон улсын санхүүгийн төв",
+    "price": 580,
+    "rent": 160,
+    "colorGroup": "finance",
     "polygon": [
       [
         1200.1,
@@ -3856,7 +4072,7 @@ const BOARD_CONFIG = [
     "labelX": 1274.4,
     "labelY": 550.8,
     "labelRotation": 29.2,
-    "buildingType": "retail",
+    "buildingType": "bank",
     "buildingX": 1277.1,
     "buildingY": 541.2,
     "buildingWidth": 55.5,
@@ -3901,15 +4117,21 @@ const BOARD_CONFIG = [
     "tokenY": 554.4,
     "tokenDepth": 554,
     "tokenScale": 0.82,
-    "tier": "national"
+    "tier": "national",
+    "legacyId": 27,
+    "legacyName": "Скай Март",
+    "sector": "finance",
+    "sectorName": "Банк, санхүү",
+    "description": "Олон улсын санхүүгийн үйл ажиллагааны төв.",
+    "shortName": "Санхүүгийн төв"
   },
   {
     "id": 28,
     "type": "property",
-    "name": "Бороо Гоулд",
-    "price": 540,
+    "name": "Нүүрсний уурхай",
+    "price": 550,
     "rent": 150,
-    "colorGroup": "D",
+    "colorGroup": "mining",
     "polygon": [
       [
         1162.0,
@@ -3976,15 +4198,21 @@ const BOARD_CONFIG = [
     "tokenY": 609.4,
     "tokenDepth": 609,
     "tokenScale": 0.82,
-    "tier": "national"
+    "tier": "national",
+    "legacyId": 28,
+    "legacyName": "Бороо Гоулд",
+    "sector": "mining",
+    "sectorName": "Уул уурхай, хүнд үйлдвэр",
+    "description": "Эрчим хүчний нүүрс олборлодог уурхай.",
+    "shortName": "Нүүрсний уурхай"
   },
   {
     "id": 29,
     "type": "property",
-    "name": "Хүрэн Толгой",
-    "price": 570,
-    "rent": 160,
-    "colorGroup": "D",
+    "name": "Зэсийн баяжуулах үйлдвэр",
+    "price": 575,
+    "rent": 165,
+    "colorGroup": "mining",
     "polygon": [
       [
         1042.1,
@@ -4051,7 +4279,13 @@ const BOARD_CONFIG = [
     "tokenY": 667.5,
     "tokenDepth": 668,
     "tokenScale": 0.82,
-    "tier": "national"
+    "tier": "national",
+    "legacyId": 29,
+    "legacyName": "Хүрэн Толгой",
+    "sector": "mining",
+    "sectorName": "Уул уурхай, хүнд үйлдвэр",
+    "description": "Зэсийн хүдэр баяжуулдаг үйлдвэр.",
+    "shortName": "Зэсийн үйлдвэр"
   },
   {
     "id": 30,
@@ -4090,10 +4324,10 @@ const BOARD_CONFIG = [
   {
     "id": 31,
     "type": "property",
-    "name": "СОД Монгол",
+    "name": "Алтны уурхай",
     "price": 600,
-    "rent": 170,
-    "colorGroup": "D",
+    "rent": 180,
+    "colorGroup": "mining",
     "polygon": [
       [
         879.4,
@@ -4115,7 +4349,7 @@ const BOARD_CONFIG = [
     "labelX": 958.3,
     "labelY": 767.8,
     "labelRotation": 33.4,
-    "buildingType": "construction",
+    "buildingType": "mining",
     "buildingX": 966.9,
     "buildingY": 752.3,
     "buildingWidth": 59.5,
@@ -4160,9 +4394,94 @@ const BOARD_CONFIG = [
     "tokenY": 786.3,
     "tokenDepth": 786,
     "tokenScale": 0.82,
-    "tier": "national"
+    "tier": "national",
+    "legacyId": 31,
+    "legacyName": "СОД Монгол",
+    "sector": "mining",
+    "sectorName": "Уул уурхай, хүнд үйлдвэр",
+    "description": "Монголын өндөр үнэ цэнтэй алт олборлолтын хөрөнгө.",
+    "shortName": "Алтны уурхай"
   }
 ];
+
+const BOARD_ASSET = {
+  image: 'board.png',
+  hasEmbeddedBusinessLabels: true,
+};
+
+function computeLabelPlateGeometry(tile) {
+  const poly = tile.polygon;
+  const cx = (Math.min(...poly.map(p => p[0])) + Math.max(...poly.map(p => p[0]))) / 2;
+  const cy = (Math.min(...poly.map(p => p[1])) + Math.max(...poly.map(p => p[1]))) / 2;
+  const inset = 0.88;
+  const shrunk = poly.map(([x, y]) => [cx + (x - cx) * inset, cy + (y - cy) * inset]);
+  const xs = shrunk.map(p => p[0]), ys = shrunk.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const w = Math.max(maxX - minX, 1), h = Math.max(maxY - minY, 1);
+  const clipPoints = shrunk.map(([x, y]) => `${((x - minX) / w * 100).toFixed(1)}% ${((y - minY) / h * 100).toFixed(1)}%`).join(', ');
+  return {
+    leftPct: (minX / 1672 * 100).toFixed(3), topPct: (minY / 941 * 100).toFixed(3),
+    widthPct: (w / 1672 * 100).toFixed(3), heightPct: (h / 941 * 100).toFixed(3),
+    clipPath: `polygon(${clipPoints})`,
+  };
+}
+
+let labelCalibrationMode = false;
+let labelCalibrationOverrides = {}; // tileId -> { dx, dy, scale, rotateExtra }
+
+function renderBusinessLabelPlate(tile) {
+  if (tile.type !== 'property') return '';
+  if (!BOARD_ASSET.hasEmbeddedBusinessLabels) return '';
+  const geo = computeLabelPlateGeometry(tile);
+  const override = labelCalibrationOverrides[tile.id] || {};
+  const dx = override.dx || 0, dy = override.dy || 0, extraScale = override.scale || 1, extraRotate = override.rotateExtra || 0;
+  const rotation = (tile.labelRotation || 0) + extraRotate;
+  const sectorIcon = SECTOR_INFO[tile.sector] ? SECTOR_INFO[tile.sector].icon : '';
+  return `<div class="dynamic-label-plate" data-tile-label="${tile.id}"
+      style="left:calc(${geo.leftPct}% + ${dx}px); top:calc(${geo.topPct}% + ${dy}px); width:${geo.widthPct}%; height:${geo.heightPct}%; clip-path:${geo.clipPath}; -webkit-clip-path:${geo.clipPath};">
+    <div class="dlp-inner" style="transform: rotate(${rotation}deg) scale(${extraScale});">
+      <span class="dlp-icon">${sectorIcon}</span>
+      <span class="business-name">${tile.shortName || tile.name}</span>
+      <span class="business-price">\u20ae${tile.price}</span>
+    </div>
+    ${labelCalibrationMode ? `<div class="dlp-calib-outline" data-calib-tile="${tile.id}"></div>` : ''}
+  </div>`;
+}
+
+let calibSelectedTileId = 1;
+function renderLabelCalibrationPanel() {
+  const businesses = BOARD_CONFIG.filter(t => t.type === 'property');
+  const o = labelCalibrationOverrides[calibSelectedTileId] || { dx: 0, dy: 0, scale: 1, rotateExtra: 0 };
+  return `<div class="label-calib-panel">
+    <div class="lcp-title">\ud83c\udff7\ufe0f Label Calibration</div>
+    <select id="lcpTileSelect" class="lcp-select">
+      ${businesses.map(t => `<option value="${t.id}" ${t.id===calibSelectedTileId?'selected':''}>${t.id}: ${t.shortName}</option>`).join('')}
+    </select>
+    <div class="lcp-row"><span>X</span><button data-adj="dx" data-amt="-2">\u2212</button><b>${o.dx}</b><button data-adj="dx" data-amt="2">+</button></div>
+    <div class="lcp-row"><span>Y</span><button data-adj="dy" data-amt="-2">\u2212</button><b>${o.dy}</b><button data-adj="dy" data-amt="2">+</button></div>
+    <div class="lcp-row"><span>Scale</span><button data-adj="scale" data-amt="-0.05">\u2212</button><b>${o.scale.toFixed(2)}</b><button data-adj="scale" data-amt="0.05">+</button></div>
+    <div class="lcp-row"><span>Rotate</span><button data-adj="rotateExtra" data-amt="-2">\u2212</button><b>${o.rotateExtra}\u00b0</b><button data-adj="rotateExtra" data-amt="2">+</button></div>
+    <button class="lcp-reset" id="lcpReset">Reset</button>
+    <div class="lcp-hint">JSON: ${JSON.stringify(labelCalibrationOverrides)}</div>
+  </div>`;
+}
+function attachLabelCalibEvents() {
+  if (!labelCalibrationMode) return;
+  const sel = document.getElementById('lcpTileSelect');
+  if (sel) sel.onchange = () => { calibSelectedTileId = parseInt(sel.value, 10); render(); };
+  document.querySelectorAll('.lcp-row button[data-adj]').forEach(btn => {
+    btn.onclick = () => {
+      const key = btn.dataset.adj, amt = parseFloat(btn.dataset.amt);
+      const o = labelCalibrationOverrides[calibSelectedTileId] || { dx: 0, dy: 0, scale: 1, rotateExtra: 0 };
+      o[key] = Math.round((o[key] + amt) * 100) / 100;
+      labelCalibrationOverrides[calibSelectedTileId] = o;
+      render();
+    };
+  });
+  const resetBtn = document.getElementById('lcpReset');
+  if (resetBtn) resetBtn.onclick = () => { delete labelCalibrationOverrides[calibSelectedTileId]; render(); };
+}
 
 const ECONOMY_CONFIG = {
   startingCash: 2500,
@@ -4903,7 +5222,10 @@ function buildCost(sp, room) {
   const base = (currentLevel + 1 >= 4) ? costs.corporationCost : costs.houseCost;
   if (!room) return base;
   const mult = getActiveMultiplier(room, sp, 'buildingCost');
-  return Math.round(base * mult / 10) * 10;
+  let cost = base * mult;
+  const ownerId = room.propOwner[sp.id];
+  if (sp.sector === 'real_estate' && ownerId && ownsFullGroup(room, ownerId, sp.id)) cost *= 0.85;
+  return Math.round(cost / 10) * 10;
 }
 
 function calculateRentBreakdown(room, sp, idx, ownerId) {
@@ -4918,11 +5240,20 @@ function calculateRentBreakdown(room, sp, idx, ownerId) {
     const fullGroup = ownsFullGroup(room, ownerId, idx);
     if (fullGroup) { sectorBonus = Math.round(sp.rent * (ECONOMY_CONFIG.completeGroupBaseRentMultiplier - 1)); sectorBonusPct = Math.round((ECONOMY_CONFIG.completeGroupBaseRentMultiplier - 1) * 100); }
   }
-  const preMarket = baseRent + buildingBonus + sectorBonus;
+  let industryBonus = 0, industryBonusLabel = '';
+  const ownsSectorFull = ownsFullGroup(room, ownerId, idx);
+  if (ownsSectorFull && sp.sector === 'energy') {
+    industryBonus = Math.round((baseRent + buildingBonus + sectorBonus) * 0.10);
+    industryBonusLabel = SECTOR_INFO.energy.bonusName;
+  } else if (ownsSectorFull && sp.sector === 'mining' && level >= 4) {
+    industryBonus = Math.round((baseRent + buildingBonus + sectorBonus) * 0.20);
+    industryBonusLabel = SECTOR_INFO.mining.bonusName;
+  }
+  const preMarket = baseRent + buildingBonus + sectorBonus + industryBonus;
   const marketMultiplier = getActiveMultiplier(room, sp, 'income');
   const total = Math.round(preMarket * marketMultiplier);
   const marketBonus = total - preMarket;
-  return { baseRent, buildingBonus, sectorBonus, sectorBonusPct, marketMultiplier, marketBonus, total, level };
+  return { baseRent, buildingBonus, sectorBonus, sectorBonusPct, industryBonus, industryBonusLabel, marketMultiplier, marketBonus, total, level };
 }
 
 function ensureStats(player) {
@@ -4977,9 +5308,20 @@ function resolveSpace(room, player, idx) {
     resolvePropertyOrTax(room, player, idx);
   } else if (sp.type === 'chance' || sp.type === 'chest') {
     const deckType = sp.type === 'chance' ? 'chance' : 'market';
-    const card = drawCardFromDeck(room, deckType);
+    const ownsTechFull = deckType === 'market' && BOARD_CONFIG.some(t => t.type === 'property' && t.sector === 'technology' && ownsFullGroup(room, player.id, t.id));
+    let card = drawCardFromDeck(room, deckType);
+    let techBonusUsed = false;
+    if (ownsTechFull && card) {
+      const card2 = drawCardFromDeck(room, deckType);
+      if (card2) {
+        const scoreOf = (c) => (c.effectType === 'cash' ? c.amount : c.effectType === 'skipTurn' ? -50 : c.effectType === 'freeHouse' || c.effectType === 'freeUpgrade' ? 80 : 0);
+        if (scoreOf(card2) > scoreOf(card)) { ensureDecks(room); room.decks.market.discard.push(card.id); card = card2; }
+        else { ensureDecks(room); room.decks.market.discard.push(card2.id); }
+        techBonusUsed = true;
+      }
+    }
     if (!card) { pushLog(room, `${player.name}: (\u043a\u0430\u0440\u0442\u044b\u043d \u0441\u0430\u0432 \u0445\u043e\u043e\u0441\u043e\u043d)`); return; }
-    room.cardDraw = { deckType, cardId: card.id, playerId: player.id, playerName: player.name, id: Date.now() + Math.random(), resolved: false };
+    room.cardDraw = { deckType, cardId: card.id, playerId: player.id, playerName: player.name, id: Date.now() + Math.random(), resolved: false, techBonusUsed };
   }
   // type 'go' / 'corner' (\u042d\u0425\u041b\u042d\u041b, \u0410\u041c\u0420\u0410\u041b\u0422, \u0417\u0410\u0425 \u0417\u042d\u042d\u041b, \u0414\u0423\u0423\u0414\u041b\u0410\u0413\u0410 \u0425\u0423\u0414\u0410\u041b\u0414\u0410\u0410): \u043e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u043c\u044d\u0434\u044d\u044d\u043b\u043b\u044d\u043b \u0442\u0430\u0439\u043b\u0431\u0430\u0440, \u0442\u0443\u0441\u0433\u0430\u0439 \u043c\u0435\u0445\u0430\u043d\u0438\u043a (\u0430\u0443\u043a\u0446\u0438\u043e\u043d/\u0437\u0430\u0445 \u0437\u044d\u044d\u043b) \u0434\u0430\u0440\u0430\u0430\u0433\u0438\u0439\u043d \u0448\u0430\u0442\u0430\u043d\u0434 \u043d\u044d\u043c\u044d\u0433\u0434\u044d\u043d\u044d
 }
@@ -5085,14 +5427,21 @@ async function rollDice() {
   const landedOnStart = wrapped && newPos === 0;
   const passedThroughOnly = wrapped && newPos !== 0;
   room.animPath = { playerId: player.id, from: oldPos, steps: sum, id: Date.now() + Math.random() };
+  if (wrapped) player.lapsCompleted = (player.lapsCompleted || 0) + 1;
+  const ownsAgriFull = BOARD_CONFIG.some(t => t.type === 'property' && t.sector === 'agriculture' && ownsFullGroup(room, player.id, t.id));
+  const agriBonus = (wrapped && ownsAgriFull) ? 20 : 0;
+  if (wrapped) {
+    if (BOARD_CONFIG.some(t => t.type === 'property' && t.sector === 'commerce' && ownsFullGroup(room, player.id, t.id))) player.commerceDiscountAvailable = true;
+    if (BOARD_CONFIG.some(t => t.type === 'property' && t.sector === 'logistics' && ownsFullGroup(room, player.id, t.id))) player.logisticsRerollAvailable = true;
+  }
   if (landedOnStart) {
-    player.money += ECONOMY_CONFIG.landOnStartReward;
-    pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436 \u20ae${ECONOMY_CONFIG.landOnStartReward} \u0430\u0432\u043b\u0430\u0430.`);
-    recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: ECONOMY_CONFIG.landOnStartReward, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436 \u0448\u0430\u0433\u043d\u0430\u043b' });
+    player.money += ECONOMY_CONFIG.landOnStartReward + agriBonus;
+    pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436 \u20ae${ECONOMY_CONFIG.landOnStartReward}${agriBonus ? ' + \u20ae' + agriBonus + ' (' + SECTOR_INFO.agriculture.bonusName + ')' : ''} \u0430\u0432\u043b\u0430\u0430.`);
+    recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: ECONOMY_CONFIG.landOnStartReward + agriBonus, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0440 \u0431\u0443\u0443\u0436 \u0448\u0430\u0433\u043d\u0430\u043b' });
   } else if (passedThroughOnly) {
-    player.money += ECONOMY_CONFIG.passStartReward;
-    pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u20ae${ECONOMY_CONFIG.passStartReward} \u0430\u0432\u043b\u0430\u0430.`);
-    recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: ECONOMY_CONFIG.passStartReward, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u0431\u043e\u043d\u0443\u0441' });
+    player.money += ECONOMY_CONFIG.passStartReward + agriBonus;
+    pushLog(room, `${player.name} \u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u20ae${ECONOMY_CONFIG.passStartReward}${agriBonus ? ' + \u20ae' + agriBonus + ' (' + SECTOR_INFO.agriculture.bonusName + ')' : ''} \u0430\u0432\u043b\u0430\u0430.`);
+    recordWealthChange(room, { playerId: player.id, type: 'pass_go', amount: ECONOMY_CONFIG.passStartReward + agriBonus, description: '\u042d\u0425\u041b\u042d\u041b \u0434\u044d\u044d\u0433\u04af\u04af\u0440 \u04e9\u043d\u0433\u04e9\u0440\u0447 \u0431\u043e\u043d\u0443\u0441' });
   }
   player.position = newPos;
   room.hasRolled = true;
@@ -5102,16 +5451,25 @@ async function rollDice() {
   await saveRoom(room); currentRoom = room; justRolled = true; render();
 }
 
+function getEffectivePrice(player, sp) {
+  if (player && player.commerceDiscountAvailable) return Math.round(sp.price * 0.9 / 10) * 10;
+  return sp.price;
+}
+
 async function buyProperty() {
   const room = await getRoom(currentRoom.roomCode);
   if (!room || !room.pendingAction || room.pendingAction.type !== 'buy' || room.pendingAction.playerId !== myId) return;
   const idx = room.pendingAction.spaceIndex;
   const player = room.players.find(p => p.id === myId);
   const sp = BOARD_CONFIG[idx];
-  if (player.money < sp.price) { room.pendingAction = null; await saveRoom(room); currentRoom = room; render(); return; }
-  player.money -= sp.price; room.propOwner[idx] = player.id;
-  pushLog(room, `${player.name} "${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432.`);
-  recordWealthChange(room, { playerId: player.id, type: 'buy_company', amount: -sp.price, tileId: idx, companyId: idx, description: `"${sp.name}"-\u0433 \u20ae${sp.price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432` });
+  const price = getEffectivePrice(player, sp);
+  const usedDiscount = player.commerceDiscountAvailable;
+  if (player.money < price) { room.pendingAction = null; await saveRoom(room); currentRoom = room; render(); return; }
+  player.money -= price; room.propOwner[idx] = player.id;
+  if (usedDiscount) player.commerceDiscountAvailable = false;
+  const discNote = usedDiscount ? ` (${SECTOR_INFO.commerce.bonusName})` : '';
+  pushLog(room, `${player.name} "${sp.name}"-\u0433 \u20ae${price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432${discNote}.`);
+  recordWealthChange(room, { playerId: player.id, type: 'buy_company', amount: -price, tileId: idx, companyId: idx, description: `"${sp.name}"-\u0433 \u20ae${price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432${discNote}` });
   room.pendingAction = null;
   await saveRoom(room); currentRoom = room; render();
   audioManager.playSfx('companyPurchase'); vibrate([30, 40, 30]);
@@ -5153,7 +5511,22 @@ async function endTurn() {
   do { next = (next + 1) % room.players.length; } while (room.players[next].bankrupt);
   room.currentPlayerIndex = next; room.hasRolled = false; room.lastDice = null;
   room.turnCount = (room.turnCount || 0) + 1;
-  if (room.turnCount % room.players.length === 0) { tickMarketEffects(room); ensureRoundCandles(room); }
+  if (room.turnCount % room.players.length === 0) {
+    tickMarketEffects(room); ensureRoundCandles(room);
+    const roundN = Math.floor(room.turnCount / room.players.length);
+    if (roundN > 0 && roundN % 3 === 0) {
+      room.players.forEach(p => {
+        if (p.bankrupt) return;
+        const ownsFinanceFull = BOARD_CONFIG.some(t => t.type === 'property' && t.sector === 'finance' && ownsFullGroup(room, p.id, t.id));
+        if (!ownsFinanceFull) return;
+        const interest = Math.min(50, Math.round(p.money * 0.05));
+        if (interest <= 0) return;
+        p.money += interest;
+        pushLog(room, `${p.name} ${SECTOR_INFO.finance.bonusName}-с \u20ae${interest} \u0445\u04af\u04af \u0430\u0432\u0430\u0432.`);
+        recordWealthChange(room, { playerId: p.id, type: 'sector_bonus', amount: interest, description: `${SECTOR_INFO.finance.bonusName} \u0445\u04af\u04af` });
+      });
+    }
+  }
   pushLog(room, `\u2014 ${room.players[next].name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u2014`);
   checkMatchTimeLimit(room);
   await saveRoom(room); currentRoom = room; render();
@@ -6496,7 +6869,7 @@ function renderLanding() {
           <div class="lp-or"><span></span>\u042d\u0421\u0412\u042d\u041b<span></span></div>
 
           <label for="codeInput">\u04e8\u0440\u04e9\u04e9\u043d\u0438\u0439 \u043a\u043e\u0434</label>
-          <input type="text" id="codeInput" maxlength="4" class="lp-code-input" placeholder="ABCD">
+          <input type="text" id="codeInput" maxlength="4" class="lp-code-input" placeholder="ABCD" value="${(new URLSearchParams(window.location.search).get('room') || '').toUpperCase()}">
           <button class="lp-join-btn" id="joinBtn">\u04e8\u0420\u04e8\u04e8\u041d\u0414 \u041d\u042d\u0413\u0414\u042d\u0425</button>
 
           <div class="error-msg" role="alert">${errorMsg}</div>
@@ -6544,6 +6917,7 @@ function attachLandingEvents() {
 function renderWaiting() {
   const room = currentRoom;
   const isHost = room.players.find(p => p.id === myId)?.isHost;
+  const inviteMsg = encodeURIComponent(`\u041d\u0430\u043c\u0430\u0439\u0433 \u201c\u0418\u0425 \u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8\u201d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u0442\u043e\u0433\u043b\u043e\u043e\u0440\u0430\u0439! \u04e8\u0440\u04e9\u043e\u043d\u0438\u0439 \u043a\u043e\u0434: ${room.roomCode}\n${window.location.origin}${window.location.pathname}?room=${room.roomCode}`);
   return `<div class="screen">
     <div class="eyebrow">\u0425\u04af\u043b\u044d\u044d\u043b\u0433\u0438\u0439\u043d \u04e9\u0440\u04e9\u04e9</div>
     <div class="seal-title">\u0422\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0434 \u0446\u0443\u0433\u043b\u0430\u0440\u0447 \u0431\u0430\u0439\u043d\u0430</div>
@@ -6551,6 +6925,11 @@ function renderWaiting() {
       <div class="room-code-box">
         <div style="font-size:11px;color:#9AA6BE;letter-spacing:2px;text-transform:uppercase;">\u04e8\u0440\u04e9\u04e9\u043d\u0438\u0439 \u043a\u043e\u0434</div>
         <div class="room-code">${room.roomCode}</div>
+      </div>
+      <div class="invite-row">
+        <a class="invite-btn invite-whatsapp" href="https://wa.me/?text=${inviteMsg}" target="_blank" rel="noopener">\ud83d\udcac WhatsApp</a>
+        <a class="invite-btn invite-messenger" href="fb-messenger://share?link=${encodeURIComponent(window.location.origin + window.location.pathname + '?room=' + room.roomCode)}" id="messengerInviteLink">\ud83d\udcac Messenger</a>
+        <button class="invite-btn invite-copy" id="copyInviteBtn">\ud83d\udd17 \u041b\u0438\u043d\u043a \u0445\u0443\u0443\u043b\u0431\u0430\u0440\u043b\u0430\u0445</button>
       </div>
       <div class="wait-list">
         ${room.players.map(p => `<div class="wait-player"><span class="wait-token" style="--token-color:${p.color}">${p.token}</span> <span>${p.name}</span> ${p.isHost?'<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">\u044d\u0437\u044d\u043d</span>':''}</div>`).join('')}
@@ -6561,7 +6940,18 @@ function renderWaiting() {
     </div>
   </div>`;
 }
-function attachWaitingEvents() { const btn = document.getElementById('startBtn'); if (btn) btn.onclick = startGame; }
+function attachWaitingEvents() {
+  const btn = document.getElementById('startBtn'); if (btn) btn.onclick = startGame;
+  const copyBtn = document.getElementById('copyInviteBtn');
+  if (copyBtn) copyBtn.onclick = async () => {
+    const url = `${window.location.origin}${window.location.pathname}?room=${currentRoom.roomCode}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      copyBtn.textContent = '\u2713 \u0425\u0443\u0443\u043b\u0431\u0430\u0433\u0434\u043b\u0430\u0430!';
+      setTimeout(() => { copyBtn.textContent = '\ud83d\udd17 \u041b\u0438\u043d\u043a \u0445\u0443\u0443\u043b\u0431\u0430\u0440\u043b\u0430\u0445'; }, 1600);
+    } catch (e) {}
+  };
+}
 
 function timeAgoLabel(logIndexFromEnd) {
   if (logIndexFromEnd === 0) return '\u041e\u0434\u043e\u043e';
@@ -7423,6 +7813,7 @@ function renderGame() {
     if (constructionHtml) upgradesToRender.push({ tile, level, idx, depth: tile.depth + 0.5, ownerIdx: -1, owner, __rawHtml: constructionHtml });
   });
   buildingsToRender.sort((a, b) => a.depth - b.depth);
+  const labelPlatesHtml = BOARD_CONFIG.filter(t => t.type === 'property').map(renderBusinessLabelPlate).join('');
   const buildingsHtml = buildingsToRender.map(b => renderBuildingIcon(b.tile, b.level, b.idx)).join('');
   upgradesToRender.sort((a, b) => a.depth - b.depth);
   const upgradesHtml = upgradesToRender.map(u => u.__rawHtml || renderUpgradeIcons(u.tile, u.level, u.idx, u.ownerIdx)).join('');
@@ -7480,6 +7871,7 @@ function renderGame() {
                 ${tilesHtml}
                 ${debugMode ? debugZonesHtml : ''}
               </svg>
+              ${labelPlatesHtml}
               ${buildingsHtml}
               ${upgradesHtml}
               <div class="money-float-anchor" id="moneyFloatAnchor" style="position:absolute; left:50%; top:50%;"></div>
@@ -7489,6 +7881,7 @@ function renderGame() {
             </div>
             ${cameraState.mode === 'corporation' ? '<div class="camera-dim-overlay"></div>' : ''}
             ${debugMode ? renderCameraDebugPanel() : ''}
+            ${labelCalibrationMode ? renderLabelCalibrationPanel() : ''}
           </div>
           <div class="mobile-board-controls">
             <button class="mbc-btn" id="mbcZoomIn" aria-label="Zoom in">+</button>
@@ -7729,9 +8122,11 @@ function renderBuyModal(room) {
   const houseCost = tierCosts.houseCost;
   const corpCost = tierCosts.corporationCost;
   const groupColor = GROUP_COLORS[sp.colorGroup] || 'var(--gold)';
-  const canAfford = me.money >= sp.price;
-  const remaining = me.money - sp.price;
-  const shortBy = sp.price - me.money;
+  const effPrice = getEffectivePrice(me, sp);
+  const hasDiscount = effPrice < sp.price;
+  const canAfford = me.money >= effPrice;
+  const remaining = me.money - effPrice;
+  const shortBy = effPrice - me.money;
   const m = ECONOMY_CONFIG.rentMultipliers;
   const mortgageVal = getMortgageValue(sp);
   const groupBonusPct = Math.round((ECONOMY_CONFIG.completeGroupBaseRentMultiplier - 1) * 100);
@@ -7742,23 +8137,24 @@ function renderBuyModal(room) {
         <img src="${fileName}.png" alt="${sp.name}" onerror="this.style.display='none'">
       </div>
       <div class="buy-modal-info">
-        <div class="buy-modal-eyebrow">\u0428\u0438\u043d\u044d \u043a\u043e\u043c\u043f\u0430\u043d\u0438</div>
+        <div class="buy-modal-eyebrow">${SECTOR_INFO[sp.sector] ? SECTOR_INFO[sp.sector].icon + ' ' + sp.sectorName : '\u0428\u0438\u043d\u044d \u0431\u0438\u0437\u043d\u0435\u0441'}</div>
         <div class="buy-modal-name">${sp.name}</div>
+        ${sp.description ? `<div class="buy-modal-desc">${sp.description}</div>` : ''}
         <div class="buy-modal-stats">
-          <div class="bm-stat"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u043d \u0430\u0432\u0430\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(sp.price)}</b></div>
+          <div class="bm-stat"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u043d \u0430\u0432\u0430\u0445 \u04af\u043d\u044d</span><b>${hasDiscount ? `<s style="opacity:0.5;font-weight:400;">\u20ae${fmt(sp.price)}</s> \u20ae${fmt(effPrice)}` : `\u20ae${fmt(sp.price)}`}</b></div>
           <div class="bm-stat"><span>\u0411\u0430\u0440\u0438\u043b\u0433\u0430\u0433\u04af\u0439 \u0442\u04af\u0440\u044d\u044d\u0441</span><b>\u20ae${fmt(sp.rent)}</b></div>
           <div class="bm-stat"><span>\u0411\u0430\u0439\u0448\u0438\u043d \u0431\u0430\u0440\u0438\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(houseCost)}</b></div>
           <div class="bm-stat"><span>\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446 \u0431\u043e\u043b\u0433\u043e\u0445 \u04af\u043d\u044d</span><b>\u20ae${fmt(corpCost)}</b></div>
           <div class="bm-stat"><span>\u0411\u0430\u0440\u044c\u0446\u0430\u0430\u043d\u044b \u04af\u043d\u044d</span><b>\u20ae${fmt(mortgageVal)}</b></div>
-          <div class="bm-stat"><span>\u04e8\u043d\u0433\u0438\u0439\u043d \u0431\u04af\u043b\u044d\u0433\u0438\u0439\u043d \u0431\u043e\u043d\u0443\u0441</span><b>+${groupBonusPct}%</b></div>
+          <div class="bm-stat"><span>\u0421\u0430\u043b\u0431\u0430\u0440\u044b\u0433 \u0431\u04af\u0440\u0434\u04af\u04af\u043b\u0431\u044d\u043b \u0431\u043e\u043d\u0443\u0441</span><b>+${groupBonusPct}%</b></div>
         </div>
+        ${hasDiscount ? `<div class="bm-discount-note">\ud83c\udff7\ufe0f ${SECTOR_INFO.commerce.bonusName}: -10%</div>` : ''}
         <div class="bm-rent-table">
           <div class="bm-rent-row"><span>1 \u0431\u0430\u0439\u0448\u0438\u043d</span><b>\u20ae${fmt(Math.round(sp.rent * m.oneHouse))}</b></div>
           <div class="bm-rent-row"><span>2 \u0431\u0430\u0439\u0448\u0438\u043d</span><b>\u20ae${fmt(Math.round(sp.rent * m.twoHouses))}</b></div>
           <div class="bm-rent-row"><span>3 \u0431\u0430\u0439\u0448\u0438\u043d</span><b>\u20ae${fmt(Math.round(sp.rent * m.threeHouses))}</b></div>
           <div class="bm-rent-row bm-rent-corp"><span>\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0446\u0438</span><b>\u20ae${fmt(Math.round(sp.rent * m.corporation))}</b></div>
         </div>
-        <div class="buy-modal-money-row">
           <div class="bm-money"><span>\u0422\u0430\u043d\u044b \u043e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u043c\u04e9\u043d\u0433\u04e9</span><b>\u20ae${fmt(me.money)}</b></div>
           <div class="bm-money"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0441\u0430\u043d\u044b \u0434\u0430\u0440\u0430\u0430</span><b class="${canAfford ? 'bm-ok' : 'bm-bad'}">\u20ae${fmt(Math.max(remaining,0))}</b></div>
         </div>
@@ -8326,11 +8722,14 @@ function renderSettingsModal() {
       </div>
     </div>
     <div class="settings-row"><span>Debug \u0433\u043e\u0440\u0438\u043c</span><button class="settings-toggle ${debugMode?'on':'off'}" id="settingsDebugToggle">${debugMode?'\u0418\u0414\u042d\u0412\u0425\u0422\u042d\u0419':'\u0423\u041d\u0422\u0410\u0420\u0410\u0410'}</button></div>
+    ${debugMode ? `<div class="settings-row"><span>Label Calibration</span><button class="settings-toggle ${labelCalibrationMode?'on':'off'}" id="settingsLabelCalibToggle">${labelCalibrationMode?'\u0418\u0414\u042d\u0412\u0425\u0422\u042d\u0419':'\u0423\u041d\u0422\u0410\u0420\u0410\u0410'}</button></div>` : ''}
     <button class="btn btn-secondary" id="closeSettingsBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
   </div>`;
   root.appendChild(div);
   div.onclick = (e) => { if (e.target === div) toggleSettingsModal(false); };
   div.querySelector('#closeSettingsBtn').onclick = () => toggleSettingsModal(false);
+  const labelCalibBtn = div.querySelector('#settingsLabelCalibToggle');
+  if (labelCalibBtn) labelCalibBtn.onclick = () => { labelCalibrationMode = !labelCalibrationMode; renderSettingsModal(); render(); };
   div.querySelectorAll('.ci-btn[data-ci]').forEach(btn => {
     btn.onclick = () => {
       gameSettings.cinematicIntensity = btn.dataset.ci;
@@ -8387,6 +8786,8 @@ function showCellDetail(idx) {
         <div class="detail-thumb" style="--grp:${groupColor};"><img src="${fileName}.png" alt="" onerror="this.style.display='none'"></div>
         <div class="detail-group-chip" style="background:${groupColor};"></div>
       </div>
+      ${sp.sectorName ? `<div class="detail-row"><span>\u0421\u0430\u043b\u0431\u0430\u0440</span><span>${SECTOR_INFO[sp.sector] ? SECTOR_INFO[sp.sector].icon + ' ' : ''}${sp.sectorName}</span></div>` : ''}
+      ${level > 0 ? `<div class="detail-row"><span>\u0422\u04e9\u0440\u04e9\u043b</span><span>${getDevLevelName(sp, level)}</span></div>` : ''}
       <div class="detail-row"><span>\u04ae\u043d\u044d</span><span>\u20ae${fmt(sp.price)}</span></div>
       <div class="detail-row"><span>\u041e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u0442\u04af\u0440\u044d\u044d\u0441</span><span>\u20ae${fmt(effectiveRent)}</span></div>
       <div class="detail-row"><span>\u0411\u0430\u0440\u0438\u043b\u0433\u0430\u0433\u04af\u0439 \u0442\u04af\u0440\u044d\u044d\u0441</span><span>\u20ae${fmt(sp.rent)}</span></div>
@@ -8430,6 +8831,7 @@ function showCellDetail(idx) {
 
 function attachGameEvents() {
   attachChatEvents();
+  attachLabelCalibEvents();
   const fsdSkip = document.getElementById('fsdSkipBtn'); if (fsdSkip) fsdSkip.onclick = skipFinalShowdown;
   const withClickFx = (fn) => (...args) => { audioManager.playSfx('buttonClick'); vibrate(15); return fn(...args); };
   const roll = document.getElementById('rollBtn'); if (roll) roll.onclick = withClickFx(rollDice);
