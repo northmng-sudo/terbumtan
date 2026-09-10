@@ -5707,17 +5707,33 @@ function checkMatchTimeLimit(room) {
 }
 
 let roomChannel = null;
+let roomPollInterval = null;
 function startPolling() {
   if (roomChannel) supabaseClient.removeChannel(roomChannel);
-  roomChannel = supabaseClient.channel('room-' + currentRoom.roomCode)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `room_code=eq.${currentRoom.roomCode}` },
+  if (roomPollInterval) clearInterval(roomPollInterval);
+  const code = currentRoom.roomCode;
+  roomChannel = supabaseClient.channel('room-' + code)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `room_code=eq.${code}` },
       payload => {
         if (!payload.new || !payload.new.state) return;
-        currentRoom = payload.new.state;
-        if (view === 'waiting' && currentRoom.started) view = 'game';
-        if (view !== 'landing') render();
+        applyRemoteRoomUpdate(payload.new.state);
       })
     .subscribe();
+  roomPollInterval = setInterval(async () => {
+    if (!currentRoom || currentRoom.roomCode !== code) return;
+    try {
+      const fresh = await getRoom(code);
+      if (fresh) applyRemoteRoomUpdate(fresh);
+    } catch (e) {}
+  }, 2500);
+}
+function applyRemoteRoomUpdate(newState) {
+  if (!newState) return;
+  const prevUpdatedAt = currentRoom ? currentRoom.updatedAt : null;
+  if (newState.updatedAt && newState.updatedAt === prevUpdatedAt) return; // no change since last known state
+  currentRoom = newState;
+  if (view === 'waiting' && currentRoom.started) view = 'game';
+  if (view !== 'landing') render();
 }
 
 /* ---------- ANIMATION STATE ---------- */
