@@ -5003,6 +5003,7 @@ function newPlayer(name, token, isHost) {
   return { id, name, token, color: TOKEN_COLORS[TOKENS.indexOf(token)], money: ECONOMY_CONFIG.startingCash, position: 0, jailTurns: 0, bankrupt: false, isHost };
 }
 
+let iAmHostOfCurrentRoom = false;
 function getStoredPlayerId(roomCode) {
   try { return localStorage.getItem('ikhKhorongoRoomId_' + roomCode); } catch (e) { return null; }
 }
@@ -5016,6 +5017,7 @@ async function createRoom(name, avatarToken) {
   const hostPlayer = newPlayer(name, token, true);
   myId = hostPlayer.id;
   storePlayerId(code, myId);
+  iAmHostOfCurrentRoom = true;
   const room = {
     roomCode: code, started: false,
     players: [hostPlayer],
@@ -5036,7 +5038,7 @@ async function joinRoom(code, name, avatarToken) {
   const existingById = storedId ? room.players.find(p => p.id === storedId && p.name === name) : null;
   const existing = existingById || room.players.find(p => p.name === name);
   if (existing) {
-    myId = existing.id; storePlayerId(code, myId); currentRoom = room; view = room.started ? 'game' : 'waiting';
+    myId = existing.id; storePlayerId(code, myId); iAmHostOfCurrentRoom = !!existing.isHost; currentRoom = room; view = room.started ? 'game' : 'waiting';
     startPolling(); render(); return;
   }
   if (room.started) { errorMsg = '\u042d\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043e\u043c \u0430\u043b\u044c \u0445\u044d\u0434\u0438\u0439\u043d \u044d\u0445\u044d\u043b\u0441\u044d\u043d \u0431\u0430\u0439\u043d\u0430.'; render(); return; }
@@ -5046,6 +5048,7 @@ async function joinRoom(code, name, avatarToken) {
   const player = newPlayer(name, freeToken, false);
   myId = player.id;
   storePlayerId(code, myId);
+  iAmHostOfCurrentRoom = false;
   const fresh = await getRoom(code);
   if (!fresh) { errorMsg = '\u041d\u044d\u0433\u0434\u044d\u0445\u044d\u0434 \u0430\u043b\u0434\u0430\u0430 \u0433\u0430\u0440\u0447\u043b\u0430\u0430, \u0434\u0430\u0445\u0438\u043d \u043e\u0440\u043e\u043b\u0434\u043e\u043d\u043e \u0443\u0443.'; render(); return; }
   if (fresh.started) { errorMsg = '\u042d\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043e\u043c \u0430\u043b\u044c \u0445\u044d\u0434\u0438\u0439\u043d \u044d\u0445\u044d\u043b\u0441\u044d\u043d \u0431\u0430\u0439\u043d\u0430.'; render(); return; }
@@ -7064,7 +7067,7 @@ async function tryAutoResumeSession(roomCode) {
   if (!room) { return false; }
   const existing = room.players.find(p => p.id === storedId);
   if (!existing) { return false; }
-  myId = existing.id; myName = existing.name;
+  myId = existing.id; myName = existing.name; iAmHostOfCurrentRoom = !!existing.isHost;
   currentRoom = room; view = room.started ? 'game' : 'waiting';
   startPolling(); render();
   return true;
@@ -7117,7 +7120,7 @@ function attachLandingEvents() {
 function renderWaiting() {
   const room = currentRoom;
   const me7061 = room.players.find(p => p.id === myId);
-  const isHost = !!(me7061 && (me7061.isHost || room.players[0]?.id === myId));
+  const isHost = iAmHostOfCurrentRoom || !!(me7061 && (me7061.isHost || room.players[0]?.id === myId));
   const inviteMsg = encodeURIComponent(`\u041d\u0430\u043c\u0430\u0439\u0433 \u201c\u0418\u0425 \u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8\u201d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u0442\u043e\u0433\u043b\u043e\u043e\u0440\u0430\u0439! \u04e8\u0440\u04e9\u043e\u043d\u0438\u0439 \u043a\u043e\u0434: ${room.roomCode}\n${window.location.origin}${window.location.pathname}?room=${room.roomCode}`);
   const muted = !gameSettings.musicEnabled && !gameSettings.sfxEnabled;
   return `<div class="screen">
