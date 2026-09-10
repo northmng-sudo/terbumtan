@@ -933,6 +933,18 @@
     width: 100%; height: 100%;
   }
   .board-image { object-fit: contain; pointer-events: none; border-radius: 14px; }
+  .board-image-day, .board-image-night {
+    opacity: 0;
+    transition: opacity 3s ease-in-out;
+    z-index: 0;
+  }
+  .board-image-day.board-image-visible, .board-image-night.board-image-visible {
+    opacity: 1;
+    z-index: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .board-image-day, .board-image-night { transition: opacity 0.4s ease; }
+  }
   .board-overlay { overflow: visible; }
   .env-lighting { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
   .env-night-overlay {
@@ -945,18 +957,15 @@
     background: radial-gradient(circle at 78% 12%, rgba(180,200,255,0.28) 0%, transparent 45%);
     transition: opacity 2s ease;
   }
-  .env-streetlights {
-    position: absolute; inset: 0; opacity: 0; border-radius: 14px;
-    background:
-      radial-gradient(circle at 15% 30%, rgba(255,214,140,0.18) 0%, transparent 6%),
-      radial-gradient(circle at 85% 30%, rgba(255,214,140,0.18) 0%, transparent 6%),
-      radial-gradient(circle at 15% 70%, rgba(255,214,140,0.18) 0%, transparent 6%),
-      radial-gradient(circle at 85% 70%, rgba(255,214,140,0.18) 0%, transparent 6%);
-    transition: opacity 2s ease;
+  .env-streetlights { position: absolute; inset: 0; border-radius: 14px; pointer-events: none; }
+  .env-city-light {
+    position: absolute; width: 3%; height: 3%; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,214,140,0.9) 0%, rgba(255,214,140,0.25) 55%, transparent 75%);
+    opacity: 0; transform: scale(0.4);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.34,1.4,.4,1);
   }
-  .env-night .env-night-overlay,
-  .env-night .env-moonlight,
-  .env-night .env-streetlights { opacity: 1; }
+  .env-night .env-moonlight { opacity: 1; }
+  .env-night .env-city-light { opacity: 1; transform: scale(1); }
   .env-night ~ .board-overlay .tile text { fill: #eaf5ef; stroke: rgba(10,10,30,0.9); }
   .env-night ~ .tile-building-badge .badge-ring { box-shadow: 0 0 10px 2px rgba(120,200,255,0.5); }
   .env-night ~ .upgrade-icon .upgrade-glow-ring { filter: brightness(1.4); }
@@ -1302,8 +1311,10 @@
     width: 92%; height: 92%;
     color: #172019;
     transform-origin: center center;
+    overflow: hidden;
+    gap: 0;
   }
-  .dlp-icon { font-size: clamp(5px, 0.75vw, 12px); line-height: 1; margin-bottom: 1px; opacity: 0.85; }
+  .dlp-icon { font-size: clamp(5px, 0.75vw, 12px); line-height: 1; margin-bottom: 1px; opacity: 0.85; flex-shrink: 0; }
   .business-name {
     max-width: 100%;
     font-size: clamp(5.5px, 0.62vw, 11px);
@@ -1313,6 +1324,7 @@
     overflow-wrap: normal;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     padding: 0 2px;
+    flex-shrink: 1;
   }
   .business-price {
     margin-top: 1px;
@@ -1320,6 +1332,8 @@
     line-height: 1;
     font-weight: 700;
     color: #5c3909;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   .dlp-calib-outline {
     position: absolute; inset: 0; border: 1px dashed rgba(255,0,0,0.7); pointer-events: none;
@@ -1337,12 +1351,12 @@
   .lcp-hint { margin-top: 8px; font-size: 8.5px; color: var(--sb-muted, #9AA6BE); word-break: break-all; max-height: 60px; overflow-y: auto; }
   @media (max-width: 768px) {
     .dlp-icon { display: none; }
-    .business-name { font-size: clamp(4px, 1.05vw, 6.5px); line-height: 1; font-weight: 800; letter-spacing: -0.2px; }
-    .business-price { font-size: clamp(3.2px, 0.8vw, 5px); margin-top: 0; }
+    .business-name { font-size: clamp(4px, 1.05vw, 6.5px); line-height: 1.02; font-weight: 800; letter-spacing: -0.2px; -webkit-line-clamp: 2; }
+    .business-price { font-size: clamp(3.2px, 0.8vw, 5px); margin-top: 0.5px; }
     .dlp-inner { width: 96%; height: 96%; }
   }
   @media (max-width: 480px) {
-    .business-name { font-size: clamp(3.5px, 1vw, 5.5px); }
+    .business-name { font-size: clamp(3.5px, 1vw, 5.5px); -webkit-line-clamp: 1; }
     .business-price { font-size: clamp(3px, 0.75vw, 4.2px); }
   }
 
@@ -4545,10 +4559,34 @@ const BOARD_CONFIG = [
   }
 ];
 
+const CITY_LIGHT_POINTS = [
+  [38, 28], [62, 24], [45, 35], [55, 40], [35, 45], [65, 45],
+  [42, 55], [58, 58], [48, 62], [52, 30], [30, 52], [70, 52],
+  [40, 68], [60, 68], [50, 48], [46, 40],
+];
+
 const BOARD_ASSET = {
   image: 'board-clean.png',
+  dayImage: 'board-day-v2.png',
+  nightImage: 'board-night-v2.png',
   hasEmbeddedBusinessLabels: false,
+  hasDayNightImages: true, // set false to fall back to the single `image` for both
 };
+function resolveBoardImageSrc(kind) {
+  // kind: 'day' | 'night'
+  if (!BOARD_ASSET.hasDayNightImages) return BOARD_ASSET.image;
+  return kind === 'night' ? BOARD_ASSET.nightImage : BOARD_ASSET.dayImage;
+}
+let boardImagesPreloaded = false;
+function preloadBoardImages() {
+  if (boardImagesPreloaded) return;
+  boardImagesPreloaded = true;
+  [resolveBoardImageSrc('day'), resolveBoardImageSrc('night')].forEach(src => {
+    const img = new Image();
+    img.onerror = () => { /* missing asset: harmless, crossfade still works once both load or fall back */ };
+    img.src = src;
+  });
+}
 
 function computeLabelPlateGeometry(tile) {
   const poly = tile.polygon;
@@ -8146,11 +8184,13 @@ function renderGame() {
         <div class="board-viewport ${debugMode?'debug':''} ${environment.timeOfDay==='night'?'env-night-active':''}" id="boardViewport">
           <div class="board-frame" id="boardFrame">
             <div class="board-camera" id="boardCamera" style="${camTransform}">
-              <img class="board-image" src="${BOARD_ASSET.image}" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433">
+              <img class="board-image board-image-day ${environment.timeOfDay==='day' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('day')}" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u04e9\u0434\u04e9\u0440)">
+              <img class="board-image board-image-night ${environment.timeOfDay==='night' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('night')}" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u0448\u04e9\u043d\u04e9)">
               <div class="env-lighting env-${environment.timeOfDay} ${environment.isTransitioning ? 'env-transitioning' : ''}">
-                <div class="env-night-overlay"></div>
                 <div class="env-moonlight"></div>
-                <div class="env-streetlights"></div>
+                <div class="env-streetlights">
+                  ${CITY_LIGHT_POINTS.map((p, i) => `<span class="env-city-light" style="left:${p[0]}%; top:${p[1]}%; transition-delay:${(i * 0.12).toFixed(2)}s;"></span>`).join('')}
+                </div>
               </div>
               <svg class="board-overlay" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
                 ${tilesHtml}
@@ -9238,6 +9278,7 @@ window.addEventListener('orientationchange', () => {
 
 render();
 initAuth();
+preloadBoardImages();
 </script>
 </body>
 </html>
