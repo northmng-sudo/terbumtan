@@ -945,7 +945,7 @@
   @media (prefers-reduced-motion: reduce) {
     .board-image-day, .board-image-night { transition: opacity 0.4s ease; }
   }
-  .board-overlay { overflow: visible; }
+  .board-overlay { overflow: visible; z-index: 2; }
   .env-lighting { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
   .env-night-overlay {
     position: absolute; inset: 0; opacity: 0; border-radius: 14px;
@@ -4664,8 +4664,8 @@ function attachLabelCalibEvents() {
 
 const ECONOMY_CONFIG = {
   startingCash: 2500,
-  passStartReward: 80,
-  landOnStartReward: 120,
+  passStartReward: 200,
+  landOnStartReward: 200,
   rentMultipliers: {
     noBuilding: 1,
     oneHouse: 2.5,
