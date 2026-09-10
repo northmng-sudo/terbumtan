@@ -5686,7 +5686,6 @@ async function endTurn() {
     }
   }
   pushLog(room, `\u2014 ${room.players[next].name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u2014`);
-  checkMatchTimeLimit(room);
   await saveRoom(room); currentRoom = room; render();
 }
 function checkMatchTimeLimit(room) {
