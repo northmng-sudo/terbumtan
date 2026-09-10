@@ -7100,7 +7100,8 @@ function attachLandingEvents() {
 }
 function renderWaiting() {
   const room = currentRoom;
-  const isHost = room.players.find(p => p.id === myId)?.isHost;
+  const me7061 = room.players.find(p => p.id === myId);
+  const isHost = !!(me7061 && (me7061.isHost || room.players[0]?.id === myId));
   const inviteMsg = encodeURIComponent(`\u041d\u0430\u043c\u0430\u0439\u0433 \u201c\u0418\u0425 \u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8\u201d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u0442\u043e\u0433\u043b\u043e\u043e\u0440\u0430\u0439! \u04e8\u0440\u04e9\u043e\u043d\u0438\u0439 \u043a\u043e\u0434: ${room.roomCode}\n${window.location.origin}${window.location.pathname}?room=${room.roomCode}`);
   const muted = !gameSettings.musicEnabled && !gameSettings.sfxEnabled;
   return `<div class="screen">
