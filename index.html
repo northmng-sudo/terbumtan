@@ -260,6 +260,87 @@
     .ag-btn { height: 52px; font-size: 14.5px; }
   }
 
+  /* ===== WAITING ROOM (cinematic lobby table) ===== */
+  .wr-screen { position: relative; min-height: 100vh; min-height: 100dvh; overflow: hidden; }
+  .wr-bg-image {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: center center; z-index: 0;
+  }
+  .wr-bg-fallback { position: absolute; inset: 0; background: #031b16; z-index: -1; }
+  .wr-bg-overlay { position: absolute; inset: 0; background: rgba(2,10,8,0.38); z-index: 1; }
+  .wr-bg-gradient {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(0deg, rgba(2,10,8,0.75) 0%, rgba(2,10,8,0.15) 35%, transparent 60%);
+  }
+  .wr-seats { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  .wr-seat { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; pointer-events: auto; }
+  .wr-seat-empty-ring {
+    width: clamp(38px, 5.5vw, 56px); height: clamp(38px, 5.5vw, 56px); border-radius: 50%;
+    border: 2px dashed rgba(245,202,85,0.35); background: rgba(0,0,0,0.2);
+  }
+  .wr-seat-token { position: relative; width: clamp(44px, 6vw, 62px); height: clamp(44px, 6vw, 62px); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
+  .wr-seat-token .token-asset-img { border-radius: 50%; box-shadow: 0 0 0 3px var(--seat-color, var(--gold)), 0 6px 14px rgba(0,0,0,0.5); background: rgba(4,26,22,0.6); }
+  .wr-seat-ready-dot {
+    position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%;
+    background: #6b7280; border: 2px solid #051a14;
+  }
+  .wr-seat-ready-dot.wr-ready { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.8); }
+  .wr-seat-name { margin-top: 6px; font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wr-seat-title { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--gold-light, #ffe8a3); text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+  .wr-table-center {
+    position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); z-index: 2;
+    text-align: center; background: rgba(2,10,8,0.55); backdrop-filter: blur(3px);
+    border: 1.5px solid rgba(245,202,85,0.4); border-radius: 16px; padding: 16px 28px;
+  }
+  .wr-table-code-label { font-size: 10px; letter-spacing: 2.5px; color: var(--sb-muted, #9AA6BE); }
+  .wr-table-code { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: clamp(22px, 3vw, 32px); color: var(--gold-light, #ffe8a3); letter-spacing: 4px; margin: 2px 0; }
+  .wr-table-count { font-size: 11px; font-weight: 700; color: #fff; }
+
+  .wr-glass-panel {
+    position: absolute; z-index: 3;
+    background: rgba(6,45,36,0.35); backdrop-filter: blur(8px);
+    border: 1px solid rgba(245,202,85,0.25); border-radius: 16px; padding: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  .wr-invite-panel { left: 20px; top: 20px; width: min(300px, 30vw); }
+  .wr-token-panel { right: 20px; top: 20px; width: min(320px, 32vw); max-height: 70vh; overflow-y: auto; }
+
+  .wr-bottom-action { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 3; }
+  .wr-start-btn { min-width: 260px; padding: 16px 36px; font-size: 15px; letter-spacing: 1px; }
+  .wr-ready-btn {
+    min-width: 220px; padding: 14px 32px; border-radius: 30px; border: 2px solid var(--gold);
+    background: rgba(0,0,0,0.4); color: var(--gold-light, #ffe8a3); font-weight: 800; font-size: 14px; letter-spacing: 1px; cursor: pointer;
+  }
+  .wr-ready-btn.wr-ready { background: linear-gradient(180deg, #4ade80, #22c55e); color: #063017; border-color: #4ade80; }
+
+  .wr-mobile-carousel, .wr-sticky-ready-btn { display: none; }
+
+  @media (max-width: 768px) {
+    .wr-bg-image { object-position: 58% center; }
+    .wr-bg-overlay { background: rgba(2,10,8,0.48); }
+    .wr-seats { display: none; }
+    .wr-table-center { top: 18%; padding: 12px 20px; }
+    .wr-invite-panel, .wr-token-panel { position: static; width: calc(100% - 24px); margin: 10px 12px; }
+    .wr-bottom-action { display: none; }
+    .wr-mobile-carousel {
+      display: flex; gap: 10px; overflow-x: auto; padding: 12px 16px calc(90px + env(safe-area-inset-bottom));
+      -webkit-overflow-scrolling: touch;
+    }
+    .wr-carousel-card {
+      flex: 0 0 auto; width: 84px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      background: rgba(6,45,36,0.4); border: 1px solid rgba(245,202,85,0.25); border-radius: 14px; padding: 10px 6px;
+    }
+    .wr-carousel-card .wr-seat-token { width: 48px; height: 48px; }
+    .wr-carousel-card .wr-seat-name { font-size: 11px; max-width: 70px; }
+    .wr-sticky-ready-btn {
+      display: block; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+      z-index: 10; height: 52px; border-radius: 26px; border: 2px solid var(--gold);
+      background: rgba(4,20,16,0.9); color: var(--gold-light, #ffe8a3); font-weight: 800; font-size: 15px; letter-spacing: 1px; cursor: pointer;
+    }
+    .wr-sticky-ready-btn.wr-ready { background: linear-gradient(180deg, #4ade80, #22c55e); color: #063017; border-color: #4ade80; }
+  }
+
   .lobby-screen { position: relative; min-height: 100vh; overflow: hidden; padding: 0; }
   .lobby-bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse at 50% 100%, var(--bg-emerald) 0%, var(--bg-deep) 65%), var(--bg-deep); }
   .lobby-glow-top { position: absolute; top: -20%; left: 50%; transform: translateX(-50%); width: 900px; height: 500px; background: radial-gradient(ellipse, rgba(245,202,85,0.16) 0%, transparent 70%); animation: lobbyGlowTop 6s ease-in-out infinite; }
@@ -1775,7 +1856,8 @@
 
   /* ===== EVENT CARD (\u0411\u041e\u041b\u041e\u041c\u0416 / \u0417\u0410\u0425 \u0417\u042d\u042d\u041b) ===== */
   .card-modal-backdrop { position: fixed; inset: 0; z-index: 2600; background: rgba(2,10,8,0.7); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 18px; animation: popIn 0.25s ease; }
-  .event-card-scene { perspective: 1200px; width: min(90vw, 440px); aspect-ratio: 3/4; }
+  .event-card-scene { perspective: 1200px; width: clamp(380px, 30vw, 440px); aspect-ratio: 3/4; }
+  @media (max-width: 768px) { .event-card-scene { width: min(90vw, 380px); } }
   .event-card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transform: scale(0.75) rotateY(0deg); transition: transform 0.8s cubic-bezier(.2,.8,.3,1.15); }
   .event-card.is-flipped { transform: scale(1) rotateY(180deg); }
   .event-card-front, .event-card-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 20px; overflow: hidden; }
@@ -1788,15 +1870,130 @@
   .event-card-back-emblem { font-size: 64px; color: var(--gold); opacity: 0.7; }
   .event-card-front {
     transform: rotateY(180deg);
-    background: linear-gradient(165deg, #fff8e6 0%, #f2e2b8 100%);
     border: 3px solid var(--gold);
-    padding: 26px 22px;
-    display: flex; flex-direction: column; align-items: center; text-align: center;
     box-shadow: 0 20px 50px rgba(0,0,0,0.6);
   }
-  .event-card-scene.rarity-uncommon .event-card-front { background: linear-gradient(165deg, #e9f9ef 0%, #cdeedb 100%); border-color: var(--emerald-light); }
-  .event-card-scene.rarity-rare .event-card-front { background: linear-gradient(165deg, #e8f1ff 0%, #cfe0fb 100%); border-color: var(--sb-blue); }
-  .event-card-scene.rarity-legendary .event-card-front { background: linear-gradient(165deg, #f3e9ff 0%, #ddc4f7 100%); border-color: #a855f7; }
+  .ec-card-v2 .event-card-front { padding: 0; display: block; }
+  .ec-bg-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  .ec-bg-fallback { position: absolute; inset: 0; z-index: -1; }
+  .ec-bg-fallback-opportunity { background: linear-gradient(165deg, #1a3a52 0%, #0d2035 100%); }
+  .ec-bg-fallback-market { background: linear-gradient(165deg, #3a2a10 0%, #1f1608 100%); }
+  .ec-overlay {
+    position: absolute; inset: 0; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: 22px 20px calc(20px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(4,10,9,0.15) 0%, rgba(4,10,9,0.55) 40%, rgba(4,10,9,0.88) 100%);
+  }
+  .ec-deck-label {
+    font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 12px; letter-spacing: 3px;
+    color: var(--gold-light, #ffe8a3); background: rgba(0,0,0,0.35); border: 1px solid rgba(245,202,85,0.5);
+    border-radius: 20px; padding: 5px 16px; margin-top: 6px;
+  }
+  .ec-event-title {
+    font-family: 'Cinzel', 'PT Serif', serif; font-weight: 800; font-size: clamp(19px, 4vw, 24px);
+    color: #fff; margin-top: auto; text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+  }
+  .ec-event-desc {
+    font-weight: 700; font-size: clamp(14px, 3.2vw, 16px); line-height: 1.4; color: #f4efe0;
+    margin-top: 8px; max-width: 100%;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  }
+  .ec-result {
+    font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: clamp(26px, 6vw, 34px);
+    margin-top: 14px; text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  }
+  .ec-result-positive { color: #ffd76a; background: linear-gradient(90deg, #ffd76a, #7ee89a); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 10px rgba(126,232,154,0.5)); }
+  .ec-result-negative { color: #ff6b6b; filter: drop-shadow(0 0 10px rgba(255,107,107,0.4)); }
+  .ec-result-special { color: #6ec3ff; filter: drop-shadow(0 0 10px rgba(110,195,255,0.5)); font-size: clamp(18px, 4vw, 22px); }
+  .ec-continue-btn {
+    display: block; width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 14px;
+    font-weight: 800; font-size: 15px; letter-spacing: 0.5px; color: #241a05; cursor: pointer;
+    background: linear-gradient(180deg, #ffcf6e 0%, #f39c1f 55%, #d9840d 100%);
+    border: 2px solid var(--gold-light);
+    box-shadow: 0 5px 0 var(--gold-dark), 0 8px 16px rgba(0,0,0,0.4);
+  }
+  .ec-pulse-green { animation: ecPulseGreen 1.1s ease-in-out 2; }
+  .ec-pulse-red { animation: ecPulseRed 1.1s ease-in-out 2; }
+  .ec-pulse-red-dark { animation: ecPulseRedDark 1.1s ease-in-out 2; }
+  @keyframes ecPulseGreen { 0%,100% { box-shadow: 0 20px 50px rgba(0,0,0,0.6); } 50% { box-shadow: 0 0 45px 8px rgba(53,208,127,0.55), 0 20px 50px rgba(0,0,0,0.6); } }
+  @keyframes ecPulseRed { 0%,100% { box-shadow: 0 20px 50px rgba(0,0,0,0.6); } 50% { box-shadow: 0 0 45px 8px rgba(255,107,107,0.5), 0 20px 50px rgba(0,0,0,0.6); } }
+  @keyframes ecPulseRedDark { 0%,100% { box-shadow: 0 20px 50px rgba(0,0,0,0.6); } 50% { box-shadow: 0 0 45px 8px rgba(158,41,52,0.6), 0 20px 50px rgba(0,0,0,0.6); } }
+  .ec-shake { animation: ecShake 0.18s linear 1; }
+  @keyframes ecShake { 0%,100% { transform: scale(1) rotateY(180deg) translateX(0); } 25% { transform: scale(1) rotateY(180deg) translateX(-2px); } 75% { transform: scale(1) rotateY(180deg) translateX(2px); } }
+  @media (prefers-reduced-motion: reduce) { .ec-pulse-green, .ec-pulse-red, .ec-pulse-red-dark, .ec-shake { animation: none !important; } }
+  .card-modal-backdrop.ec-closing { animation: ecBackdropFadeOut 0.25s ease forwards; }
+  @keyframes ecBackdropFadeOut { to { opacity: 0; } }
+  .event-card-scene.rarity-uncommon .event-card-front { border-color: var(--emerald-light); }
+  .event-card-scene.rarity-rare .event-card-front { border-color: var(--sb-blue); }
+  .event-card-scene.rarity-legendary .event-card-front { border-color: #a855f7; }
+
+  .ec-applying-spinner {
+    width: 34px; height: 34px; margin-top: 16px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.25); border-top-color: var(--gold-light, #ffe8a3);
+    animation: ecSpin 0.8s linear infinite;
+  }
+  @keyframes ecSpin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .ec-applying-spinner { animation: none; opacity: 0.6; } }
+  .ec-choice-nudge {
+    position: absolute; left: 50%; bottom: -8px; transform: translate(-50%, 100%);
+    background: rgba(20,10,6,0.95); border: 1.5px solid var(--gold); border-radius: 10px;
+    padding: 9px 16px; font-size: 12.5px; font-weight: 700; color: var(--gold-light, #ffe8a3);
+    white-space: nowrap; z-index: 5; box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  }
+  .ec-nudge-pulse { animation: ecNudgePop 2.2s ease; }
+  @keyframes ecNudgePop { 0% { opacity: 0; transform: translate(-50%, 100%) scale(0.9); } 12% { opacity: 1; transform: translate(-50%, 100%) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; } }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  /* ===== Opportunity particles (blue-gold) ===== */
+  .opportunity-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .op-particle { position: absolute; border-radius: 50%; will-change: transform, opacity; animation-name: opFloat; animation-timing-function: ease-out; animation-fill-mode: both; }
+  .op-particle.op-gold { background: radial-gradient(circle, #FFF8DC 0%, #F4D477 55%, #D6AA3A 100%); box-shadow: 0 0 4px rgba(244,212,119,0.7); }
+  .op-particle.op-blue { background: radial-gradient(circle, #FFF8DC 0%, #9ED8FF 40%, #4DA3FF 100%); box-shadow: 0 0 5px rgba(77,163,255,0.7); }
+  .op-particle.op-spark { background: #FFF8DC; box-shadow: 0 0 6px 1px rgba(255,248,220,0.9); }
+  @keyframes opFloat {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    12% { opacity: 1; }
+    50% { transform: translateY(-60%) translateX(calc(var(--drift) * 0.5)); }
+    88% { opacity: 0.7; }
+    100% { transform: translateY(-130%) translateX(var(--drift)); opacity: 0; }
+  }
+
+  /* ===== Market particles (positive / negative / neutral) ===== */
+  .market-positive-particles, .market-negative-particles, .market-neutral-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .mkt-particle { position: absolute; border-radius: 50%; will-change: transform, opacity; animation-fill-mode: both; }
+  .mp-emerald { background: #35D07F; box-shadow: 0 0 4px rgba(53,208,127,0.7); }
+  .mp-lightgreen { background: #8CF0B5; box-shadow: 0 0 4px rgba(140,240,181,0.7); }
+  .mp-gold { background: #F4D477; box-shadow: 0 0 4px rgba(244,212,119,0.7); }
+  .mp-red { background: #FF5D5D; box-shadow: 0 0 4px rgba(255,93,93,0.7); }
+  .mp-darkred { background: #9E2934; box-shadow: 0 0 4px rgba(158,41,52,0.6); }
+  .mp-mutedgold { background: #B58A32; box-shadow: 0 0 4px rgba(181,138,50,0.6); }
+  .mp-silver { background: #C3CBD3; box-shadow: 0 0 4px rgba(195,203,211,0.6); }
+  .mp-mutedblue { background: #7895B2; box-shadow: 0 0 4px rgba(120,149,178,0.6); }
+  .mp-softgold { background: #C8A95C; box-shadow: 0 0 4px rgba(200,169,92,0.6); }
+  .mkt-particle.mkt-positive { animation-name: mktFloatUp; animation-timing-function: ease-out; }
+  .mkt-particle.mkt-negative { animation-name: mktFallDown; animation-timing-function: ease-in; }
+  .mkt-particle.mkt-neutral { animation-name: mktDriftSide; animation-timing-function: ease-in-out; }
+  @keyframes mktFloatUp {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    12% { opacity: 1; }
+    100% { transform: translateY(-120%) translateX(var(--drift)); opacity: 0; }
+  }
+  @keyframes mktFallDown {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    12% { opacity: 1; }
+    100% { transform: translateY(120%) translateX(var(--drift)); opacity: 0; }
+  }
+  @keyframes mktDriftSide {
+    0% { transform: translateX(0) translateY(0); opacity: 0; }
+    15% { opacity: 0.8; }
+    50% { transform: translateX(var(--drift)) translateY(-8%); }
+    85% { opacity: 0.5; }
+    100% { transform: translateX(calc(var(--drift) * 1.6)) translateY(2%); opacity: 0; }
+  }
+  @media (max-width: 480px) {
+    .op-particle, .mkt-particle { animation-duration: calc(var(--duration, 2s)); }
+  }
   .event-card-badge {
     position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
     font-family: 'Work Sans', sans-serif; font-weight: 800; font-size: 10.5px; letter-spacing: 1.5px;
@@ -5287,6 +5484,7 @@ async function getRoom(code) {
 }
 async function saveRoom(roomState) {
   roomState.updatedAt = Date.now();
+  lastSelfSaveAt = roomState.updatedAt;
   await supabaseClient.from('rooms').upsert({ room_code: roomState.roomCode, state: roomState });
 }
 
@@ -6077,12 +6275,15 @@ function startPolling() {
     } catch (e) {}
   }, 2500);
 }
+let lastSelfSaveAt = 0;
 function applyRemoteRoomUpdate(newState) {
   if (!newState) return;
   const prevUpdatedAt = currentRoom ? currentRoom.updatedAt : null;
   if (newState.updatedAt && newState.updatedAt === prevUpdatedAt) return; // no change since last known state
+  const withinSelfSaveGrace = (Date.now() - lastSelfSaveAt) < 2000;
   currentRoom = newState;
   if (view === 'waiting' && currentRoom.started) view = 'game';
+  if (withinSelfSaveGrace) return; // avoid re-rendering right after our own save's realtime echo
   if (view !== 'landing') render();
 }
 
@@ -7490,7 +7691,11 @@ function attachLandingEvents() {
   const cycleAvatar = (dir) => {
     myAvatarIndex = ((myAvatarIndex + dir) % TOKENS.length + TOKENS.length) % TOKENS.length;
     try { localStorage.setItem('ikhKhorongoAvatarIdx', String(myAvatarIndex)); } catch (e) {}
-    render();
+    const avatarEl = document.getElementById('lpAvatarDisplay');
+    if (avatarEl) {
+      avatarEl.style.setProperty('--ring-color', TOKEN_COLORS[myAvatarIndex]);
+      avatarEl.innerHTML = renderTokenGlyph(TOKENS[myAvatarIndex]);
+    }
   };
   document.getElementById('avatarPrevBtn').onclick = () => cycleAvatar(-1);
   document.getElementById('avatarNextBtn').onclick = () => cycleAvatar(1);
@@ -7505,38 +7710,104 @@ function attachLandingEvents() {
     fetchStatistics(authState.user.id).then(s => { authState._stats = s || {}; if (mmState.isOpen) render(); });
   }
 }
+let lobbyBackgroundPreloaded = false;
+function preloadLobbyBackground() {
+  if (lobbyBackgroundPreloaded) return;
+  lobbyBackgroundPreloaded = true;
+  const img = new Image();
+  img.onerror = () => {};
+  img.src = 'lobby-background-v1.png';
+}
+
+const WAITING_SEAT_POSITIONS = [
+  [65.3, 14.5], [87.0, 32.4], [87.0, 57.6], [65.3, 75.5],
+  [34.7, 75.5], [13.0, 57.6], [13.0, 32.4], [34.7, 14.5],
+];
+function toggleReadyState() {
+  const me = currentRoom.players.find(p => p.id === myId);
+  if (!me) return;
+  me.ready = !me.ready;
+  patchReadyUI(me.id, me.ready);
+  (async () => {
+    const room = await getRoom(currentRoom.roomCode);
+    if (!room) return;
+    const p = room.players.find(pl => pl.id === myId);
+    if (!p) return;
+    p.ready = me.ready;
+    await saveRoom(room); currentRoom = room;
+  })();
+}
+function patchReadyUI(playerId, ready) {
+  document.querySelectorAll(`[data-ready-for="${playerId}"]`).forEach(el => {
+    el.classList.toggle('wr-ready', ready);
+    el.textContent = ready ? '\u2713 \u0411\u042d\u041b\u042d\u041d' : '\u0411\u042d\u041b\u042d\u041d \u0411\u041e\u041b\u041e\u0425';
+  });
+  document.querySelectorAll(`.wr-seat[data-player-id="${playerId}"] .wr-seat-ready-dot`).forEach(el => {
+    el.classList.toggle('wr-ready', ready);
+  });
+}
+
 function renderWaiting() {
   const room = currentRoom;
   const me7061 = room.players.find(p => p.id === myId);
   const isHost = iAmHostOfCurrentRoom || !!(me7061 && (me7061.isHost || room.players[0]?.id === myId));
   const inviteMsg = encodeURIComponent(`\u041d\u0430\u043c\u0430\u0439\u0433 \u201c\u0418\u0425 \u0425\u04e8\u0420\u04e8\u041d\u0413\u04e8\u201d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u0442\u043e\u0433\u043b\u043e\u043e\u0440\u0430\u0439! \u04e8\u0440\u04e9\u043e\u043d\u0438\u0439 \u043a\u043e\u0434: ${room.roomCode}\n${window.location.origin}${window.location.pathname}?room=${room.roomCode}`);
   const muted = !gameSettings.musicEnabled && !gameSettings.sfxEnabled;
-  return `<div class="screen">
+  const meReady = !!(me7061 && me7061.ready);
+
+  const seatsHtml = WAITING_SEAT_POSITIONS.map((pos, i) => {
+    const p = room.players[i];
+    if (!p) return `<div class="wr-seat wr-seat-empty" style="left:${pos[0]}%; top:${pos[1]}%;"><div class="wr-seat-empty-ring"></div></div>`;
+    return `<div class="wr-seat wr-seat-filled" data-player-id="${p.id}" style="left:${pos[0]}%; top:${pos[1]}%; --seat-color:${p.color};">
+      <div class="wr-seat-token">${renderTokenGlyph(p.token)}<span class="wr-seat-ready-dot ${p.ready ? 'wr-ready' : ''}"></span></div>
+      <div class="wr-seat-name">${p.name}</div>
+      <div class="wr-seat-title">${p.isHost ? '\u042d\u0417\u042d\u041d' : '\u0422\u041e\u0413\u041b\u041e\u0413\u0427'}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="wr-screen">
+    <img class="wr-bg-image" src="lobby-background-v1.png" alt="" onerror="this.style.opacity=0">
+    <div class="wr-bg-fallback"></div>
+    <div class="wr-bg-overlay"></div>
+    <div class="wr-bg-gradient"></div>
+
     <div class="pre-game-audio-bar">
       <button class="sb-icon-btn" id="quickMuteToggle" title="\u0414\u0443\u0443">${muted ? '\ud83d\udd07' : '\ud83d\udd0a'}</button>
       <button class="sb-icon-btn" id="preGameSettingsBtn" title="\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e" aria-label="\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e">\u2699\ufe0f</button>
     </div>
     <div id="card-popup-root"></div>
-    <div class="eyebrow">\u0425\u04af\u043b\u044d\u044d\u043b\u0433\u0438\u0439\u043d \u04e9\u0440\u04e9\u04e9</div>
-    <div class="seal-title">\u0422\u043e\u0433\u043b\u043e\u0433\u0447\u0438\u0434 \u0446\u0443\u0433\u043b\u0430\u0440\u0447 \u0431\u0430\u0439\u043d\u0430</div>
-    <div class="landing-card">
-      <div class="room-code-box">
-        <div style="font-size:11px;color:#9AA6BE;letter-spacing:2px;text-transform:uppercase;">\u04e8\u0440\u04e9\u04e9\u043d\u0438\u0439 \u043a\u043e\u0434</div>
-        <div class="room-code">${room.roomCode}</div>
-      </div>
+
+    <div class="wr-seats">${seatsHtml}</div>
+
+    <div class="wr-table-center">
+      <div class="wr-table-code-label">\u04e8\u0420\u04e8\u041e\u041d\u0418\u0419 \u041a\u041e\u0414</div>
+      <div class="wr-table-code">${room.roomCode}</div>
+      <div class="wr-table-count">${room.players.length}/8 \u0422\u041e\u0413\u041b\u041e\u0413\u0427</div>
+    </div>
+
+    <div class="wr-glass-panel wr-invite-panel">
       <div class="invite-row">
         <a class="invite-btn invite-whatsapp" href="https://wa.me/?text=${inviteMsg}" target="_blank" rel="noopener">\ud83d\udcac WhatsApp</a>
         <a class="invite-btn invite-messenger" href="fb-messenger://share?link=${encodeURIComponent(window.location.origin + window.location.pathname + '?room=' + room.roomCode)}" id="messengerInviteLink">\ud83d\udcac Messenger</a>
         <button class="invite-btn invite-copy" id="copyInviteBtn">\ud83d\udd17 \u041b\u0438\u043d\u043a \u0445\u0443\u0443\u043b\u0431\u0430\u0440\u043b\u0430\u0445</button>
       </div>
-      <div class="wait-list">
-        ${room.players.map(p => `<div class="wait-player"><span class="wait-token" data-owner-id="${p.id}" style="--token-color:${p.color}">${renderTokenGlyph(p.token)}</span> <span>${p.name}</span> ${p.isHost?'<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">\u044d\u0437\u044d\u043d</span>':''}</div>`).join('')}
-      </div>
-      ${renderTokenSelectGrid(room)}
-      ${isHost
-        ? `<button class="btn btn-primary" id="startBtn" ${room.players.length<2?'disabled':''}>\u0422\u043e\u0433\u043b\u043e\u043e\u043c \u044d\u0445\u043b\u04af\u04af\u043b\u044d\u0445</button>`
-        : `<div class="waiting-note"><span class="pulse-dot"></span>\u0425\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430...</div>`}
     </div>
+
+    <div class="wr-glass-panel wr-token-panel">${renderTokenSelectGrid(room)}</div>
+
+    <div class="wr-bottom-action">
+      ${isHost
+        ? `<button class="btn btn-primary wr-start-btn" id="startBtn" ${room.players.length<2?'disabled':''}>\u0422\u041e\u0413\u041b\u041e\u041e\u041c \u042d\u0425\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`
+        : `<button class="wr-ready-btn ${meReady?'wr-ready':''}" id="readyToggleBtn" data-ready-for="${myId}">${meReady?'\u2713 \u0411\u042d\u041b\u042d\u041d':'\u0411\u042d\u041b\u042d\u041d \u0411\u041e\u041b\u041e\u0425'}</button>`}
+    </div>
+
+    <div class="wr-mobile-carousel">
+      ${room.players.map(p => `<div class="wr-carousel-card" style="--seat-color:${p.color};">
+        <div class="wr-seat-token">${renderTokenGlyph(p.token)}<span class="wr-seat-ready-dot ${p.ready?'wr-ready':''}"></span></div>
+        <div class="wr-seat-name">${p.name}</div>
+      </div>`).join('')}
+    </div>
+    ${!isHost ? `<button class="wr-sticky-ready-btn ${meReady?'wr-ready':''}" id="readyToggleBtnMobile" data-ready-for="${myId}">${meReady?'\u2713 \u0411\u042d\u041b\u042d\u041d':'\u0411\u042d\u041b\u042d\u041d \u0411\u041e\u041b\u041e\u0425'}</button>` : `<button class="btn btn-primary wr-sticky-ready-btn" id="startBtnMobile" ${room.players.length<2?'disabled':''}>\u0422\u041e\u0413\u041b\u041e\u041e\u041c \u042d\u0425\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`}
   </div>`;
 }
 function renderTokenSelectGrid(room) {
@@ -7606,7 +7877,11 @@ async function selectPlayerToken(tokenId) {
 
 function attachWaitingEvents() {
   wireQuickMuteAndSettings();
+  preloadLobbyBackground();
   const btn = document.getElementById('startBtn'); if (btn) btn.onclick = startGame;
+  const btnMobile = document.getElementById('startBtnMobile'); if (btnMobile) btnMobile.onclick = startGame;
+  const readyBtn = document.getElementById('readyToggleBtn'); if (readyBtn) readyBtn.onclick = toggleReadyState;
+  const readyBtnMobile = document.getElementById('readyToggleBtnMobile'); if (readyBtnMobile) readyBtnMobile.onclick = toggleReadyState;
   const copyBtn = document.getElementById('copyInviteBtn');
   if (copyBtn) copyBtn.onclick = async () => {
     const url = `${window.location.origin}${window.location.pathname}?room=${currentRoom.roomCode}`;
@@ -8674,8 +8949,83 @@ function renderMilestoneOverlay(milestone) {
 let buyModalOpen = false;
 let cardModalOpen = false;
 let cardModalKey = null;
-let cardModalStage = 'revealing'; // revealing | reading | selecting | completed
+let cardModalStage = 'opening'; // opening | revealing | applying | resolved | awaitingChoice | closing | closed
 let currentCardModalCard = null;
+
+// ===== Reusable modal keyboard-handler stack (topmost handler wins) =====
+let modalKeyHandlerStack = [];
+function globalModalKeyDispatcher(e) {
+  if (modalKeyHandlerStack.length === 0) return;
+  modalKeyHandlerStack[modalKeyHandlerStack.length - 1](e);
+}
+function pushModalKeyHandler(handler) {
+  modalKeyHandlerStack.push(handler);
+  if (modalKeyHandlerStack.length === 1) document.addEventListener('keydown', globalModalKeyDispatcher, true);
+}
+function popModalKeyHandler(handler) {
+  modalKeyHandlerStack = modalKeyHandlerStack.filter(h => h !== handler);
+  if (modalKeyHandlerStack.length === 0) document.removeEventListener('keydown', globalModalKeyDispatcher, true);
+}
+function isEditableElement(el) {
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
+}
+
+let cardModalPreviousFocus = null;
+let cardModalKeyHandlerRef = null;
+function installCardModalKeyHandler(card) {
+  cardModalPreviousFocus = document.activeElement;
+  cardModalKeyHandlerRef = (e) => handleCardModalKeydown(e, card);
+  pushModalKeyHandler(cardModalKeyHandlerRef);
+}
+function removeCardModalKeyHandler() {
+  if (cardModalKeyHandlerRef) { popModalKeyHandler(cardModalKeyHandlerRef); cardModalKeyHandlerRef = null; }
+  if (cardModalPreviousFocus && typeof cardModalPreviousFocus.focus === 'function') {
+    try { cardModalPreviousFocus.focus(); } catch (e) {}
+  }
+  cardModalPreviousFocus = null;
+}
+function handleCardModalKeydown(e, card) {
+  if (isEditableElement(document.activeElement)) return;
+  if (e.key === 'Escape') {
+    e.preventDefault(); e.stopPropagation();
+    if (cardModalStage === 'resolved') { closeCardModal(); }
+    else if (cardModalStage === 'awaitingChoice') { showCardChoiceNudge(); }
+    return; // opening/revealing/applying/closing: Escape does nothing
+  }
+  if (e.key === 'Enter') {
+    if (cardModalStage === 'resolved') {
+      e.preventDefault();
+      const btn = document.getElementById('cardContinueBtn') || document.getElementById('cardNoOptionBtn');
+      if (btn) btn.click();
+    }
+    return;
+  }
+  if (e.key === 'Tab') { trapFocusInCardModal(e); }
+}
+function trapFocusInCardModal(e) {
+  const root = document.getElementById('buy-modal-root');
+  if (!root) return;
+  const focusable = Array.from(root.querySelectorAll('button, [tabindex]:not([tabindex="-1"])')).filter(el => !el.disabled && el.offsetParent !== null);
+  if (focusable.length === 0) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+function showCardChoiceNudge() {
+  const root = document.getElementById('buy-modal-root');
+  if (!root) return;
+  let nudge = root.querySelector('.ec-choice-nudge');
+  if (nudge) { nudge.classList.remove('ec-nudge-pulse'); void nudge.offsetWidth; nudge.classList.add('ec-nudge-pulse'); return; }
+  const scene = root.querySelector('.event-card-scene');
+  if (!scene) return;
+  nudge = document.createElement('div');
+  nudge.className = 'ec-choice-nudge ec-nudge-pulse';
+  nudge.textContent = '\u042d\u043d\u044d \u043a\u0430\u0440\u0442\u0430\u0430\u0441 \u04af\u0440\u0433\u044d\u043b\u0436\u043b\u04af\u04af\u043b\u044d\u0445\u0438\u0439\u043d \u04e9\u043c\u043d\u04e9 \u0441\u043e\u043d\u0433\u043e\u043b\u0442\u043e\u043e \u0445\u0438\u0439\u043d\u044d \u04af\u04af';
+  scene.appendChild(nudge);
+  setTimeout(() => { if (nudge && nudge.parentNode) nudge.remove(); }, 2200);
+}
 
 (function setupCardModalDelegation() {
   const root = document.getElementById('buy-modal-root');
@@ -8684,9 +9034,9 @@ let currentCardModalCard = null;
     const contBtn = e.target.closest('#cardContinueBtn');
     if (contBtn && currentCardModalCard) { onCardContinueClick(currentCardModalCard); return; }
     const noOptBtn = e.target.closest('#cardNoOptionBtn');
-    if (noOptBtn && currentCardModalCard) { resolveCardFinal(currentCardModalCard, null); return; }
+    if (noOptBtn && currentCardModalCard) { onCardChoiceSelected(currentCardModalCard, null); return; }
     const selItem = e.target.closest('.card-select-item');
-    if (selItem && currentCardModalCard) { resolveCardFinal(currentCardModalCard, parseInt(selItem.dataset.tile, 10)); return; }
+    if (selItem && currentCardModalCard) { onCardChoiceSelected(currentCardModalCard, parseInt(selItem.dataset.tile, 10)); return; }
   });
 })();
 
@@ -8725,67 +9075,168 @@ function maybeShowCardModal(room) {
   const shouldShow = cd && !cd.resolved && cd.playerId === myId && !isAnimatingMovement && !buildingAnimationActive;
   if (!shouldShow) {
     if (cardModalOpen && (!cd || cd.resolved)) {
-      cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing'; currentCardModalCard = null;
-      root.innerHTML = '';
+      closeCardModalImmediate();
     }
     return;
   }
   const key = cd.id;
   if (cardModalOpen && cardModalKey === key) return;
-  cardModalOpen = true; cardModalKey = key; cardModalStage = 'revealing';
+  cardModalOpen = true; cardModalKey = key; cardModalStage = 'opening';
   const card = findCardById(cd.deckType, cd.cardId);
   if (!reducedMotion) playCardSound('draw');
   renderCardModal(room, card);
+  installCardModalKeyHandler(card);
   setTimeout(() => {
     if (!cardModalOpen || cardModalKey !== key) return;
-    cardModalStage = 'reading';
+    cardModalStage = 'revealing';
     if (!reducedMotion) { playCardSound('flip'); audioManager.playSfx('cardFlip'); }
     if (card) playCardSound(card.rarity === 'legendary' ? 'legendary' : (card.effectType === 'cash' && card.value < 0 ? 'negative' : card.effectType === 'cash' ? 'positive' : 'flip'));
     renderCardModal(room, card);
-  }, reducedMotion ? 150 : 750);
+    const flipMs = reducedMotion ? 150 : 800;
+    setTimeout(() => {
+      if (!cardModalOpen || cardModalKey !== key) return;
+      if (card.selectionRequired) {
+        cardModalStage = 'awaitingChoice';
+        renderCardModal(currentRoom, card);
+      } else {
+        cardModalStage = 'applying';
+        renderCardModal(currentRoom, card);
+        resolveCardFinal(card, null, key);
+      }
+    }, flipMs);
+  }, reducedMotion ? 60 : 400);
+}
+
+function getCardResultDisplay(card) {
+  if (card.effectType === 'cash') {
+    const positive = card.value >= 0;
+    return { text: `${positive ? '+' : '\u2212'}\u20ae${fmt(Math.abs(card.value))}`, cls: positive ? 'ec-result-positive' : 'ec-result-negative', value: card.value, isMoney: true };
+  }
+  if (card.effectType === 'skipTurn') {
+    return { text: `${card.skipTurns || 1} \u042d\u042d\u041b\u0416 \u04e8\u041d\u0416\u0418\u041d\u04e8`, cls: 'ec-result-special', isMoney: false };
+  }
+  if (card.effectType === 'freeHouse' || card.effectType === 'freeUpgrade') {
+    return { text: '\u04ae\u041d\u0415 \u0428\u0410\u0422\u041b\u0410\u041b\u0413\u0410\u0410', cls: 'ec-result-positive', isMoney: false };
+  }
+  if (card.multiplier != null) {
+    const positive = card.multiplier >= 1;
+    const pct = Math.round(Math.abs(card.multiplier - 1) * 100);
+    return { text: `${positive ? '+' : '\u2212'}${pct}%`, cls: positive ? 'ec-result-positive' : 'ec-result-negative', isMoney: false };
+  }
+  return { text: '', cls: 'ec-result-special', isMoney: false };
+}
+
+function getEffectTone(card) {
+  if (card.effectTone) return card.effectTone;
+  if (card.effectType === 'cash') return card.value > 0 ? 'positive' : card.value < 0 ? 'negative' : 'neutral';
+  if (card.multiplier != null) return card.multiplier > 1 ? 'positive' : card.multiplier < 1 ? 'negative' : 'neutral';
+  if (card.effectType === 'skipTurn') return 'negative';
+  if (card.effectType === 'freeHouse' || card.effectType === 'freeUpgrade') return 'positive';
+  return 'neutral';
+}
+function randRange(a, b) { return a + Math.random() * (b - a); }
+function randInt(a, b) { return Math.floor(randRange(a, b + 1)); }
+
+function generateOpportunityParticles() {
+  if (reducedMotion) return '';
+  let count = isMobileView ? randInt(14, 20) : randInt(28, 36);
+  const parts = [];
+  for (let i = 0; i < count; i++) {
+    const r = Math.random();
+    const type = r < 0.55 ? 'op-gold' : r < 0.85 ? 'op-blue' : 'op-spark';
+    const size = type === 'op-spark' ? randRange(2, 4) : randRange(3, 6);
+    parts.push(`<span class="op-particle ${type}" style="left:${randRange(4,96).toFixed(1)}%; bottom:${randRange(-6,30).toFixed(1)}%; width:${size.toFixed(1)}px; height:${size.toFixed(1)}px; opacity:${randRange(0.5,1).toFixed(2)}; animation-delay:${randRange(0,1.5).toFixed(2)}s; animation-duration:${randRange(1.8,3).toFixed(2)}s; --drift:${randRange(-40,40).toFixed(0)}px;"></span>`);
+  }
+  return parts.join('');
+}
+function generateMarketParticles(tone) {
+  if (reducedMotion) return '';
+  let count = isMobileView ? randInt(14, 20) : randInt(28, 36);
+  const palette = tone === 'positive' ? ['mp-emerald', 'mp-lightgreen', 'mp-gold']
+    : tone === 'negative' ? ['mp-red', 'mp-darkred', 'mp-mutedgold']
+    : ['mp-silver', 'mp-mutedblue', 'mp-softgold'];
+  const parts = [];
+  for (let i = 0; i < count; i++) {
+    const cls = palette[Math.floor(Math.random() * palette.length)];
+    const size = randRange(3, 6);
+    parts.push(`<span class="mkt-particle ${cls} mkt-${tone}" style="left:${randRange(4,96).toFixed(1)}%; ${tone==='negative'?'top':'bottom'}:${randRange(-6,20).toFixed(1)}%; width:${size.toFixed(1)}px; height:${size.toFixed(1)}px; opacity:${randRange(0.5,1).toFixed(2)}; animation-delay:${randRange(0,1.5).toFixed(2)}s; animation-duration:${randRange(1.8,3).toFixed(2)}s; --drift:${randRange(-35,35).toFixed(0)}px;"></span>`);
+  }
+  return parts.join('');
 }
 
 function renderCardModal(room, card) {
   const root = document.getElementById('buy-modal-root');
   if (!root || !card) return;
-  const deckLabel = card.deck === 'chance' ? '\u0411\u041e\u041b\u041e\u041c\u0416' : '\u0417\u0410\u0425 \u0417\u042d\u042d\u041b';
-  const flipped = cardModalStage !== 'revealing' || reducedMotion;
+  const isMarket = card.deck === 'market';
+  const deckLabel = isMarket ? '\u0417\u0410\u0425 \u0417\u042d\u042d\u041b' : '\u0411\u041e\u041b\u041e\u041c\u0416';
+  const bgAsset = isMarket ? 'market-card-v1.png' : 'opportunity-card-v1.png';
+  const flipped = cardModalStage !== 'opening' && cardModalStage !== 'revealing';
   const rarityClass = 'rarity-' + card.rarity;
+  const result = getCardResultDisplay(card);
+  const tone = getEffectTone(card);
+  const showResult = cardModalStage === 'resolved' || cardModalStage === 'closing';
+  const pulseClass = isMarket && showResult ? (tone === 'positive' ? 'ec-pulse-green' : tone === 'negative' ? 'ec-pulse-red-dark' : '') : '';
+  const shakeClass = isMarket && showResult && tone === 'negative' && !reducedMotion ? 'ec-shake' : '';
+  const closingClass = cardModalStage === 'closing' ? 'ec-closing' : '';
 
   let bodyHtml = '';
-  if (cardModalStage === 'selecting') {
+  if (cardModalStage === 'awaitingChoice') {
     const room2 = currentRoom;
     const me = room2.players.find(p => p.id === myId);
     const eligible = BOARD_CONFIG.filter(t => t.type === 'property' && canBuildOnTile(t, room2, me));
     if (eligible.length === 0) {
-      bodyHtml = `<div class="event-card-desc">\u0422\u0430\u043d\u0434 \u044d\u043d\u044d \u043a\u0430\u0440\u0442\u044b\u0433 \u0430\u0448\u0438\u0433\u043b\u0430\u0445 \u0431\u043e\u043b\u043e\u043c\u0436\u0442\u043e\u0439 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u0431\u0430\u0439\u0445\u0433\u04af\u0439.</div>
-        <button class="buy-modal-buy-btn" id="cardNoOptionBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
+      bodyHtml = `<div class="ec-event-desc">\u0422\u0430\u043d\u0434 \u044d\u043d\u044d \u043a\u0430\u0440\u0442\u044b\u0433 \u0430\u0448\u0438\u0433\u043b\u0430\u0445 \u0431\u043e\u043b\u043e\u043c\u0436\u0442\u043e\u0439 \u043a\u043e\u043c\u043f\u0430\u043d\u0438 \u043e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u0431\u0430\u0439\u0445\u0433\u04af\u0439.</div>
+        <button class="ec-continue-btn" id="cardNoOptionBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
     } else {
-      bodyHtml = `<div class="event-card-desc">\u041a\u043e\u043c\u043f\u0430\u043d\u0438\u0430\u0433\u0430\u0430 \u0441\u043e\u043d\u0433\u043e\u043d\u043e \u0443\u0443:</div>
+      bodyHtml = `<div class="ec-event-desc">\u041a\u043e\u043c\u043f\u0430\u043d\u0438\u0430\u0433\u0430\u0430 \u0441\u043e\u043d\u0433\u043e\u043d\u043e \u0443\u0443:</div>
         <div class="card-select-list">${eligible.map(t => `<button class="card-select-item" data-tile="${t.id}">${t.name} <span>LV.${houseLevel(room2, t.id)}</span></button>`).join('')}</div>`;
     }
+  } else if (cardModalStage === 'applying') {
+    bodyHtml = `<div class="ec-event-desc">${card.description}</div>
+      <div class="ec-applying-spinner" aria-hidden="true"></div>`;
   } else {
-    bodyHtml = `<div class="event-card-desc">${card.description}</div>
-      <button class="buy-modal-buy-btn" id="cardContinueBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
+    bodyHtml = `<div class="ec-event-desc">${card.description}</div>
+      ${result.text ? `<div class="ec-result ${result.cls}" id="ecResultValue" data-target="${result.isMoney ? result.value : ''}">${result.text}</div>` : ''}
+      <button class="ec-continue-btn" id="cardContinueBtn">\u04ae\u0420\u0413\u042d\u041b\u0416\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`;
   }
 
-  root.innerHTML = `<div class="buy-modal-backdrop card-modal-backdrop">
+  const particlesHtml = !flipped ? '' : (isMarket ? generateMarketParticles(tone) : generateOpportunityParticles());
+  const particlesThemeClass = isMarket ? `market-${tone}-particles` : 'opportunity-particles';
+
+  root.innerHTML = `<div class="buy-modal-backdrop card-modal-backdrop ${closingClass}">
     <div class="event-card-scene ${rarityClass}">
-      <div class="event-card ${flipped ? 'is-flipped' : ''}" role="dialog" aria-modal="true" aria-labelledby="cardTitleId">
+      <div class="event-card ec-card-v2 ${flipped ? 'is-flipped' : ''} ${pulseClass} ${shakeClass}" role="dialog" aria-modal="true" aria-labelledby="cardTitleId">
         <div class="event-card-back"><div class="event-card-back-emblem">\u2726</div></div>
         <div class="event-card-front">
-          <div class="event-card-badge">${deckLabel}</div>
-          <div class="event-card-rarity-glow"></div>
-          <div class="event-card-icon">${card.deck === 'chance' ? '\ud83c\udf40' : '\ud83d\udcc8'}</div>
-          <div class="event-card-title" id="cardTitleId">${card.title}</div>
-          ${bodyHtml}
-          <div class="event-card-particles">${(card.rarity === 'legendary' || (card.effectType==='cash')) ? renderCardParticles(card) : ''}</div>
+          <img class="ec-bg-image" src="${bgAsset}" alt="">
+          <div class="ec-bg-fallback ${isMarket ? 'ec-bg-fallback-market' : 'ec-bg-fallback-opportunity'}"></div>
+          <div class="ec-overlay">
+            <div class="ec-deck-label">${deckLabel}</div>
+            <div class="ec-event-title" id="cardTitleId">${card.title}</div>
+            ${bodyHtml}
+          </div>
+          <div class="event-card-particles ${particlesThemeClass}" aria-hidden="true">${particlesHtml}</div>
         </div>
       </div>
     </div>
+    <div class="sr-only" aria-live="polite" id="cardAriaLive"></div>
   </div>`;
 
   currentCardModalCard = card;
+  if (cardModalStage === 'resolved' && result.isMoney && !reducedMotion) animateCardResultCountUp(result.value);
+}
+function animateCardResultCountUp(targetValue) {
+  const el = document.getElementById('ecResultValue');
+  if (!el) return;
+  const duration = 800; const start = performance.now(); const sign = targetValue >= 0 ? '+' : '\u2212';
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const current = Math.round(Math.abs(targetValue) * eased);
+    el.textContent = `${sign}\u20ae${fmt(current)}`;
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 function renderCardParticles(card) {
@@ -8795,16 +9246,19 @@ function renderCardParticles(card) {
 }
 
 function onCardContinueClick(card) {
-  if (card.selectionRequired) {
-    cardModalStage = 'selecting';
-    renderCardModal(currentRoom, card);
-    return;
-  }
-  resolveCardFinal(card, null);
+  if (cardModalStage !== 'resolved') return;
+  closeCardModal();
+}
+function onCardChoiceSelected(card, chosenTileIdx) {
+  if (cardModalStage !== 'awaitingChoice') return;
+  cardModalStage = 'applying';
+  renderCardModal(currentRoom, card);
+  resolveCardFinal(card, chosenTileIdx, cardModalKey);
 }
 
-async function resolveCardFinal(card, chosenTileIdx) {
+async function resolveCardFinal(card, chosenTileIdx, key) {
   const room = await getRoom(currentRoom.roomCode);
+  if (!cardModalOpen || cardModalKey !== key) return; // modal was closed/superseded meanwhile
   if (!room || !room.cardDraw || room.cardDraw.resolved || room.cardDraw.playerId !== myId) return;
   const player = room.players.find(p => p.id === myId);
   try {
@@ -8815,11 +9269,36 @@ async function resolveCardFinal(card, chosenTileIdx) {
     room.cardDraw.resolved = true;
     room.cardDraw = null;
     await saveRoom(room); currentRoom = room;
-    cardModalOpen = false; cardModalKey = null; cardModalStage = 'revealing'; currentCardModalCard = null;
-    const root = document.getElementById('buy-modal-root');
-    if (root) root.innerHTML = '';
-    render();
+    if (!cardModalOpen || cardModalKey !== key) return;
+    cardModalStage = 'resolved';
+    renderCardModal(currentRoom, card);
+    announceCardResolution(card);
   }
+}
+
+function announceCardResolution(card) {
+  const el = document.getElementById('cardAriaLive');
+  if (!el) return;
+  const deckLabel = card.deck === 'market' ? '\u0417\u0430\u0445 \u0437\u044d\u044d\u043b\u0438\u0439\u043d \u043a\u0430\u0440\u0442' : '\u0411\u043e\u043b\u043e\u043c\u0436 \u043a\u0430\u0440\u0442';
+  el.textContent = `${deckLabel}: ${card.description}`;
+}
+
+function closeCardModal() {
+  if (!cardModalOpen) return;
+  cardModalStage = 'closing';
+  renderCardModal(currentRoom, currentCardModalCard);
+  const closeKey = cardModalKey;
+  setTimeout(() => {
+    if (cardModalKey !== closeKey) return;
+    closeCardModalImmediate();
+    render();
+  }, reducedMotion ? 60 : 250);
+}
+function closeCardModalImmediate() {
+  cardModalOpen = false; cardModalKey = null; cardModalStage = 'opening'; currentCardModalCard = null;
+  const root = document.getElementById('buy-modal-root');
+  if (root) root.innerHTML = '';
+  removeCardModalKeyHandler();
 }
 
 let lastSeenResolvedCardId = null;
