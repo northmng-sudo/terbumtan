@@ -261,7 +261,20 @@
   }
 
   /* ===== WAITING ROOM (cinematic lobby table) ===== */
-  .wr-screen { position: relative; min-height: 100vh; min-height: 100dvh; overflow: hidden; }
+  .wr-screen { position: relative; min-height: 100vh; min-height: 100dvh; overflow: hidden; background: #031b16; display: flex; align-items: center; justify-content: center; }
+  .wr-stage {
+    position: relative; width: 100%; height: 100%;
+    aspect-ratio: 1672 / 941;
+    max-height: 100vh; max-height: 100dvh; max-width: 100vw;
+    margin: auto;
+    overflow: hidden;
+  }
+  @media (min-aspect-ratio: 1672/941) {
+    .wr-stage { width: auto; height: 100vh; height: 100dvh; }
+  }
+  @media (max-aspect-ratio: 1672/941) {
+    .wr-stage { width: 100vw; height: auto; }
+  }
   .wr-bg-image {
     position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover; object-position: center center; z-index: 0;
@@ -317,6 +330,7 @@
   .wr-mobile-carousel, .wr-sticky-ready-btn { display: none; }
 
   @media (max-width: 768px) {
+    .wr-stage { aspect-ratio: unset; width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; }
     .wr-bg-image { object-position: 58% center; }
     .wr-bg-overlay { background: rgba(2,10,8,0.48); }
     .wr-seats { display: none; }
@@ -7766,24 +7780,24 @@ function renderWaiting() {
   }).join('');
 
   return `<div class="wr-screen">
-    <img class="wr-bg-image" src="lobby-background-v1.png" alt="" onerror="this.style.opacity=0">
-    <div class="wr-bg-fallback"></div>
-    <div class="wr-bg-overlay"></div>
-    <div class="wr-bg-gradient"></div>
+    <div class="wr-stage">
+      <img class="wr-bg-image" src="lobby-background-v1.png" alt="" onerror="this.style.opacity=0">
+      <div class="wr-bg-fallback"></div>
+      <div class="wr-bg-overlay"></div>
+      <div class="wr-bg-gradient"></div>
+      <div class="wr-seats">${seatsHtml}</div>
+      <div class="wr-table-center">
+        <div class="wr-table-code-label">\u04e8\u0420\u04e8\u041e\u041d\u0418\u0419 \u041a\u041e\u0414</div>
+        <div class="wr-table-code">${room.roomCode}</div>
+        <div class="wr-table-count">${room.players.length}/8 \u0422\u041e\u0413\u041b\u041e\u0413\u0427</div>
+      </div>
+    </div>
 
     <div class="pre-game-audio-bar">
       <button class="sb-icon-btn" id="quickMuteToggle" title="\u0414\u0443\u0443">${muted ? '\ud83d\udd07' : '\ud83d\udd0a'}</button>
       <button class="sb-icon-btn" id="preGameSettingsBtn" title="\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e" aria-label="\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e">\u2699\ufe0f</button>
     </div>
     <div id="card-popup-root"></div>
-
-    <div class="wr-seats">${seatsHtml}</div>
-
-    <div class="wr-table-center">
-      <div class="wr-table-code-label">\u04e8\u0420\u04e8\u041e\u041d\u0418\u0419 \u041a\u041e\u0414</div>
-      <div class="wr-table-code">${room.roomCode}</div>
-      <div class="wr-table-count">${room.players.length}/8 \u0422\u041e\u0413\u041b\u041e\u0413\u0427</div>
-    </div>
 
     <div class="wr-glass-panel wr-invite-panel">
       <div class="invite-row">
