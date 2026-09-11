@@ -7562,12 +7562,25 @@ function renderTokenSelectGrid(room) {
   </div>`;
 }
 async function selectPlayerToken(tokenId) {
+  const localMe = currentRoom.players.find(p => p.id === myId);
+  if (!localMe) return;
+  const localTaken = currentRoom.players.some(p => p.id !== myId && p.token === tokenId);
+  if (localTaken) { render(); return; }
+
+  const prevToken = localMe.token, prevColor = localMe.color;
+  localMe.token = tokenId;
+  localMe.color = TOKEN_COLORS[TOKENS.indexOf(tokenId)];
+  render();
+
   const room = await getRoom(currentRoom.roomCode);
-  if (!room) return;
+  if (!room) { localMe.token = prevToken; localMe.color = prevColor; render(); return; }
   const me = room.players.find(p => p.id === myId);
   if (!me) return;
   const takenByOther = room.players.some(p => p.id !== myId && p.token === tokenId);
-  if (takenByOther) { currentRoom = room; render(); return; }
+  if (takenByOther) {
+    localMe.token = prevToken; localMe.color = prevColor;
+    currentRoom = room; render(); return;
+  }
   me.token = tokenId;
   me.color = TOKEN_COLORS[TOKENS.indexOf(tokenId)];
   await saveRoom(room); currentRoom = room; render();
