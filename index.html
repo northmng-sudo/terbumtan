@@ -1812,7 +1812,7 @@
   }
   .buy-modal-group-tag { position: absolute; top: 0; left: 0; right: 0; height: 6px; }
   .buy-modal-visual img { width: 100%; max-width: 220px; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(0,0,0,0.5)); }
-  .buy-modal-info { flex: 1; padding: 22px 22px 24px; display: flex; flex-direction: column; overflow-y: auto; max-height: 92vh; }
+  .buy-modal-info { flex: 1; min-width: 0; padding: 22px 22px 24px; display: flex; flex-direction: column; overflow-y: auto; max-height: 92vh; }
   .buy-modal-eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--emerald-light); font-weight: 800; }
   .buy-modal-desc { font-size: 11.5px; color: var(--sb-muted, #9AA6BE); line-height: 1.4; margin: 4px 0 10px; }
   .bm-discount-note { font-size: 11.5px; font-weight: 800; color: #ff9a5a; background: rgba(255,154,90,0.12); border: 1px solid rgba(255,154,90,0.35); border-radius: 8px; padding: 5px 10px; margin-bottom: 8px; display: inline-block; }
@@ -2781,7 +2781,7 @@ const BOARD_CONFIG = [
     "id": 1,
     "type": "property",
     "name": "Органик ферм",
-    "price": 180,
+    "price": 90,
     "rent": 25,
     "colorGroup": "agriculture",
     "polygon": [
@@ -2862,7 +2862,7 @@ const BOARD_CONFIG = [
     "id": 2,
     "type": "property",
     "name": "Сүүний үйлдвэр",
-    "price": 230,
+    "price": 115,
     "rent": 35,
     "colorGroup": "agriculture",
     "polygon": [
@@ -2943,7 +2943,7 @@ const BOARD_CONFIG = [
     "id": 3,
     "type": "property",
     "name": "Хүнсний цогцолбор",
-    "price": 280,
+    "price": 140,
     "rent": 45,
     "colorGroup": "agriculture",
     "polygon": [
@@ -3024,7 +3024,7 @@ const BOARD_CONFIG = [
     "id": 4,
     "type": "property",
     "name": "Сүлжээ дэлгүүр",
-    "price": 180,
+    "price": 90,
     "rent": 25,
     "colorGroup": "commerce",
     "polygon": [
@@ -3105,7 +3105,7 @@ const BOARD_CONFIG = [
     "id": 5,
     "type": "property",
     "name": "Бөөний худалдааны төв",
-    "price": 230,
+    "price": 115,
     "rent": 35,
     "colorGroup": "commerce",
     "polygon": [
@@ -3220,7 +3220,7 @@ const BOARD_CONFIG = [
     "id": 7,
     "type": "property",
     "name": "Тансаг худалдааны төв",
-    "price": 280,
+    "price": 140,
     "rent": 45,
     "colorGroup": "commerce",
     "polygon": [
@@ -3345,7 +3345,7 @@ const BOARD_CONFIG = [
     "id": 9,
     "type": "property",
     "name": "Орон сууцны хотхон",
-    "price": 300,
+    "price": 150,
     "rent": 50,
     "colorGroup": "real_estate",
     "polygon": [
@@ -3426,7 +3426,7 @@ const BOARD_CONFIG = [
     "id": 10,
     "type": "property",
     "name": "Бизнесийн цамхаг",
-    "price": 375,
+    "price": 190,
     "rent": 68,
     "colorGroup": "real_estate",
     "polygon": [
@@ -3507,7 +3507,7 @@ const BOARD_CONFIG = [
     "id": 11,
     "type": "property",
     "name": "Тансаг зэрэглэлийн хотхон",
-    "price": 450,
+    "price": 225,
     "rent": 85,
     "colorGroup": "real_estate",
     "polygon": [
@@ -3588,7 +3588,7 @@ const BOARD_CONFIG = [
     "id": 12,
     "type": "property",
     "name": "Ачаа тээврийн төв",
-    "price": 300,
+    "price": 150,
     "rent": 50,
     "colorGroup": "logistics",
     "polygon": [
@@ -3669,7 +3669,7 @@ const BOARD_CONFIG = [
     "id": 13,
     "type": "property",
     "name": "Логистикийн терминал",
-    "price": 375,
+    "price": 190,
     "rent": 68,
     "colorGroup": "logistics",
     "polygon": [
@@ -3785,7 +3785,7 @@ const BOARD_CONFIG = [
     "id": 15,
     "type": "property",
     "name": "Олон улсын тээврийн сүлжээ",
-    "price": 450,
+    "price": 225,
     "rent": 85,
     "colorGroup": "logistics",
     "polygon": [
@@ -3910,7 +3910,7 @@ const BOARD_CONFIG = [
     "id": 17,
     "type": "property",
     "name": "Шатахуун түгээх сүлжээ",
-    "price": 480,
+    "price": 240,
     "rent": 90,
     "colorGroup": "energy",
     "polygon": [
@@ -3991,7 +3991,7 @@ const BOARD_CONFIG = [
     "id": 18,
     "type": "property",
     "name": "Нарны цахилгаан станц",
-    "price": 565,
+    "price": 280,
     "rent": 115,
     "colorGroup": "energy",
     "polygon": [
@@ -4072,7 +4072,7 @@ const BOARD_CONFIG = [
     "id": 19,
     "type": "property",
     "name": "Салхин эрчим хүчний парк",
-    "price": 650,
+    "price": 325,
     "rent": 140,
     "colorGroup": "energy",
     "polygon": [
@@ -4153,7 +4153,7 @@ const BOARD_CONFIG = [
     "id": 20,
     "type": "property",
     "name": "Үүрэн холбооны сүлжээ",
-    "price": 480,
+    "price": 240,
     "rent": 90,
     "colorGroup": "technology",
     "polygon": [
@@ -4234,7 +4234,7 @@ const BOARD_CONFIG = [
     "id": 21,
     "type": "property",
     "name": "Дата төв",
-    "price": 565,
+    "price": 280,
     "rent": 115,
     "colorGroup": "technology",
     "polygon": [
@@ -4349,7 +4349,7 @@ const BOARD_CONFIG = [
     "id": 23,
     "type": "property",
     "name": "Технологийн парк",
-    "price": 650,
+    "price": 325,
     "rent": 140,
     "colorGroup": "technology",
     "polygon": [
@@ -4474,7 +4474,7 @@ const BOARD_CONFIG = [
     "id": 25,
     "type": "property",
     "name": "Арилжааны банк",
-    "price": 700,
+    "price": 350,
     "rent": 150,
     "colorGroup": "finance",
     "polygon": [
@@ -4555,7 +4555,7 @@ const BOARD_CONFIG = [
     "id": 26,
     "type": "property",
     "name": "Хөрөнгө оруулалтын сан",
-    "price": 825,
+    "price": 410,
     "rent": 185,
     "colorGroup": "finance",
     "polygon": [
@@ -4636,7 +4636,7 @@ const BOARD_CONFIG = [
     "id": 27,
     "type": "property",
     "name": "Олон улсын санхүүгийн төв",
-    "price": 950,
+    "price": 475,
     "rent": 220,
     "colorGroup": "finance",
     "polygon": [
@@ -4717,7 +4717,7 @@ const BOARD_CONFIG = [
     "id": 28,
     "type": "property",
     "name": "Нүүрсний уурхай",
-    "price": 700,
+    "price": 350,
     "rent": 150,
     "colorGroup": "mining",
     "polygon": [
@@ -4798,7 +4798,7 @@ const BOARD_CONFIG = [
     "id": 29,
     "type": "property",
     "name": "Зэсийн баяжуулах үйлдвэр",
-    "price": 825,
+    "price": 410,
     "rent": 185,
     "colorGroup": "mining",
     "polygon": [
@@ -4916,7 +4916,7 @@ const BOARD_CONFIG = [
     "id": 31,
     "type": "property",
     "name": "Алтны уурхай",
-    "price": 950,
+    "price": 475,
     "rent": 220,
     "colorGroup": "mining",
     "polygon": [
