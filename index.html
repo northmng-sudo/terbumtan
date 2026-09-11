@@ -7530,7 +7530,7 @@ function renderWaiting() {
         <button class="invite-btn invite-copy" id="copyInviteBtn">\ud83d\udd17 \u041b\u0438\u043d\u043a \u0445\u0443\u0443\u043b\u0431\u0430\u0440\u043b\u0430\u0445</button>
       </div>
       <div class="wait-list">
-        ${room.players.map(p => `<div class="wait-player"><span class="wait-token" style="--token-color:${p.color}">${renderTokenGlyph(p.token)}</span> <span>${p.name}</span> ${p.isHost?'<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">\u044d\u0437\u044d\u043d</span>':''}</div>`).join('')}
+        ${room.players.map(p => `<div class="wait-player"><span class="wait-token" data-owner-id="${p.id}" style="--token-color:${p.color}">${renderTokenGlyph(p.token)}</span> <span>${p.name}</span> ${p.isHost?'<span style="color:#9AA6BE;font-size:11px;margin-left:auto;">\u044d\u0437\u044d\u043d</span>':''}</div>`).join('')}
       </div>
       ${renderTokenSelectGrid(room)}
       ${isHost
@@ -7561,16 +7561,34 @@ function renderTokenSelectGrid(room) {
     </div>
   </div>`;
 }
+function patchTokenSelectionUI(newTokenId) {
+  document.querySelectorAll('.token-select-card').forEach(card => {
+    card.classList.toggle('selected', card.dataset.tokenSelect === newTokenId);
+    const tagEl = card.querySelector('.tsc-selected-tag');
+    if (card.dataset.tokenSelect === newTokenId) {
+      if (!tagEl) card.insertAdjacentHTML('beforeend', '<span class="tsc-selected-tag">\u0421\u043e\u043d\u0433\u043e\u0433\u0434\u0441\u043e\u043d</span>');
+    } else if (tagEl) {
+      tagEl.remove();
+    }
+  });
+  document.querySelectorAll('.wait-token').forEach(el => {
+    if (el.dataset.ownerId === myId) {
+      el.style.setProperty('--token-color', TOKEN_COLORS[TOKENS.indexOf(newTokenId)]);
+      const img = el.querySelector('.token-asset-img');
+      if (img) img.src = getTokenType(newTokenId).asset;
+    }
+  });
+}
 async function selectPlayerToken(tokenId) {
   const localMe = currentRoom.players.find(p => p.id === myId);
   if (!localMe) return;
   const localTaken = currentRoom.players.some(p => p.id !== myId && p.token === tokenId);
-  if (localTaken) { render(); return; }
+  if (localTaken) return;
 
   const prevToken = localMe.token, prevColor = localMe.color;
   localMe.token = tokenId;
   localMe.color = TOKEN_COLORS[TOKENS.indexOf(tokenId)];
-  render();
+  patchTokenSelectionUI(tokenId);
 
   const room = await getRoom(currentRoom.roomCode);
   if (!room) { localMe.token = prevToken; localMe.color = prevColor; render(); return; }
@@ -7583,7 +7601,7 @@ async function selectPlayerToken(tokenId) {
   }
   me.token = tokenId;
   me.color = TOKEN_COLORS[TOKENS.indexOf(tokenId)];
-  await saveRoom(room); currentRoom = room; render();
+  await saveRoom(room); currentRoom = room;
 }
 
 function attachWaitingEvents() {
