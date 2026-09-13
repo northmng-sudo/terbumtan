@@ -6286,9 +6286,11 @@ function applyRemoteRoomUpdate(newState) {
   const prevUpdatedAt = currentRoom ? currentRoom.updatedAt : null;
   if (newState.updatedAt && newState.updatedAt === prevUpdatedAt) return; // no change since last known state
   const withinSelfSaveGrace = (Date.now() - lastSelfSaveAt) < 2000;
+  const wasWaiting = view === 'waiting';
   currentRoom = newState;
-  if (view === 'waiting' && currentRoom.started) view = 'game';
-  if (withinSelfSaveGrace) return; // avoid re-rendering right after our own save's realtime echo
+  const gameJustStarted = wasWaiting && currentRoom.started;
+  if (gameJustStarted) view = 'game';
+  if (withinSelfSaveGrace && !gameJustStarted) return; // avoid re-rendering right after our own save's realtime echo, but never suppress a critical view transition
   if (view !== 'landing') render();
 }
 
