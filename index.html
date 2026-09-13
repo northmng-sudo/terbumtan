@@ -6279,7 +6279,19 @@ function startPolling() {
       if (fresh) applyRemoteRoomUpdate(fresh);
     } catch (e) {}
   }, 2500);
+  if (!visibilityPollHandlerInstalled) {
+    visibilityPollHandlerInstalled = true;
+    document.addEventListener('visibilitychange', async () => {
+      if (document.hidden) return;
+      if (!currentRoom || !currentRoom.roomCode) return;
+      try {
+        const fresh = await getRoom(currentRoom.roomCode);
+        if (fresh) applyRemoteRoomUpdate(fresh);
+      } catch (e) {}
+    });
+  }
 }
+let visibilityPollHandlerInstalled = false;
 let lastSelfSaveAt = 0;
 function applyRemoteRoomUpdate(newState) {
   if (!newState) return;
@@ -6537,6 +6549,7 @@ function focusCameraOnTile(tileId, options = {}) {
 function followPlayerStep(playerId, tileIndex) {
   try {
     if (reducedMotion) return;
+    if (playerId !== myId) return; // only follow the local player's own movement; spectators keep their current view
     if (!canOverrideCamera('following')) return;
     const tile = BOARD_CONFIG[tileIndex];
     if (!tile) return;
