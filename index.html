@@ -279,7 +279,24 @@
   .wr-seat-empty-ring {
     width: clamp(38px, 5.5vw, 56px); height: clamp(38px, 5.5vw, 56px); border-radius: 50%;
     border: 2px dashed rgba(245,202,85,0.35); background: rgba(0,0,0,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: rgba(245,202,85,0.5);
   }
+  .wr-seat-addbot { cursor: pointer; transition: transform 0.15s ease; }
+  .wr-seat-addbot:hover { transform: translate(-50%, -50%) scale(1.08); }
+  .wr-seat-addbot:hover .wr-seat-empty-ring { border-color: var(--gold); border-style: solid; color: var(--gold-light, #ffe8a3); }
+  .wr-seat-addbot-label { margin-top: 4px; font-size: 9px; font-weight: 800; letter-spacing: 1px; color: rgba(245,202,85,0.6); }
+  .wr-seat-bot-tag {
+    position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+    background: #7c3aed; color: #fff; font-size: 7px; font-weight: 800; letter-spacing: 0.5px;
+    border-radius: 6px; padding: 1px 4px; white-space: nowrap;
+  }
+  .wr-seat-remove-bot {
+    position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; z-index: 2;
+    background: rgba(220,50,50,0.85); border: 1.5px solid #fff; color: #fff; font-size: 10px; line-height: 1;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .wr-carousel-addbot { border-style: dashed; cursor: pointer; justify-content: center; }
   .wr-seat-token { position: relative; width: clamp(44px, 6vw, 62px); height: clamp(44px, 6vw, 62px); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
   .wr-seat-token .token-asset-img { border-radius: 50%; box-shadow: 0 0 0 3px var(--seat-color, var(--gold)), 0 6px 14px rgba(0,0,0,0.5); background: rgba(4,26,22,0.6); }
   .wr-seat-ready-dot {
@@ -5554,6 +5571,92 @@ async function joinRoom(code, name, avatarToken) {
   currentRoom = fresh; view = 'waiting'; startPolling(); render();
 }
 
+const BOT_NAMES = ['\u0411\u0430\u0442\u0430\u0430-\u0411\u041e\u0422', '\u0421\u0430\u0440\u0430\u043d\u0442\u0443\u044f-\u0411\u041e\u0422', '\u0413\u0430\u043d\u0431\u0430\u0430\u0442\u0430\u0440-\u0411\u041e\u0422', '\u041e\u044e\u0443\u043d\u0430-\u0411\u041e\u0422', '\u0422\u04e9\u043c\u04e9\u0440-\u0411\u041e\u0422', '\u0417\u0430\u044f-\u0411\u041e\u0422', '\u0411\u043e\u043b\u043e\u0440-\u0411\u041e\u0422'];
+async function addBotPlayer() {
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room || room.started || room.players.length >= 8) return;
+  const usedTokens = room.players.map(p => p.token);
+  const freeToken = TOKENS.find(t => !usedTokens.includes(t));
+  if (!freeToken) return;
+  const usedNames = room.players.map(p => p.name);
+  const botName = BOT_NAMES.find(n => !usedNames.includes(n)) || ('\u0411\u041e\u0422-' + (room.players.length + 1));
+  const bot = newPlayer(botName, freeToken, false);
+  bot.isBot = true;
+  bot.ready = true;
+  room.players.push(bot);
+  await saveRoom(room); currentRoom = room; render();
+}
+async function removeBotPlayer(botId) {
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room || room.started) return;
+  room.players = room.players.filter(p => p.id !== botId);
+  await saveRoom(room); currentRoom = room; render();
+}
+
+let botTurnRunning = false;
+async function runBotTurn() {
+  if (botTurnRunning) return;
+  const room0 = currentRoom;
+  if (!room0 || !room0.started || room0.winnerId) return;
+  const bot0 = room0.players[room0.currentPlayerIndex];
+  if (!bot0 || !bot0.isBot || bot0.bankrupt) return;
+  botTurnRunning = true;
+  const realMyId = myId;
+  try {
+    await new Promise(r => setTimeout(r, 900));
+    myId = bot0.id;
+    await rollDice();
+    await new Promise(r => setTimeout(r, reducedMotion ? 300 : 2300));
+
+    let room = await getRoom(currentRoom.roomCode);
+    if (!room) return;
+    currentRoom = room;
+    const bot = room.players.find(p => p.id === bot0.id);
+    if (!bot) return;
+
+    if (room.cardDraw && !room.cardDraw.resolved && room.cardDraw.playerId === bot.id) {
+      await new Promise(r => setTimeout(r, 900));
+      const card = findCardById(room.cardDraw.deckType, room.cardDraw.cardId);
+      if (card) {
+        let chosenTileIdx = null;
+        if (card.selectionRequired) {
+          const eligible = BOARD_CONFIG.filter(t => t.type === 'property' && canBuildOnTile(t, room, bot));
+          if (eligible.length > 0) chosenTileIdx = eligible[Math.floor(Math.random() * eligible.length)].id;
+        }
+        try { applyCardEffect(room, card, bot, chosenTileIdx); } finally {
+          room.cardDraw.resolved = true; room.cardDraw = null;
+          await saveRoom(room); currentRoom = room; render();
+        }
+      }
+      await new Promise(r => setTimeout(r, 700));
+    }
+
+    room = await getRoom(currentRoom.roomCode);
+    if (!room) return;
+    currentRoom = room;
+    if (room.pendingAction && room.pendingAction.type === 'buy' && room.pendingAction.playerId === bot.id) {
+      const tile = BOARD_CONFIG[room.pendingAction.spaceIndex];
+      const price = getEffectivePrice(bot, tile);
+      const shouldBuy = bot.money - price >= price * 0.8; // keep a reasonable cash buffer
+      await new Promise(r => setTimeout(r, 900));
+      if (shouldBuy) await buyProperty(); else await skipBuy();
+      await new Promise(r => setTimeout(r, reducedMotion ? 200 : 900));
+    }
+
+    room = await getRoom(currentRoom.roomCode);
+    if (!room) return;
+    currentRoom = room;
+    if (room.consecutiveDoubles > 0 && !room.hasRolled) {
+      botTurnRunning = false; myId = realMyId; runBotTurn(); return; // rolled doubles: go again
+    }
+    await endTurn();
+  } finally {
+    myId = realMyId;
+    botTurnRunning = false;
+    render();
+  }
+}
+
 async function startGame() {
   const room = await getRoom(currentRoom.roomCode);
   if (!room || room.players.length < 2) return;
@@ -5565,6 +5668,7 @@ async function startGame() {
 }
 
 function isMyTurn(room) { return room.players[room.currentPlayerIndex] && room.players[room.currentPlayerIndex].id === myId; }
+function isBotTurn(room) { const p = room.players[room.currentPlayerIndex]; return !!(p && p.isBot && !p.bankrupt); }
 function pushLog(room, text) { room.log.push(text); if (room.log.length > 40) room.log = room.log.slice(-40); }
 
 /* ===== SOCIAL INTERACTION SYSTEM ===== */
@@ -7251,7 +7355,7 @@ function render() {
     } else {
       attachGameEvents();
       maybeFlashMoney(currentRoom);
-      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); maybeShowCardResultToast(currentRoom); watchChatMessages(currentRoom); watchBankruptcies(currentRoom); watchWealthChanges(currentRoom); }
+      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); maybeShowCardResultToast(currentRoom); watchChatMessages(currentRoom); watchBankruptcies(currentRoom); watchWealthChanges(currentRoom); if (iAmHostOfCurrentRoom && isBotTurn(currentRoom) && !botTurnRunning) runBotTurn(); }
       if (rentCinematicActive) animateRentCounters();
     }
     return;
@@ -7777,9 +7881,16 @@ function renderWaiting() {
 
   const seatsHtml = WAITING_SEAT_POSITIONS.map((pos, i) => {
     const p = room.players[i];
-    if (!p) return `<div class="wr-seat wr-seat-empty" style="left:${pos[0]}%; top:${pos[1]}%;"><div class="wr-seat-empty-ring"></div></div>`;
+    if (!p) {
+      return isHost
+        ? `<div class="wr-seat wr-seat-empty wr-seat-addbot" data-add-bot="1" style="left:${pos[0]}%; top:${pos[1]}%;"><div class="wr-seat-empty-ring">+</div><div class="wr-seat-addbot-label">\u0411\u041e\u0422</div></div>`
+        : `<div class="wr-seat wr-seat-empty" style="left:${pos[0]}%; top:${pos[1]}%;"><div class="wr-seat-empty-ring"></div></div>`;
+    }
+    const botTag = p.isBot ? `<span class="wr-seat-bot-tag">BOT</span>` : '';
+    const removeBtn = (p.isBot && isHost) ? `<button class="wr-seat-remove-bot" data-remove-bot="${p.id}" title="\u0411\u043e\u0442 \u0445\u0430\u0441\u0430\u0445">\u2715</button>` : '';
     return `<div class="wr-seat wr-seat-filled" data-player-id="${p.id}" style="left:${pos[0]}%; top:${pos[1]}%; --seat-color:${p.color};">
-      <div class="wr-seat-token">${renderTokenGlyph(p.token)}<span class="wr-seat-ready-dot ${p.ready ? 'wr-ready' : ''}"></span></div>
+      ${removeBtn}
+      <div class="wr-seat-token">${renderTokenGlyph(p.token)}<span class="wr-seat-ready-dot ${p.ready ? 'wr-ready' : ''}"></span>${botTag}</div>
       <div class="wr-seat-name">${p.name}</div>
       <div class="wr-seat-title">${p.isHost ? '\u042d\u0417\u042d\u041d' : '\u0422\u041e\u0413\u041b\u041e\u0413\u0427'}</div>
     </div>`;
@@ -7823,9 +7934,11 @@ function renderWaiting() {
 
     <div class="wr-mobile-carousel">
       ${room.players.map(p => `<div class="wr-carousel-card" style="--seat-color:${p.color};">
-        <div class="wr-seat-token">${renderTokenGlyph(p.token)}<span class="wr-seat-ready-dot ${p.ready?'wr-ready':''}"></span></div>
+        ${(p.isBot && isHost) ? `<button class="wr-seat-remove-bot" data-remove-bot="${p.id}" title="\u0411\u043e\u0442 \u0445\u0430\u0441\u0430\u0445">\u2715</button>` : ''}
+        <div class="wr-seat-token">${renderTokenGlyph(p.token)}<span class="wr-seat-ready-dot ${p.ready?'wr-ready':''}"></span>${p.isBot ? '<span class="wr-seat-bot-tag">BOT</span>' : ''}</div>
         <div class="wr-seat-name">${p.name}</div>
       </div>`).join('')}
+      ${(isHost && room.players.length < 8) ? `<div class="wr-carousel-card wr-carousel-addbot" data-add-bot="1"><div class="wr-seat-empty-ring">+</div><div class="wr-seat-addbot-label">\u0411\u041e\u0422</div></div>` : ''}
     </div>
     ${!isHost ? `<button class="wr-sticky-ready-btn ${meReady?'wr-ready':''}" id="readyToggleBtnMobile" data-ready-for="${myId}">${meReady?'\u2713 \u0411\u042d\u041b\u042d\u041d':'\u0411\u042d\u041b\u042d\u041d \u0411\u041e\u041b\u041e\u0425'}</button>` : `<button class="btn btn-primary wr-sticky-ready-btn" id="startBtnMobile" ${room.players.length<2?'disabled':''}>\u0422\u041e\u0413\u041b\u041e\u041e\u041c \u042d\u0425\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`}
   </div>`;
@@ -7898,6 +8011,8 @@ async function selectPlayerToken(tokenId) {
 function attachWaitingEvents() {
   wireQuickMuteAndSettings();
   preloadLobbyBackground();
+  document.querySelectorAll('[data-add-bot]').forEach(el => { el.onclick = addBotPlayer; });
+  document.querySelectorAll('[data-remove-bot]').forEach(el => { el.onclick = (e) => { e.stopPropagation(); removeBotPlayer(el.dataset.removeBot); }; });
   const btn = document.getElementById('startBtn'); if (btn) btn.onclick = startGame;
   const btnMobile = document.getElementById('startBtnMobile'); if (btnMobile) btnMobile.onclick = startGame;
   const readyBtn = document.getElementById('readyToggleBtn'); if (readyBtn) readyBtn.onclick = toggleReadyState;
