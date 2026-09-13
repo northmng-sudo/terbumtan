@@ -1812,7 +1812,8 @@
   .buy-modal {
     width: min(94vw, 620px);
     max-height: 92vh;
-    display: flex;
+    display: grid;
+    grid-template-columns: 42% 1fr;
     background: linear-gradient(160deg, var(--sidebar-bg-2) 0%, var(--sidebar-bg) 100%);
     border: 2px solid var(--gold);
     border-radius: 24px;
@@ -1821,7 +1822,8 @@
     animation: buyModalPop 0.4s cubic-bezier(.2,1.3,.4,1);
   }
   .buy-modal-visual {
-    flex: 0 0 42%;
+    grid-column: 1;
+    min-width: 0; min-height: 0;
     position: relative;
     display: flex; align-items: center; justify-content: center;
     background: linear-gradient(160deg, color-mix(in srgb, var(--grp) 22%, var(--emerald-dark)) 0%, var(--sidebar-bg) 85%);
@@ -1829,7 +1831,7 @@
   }
   .buy-modal-group-tag { position: absolute; top: 0; left: 0; right: 0; height: 6px; }
   .buy-modal-visual img { width: 100%; max-width: 220px; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(0,0,0,0.5)); }
-  .buy-modal-info { flex: 1; min-width: 0; padding: 22px 22px 24px; display: flex; flex-direction: column; overflow-y: auto; max-height: 92vh; }
+  .buy-modal-info { grid-column: 2; min-width: 0; min-height: 0; padding: 22px 22px 24px; display: flex; flex-direction: column; overflow-y: auto; max-height: 92vh; }
   .buy-modal-eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--emerald-light); font-weight: 800; }
   .buy-modal-desc { font-size: 11.5px; color: var(--sb-muted, #9AA6BE); line-height: 1.4; margin: 4px 0 10px; }
   .bm-discount-note { font-size: 11.5px; font-weight: 800; color: #ff9a5a; background: rgba(255,154,90,0.12); border: 1px solid rgba(255,154,90,0.35); border-radius: 8px; padding: 5px 10px; margin-bottom: 8px; display: inline-block; }
@@ -1871,8 +1873,9 @@
   }
   @keyframes buyModalPop { 0% { transform: scale(0.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   @media (max-width: 560px) {
-    .buy-modal { flex-direction: column; }
-    .buy-modal-visual { flex: 0 0 auto; padding: 20px 20px 6px; }
+    .buy-modal { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .buy-modal-visual { grid-column: 1; grid-row: 1; padding: 20px 20px 6px; }
+    .buy-modal-info { grid-column: 1; grid-row: 2; }
     .buy-modal-visual img { max-width: 150px; }
   }
 
@@ -9575,18 +9578,18 @@ async function runRentCinematic(room, txn) {
     focusCameraOnTile(txn.tileIdx, { mode: 'landing', scale: reducedMotion ? 1.1 : (isMobileView ? 1.95 : 1.22) });
     audioManager.playSfx('rentStart');
     render();
-    await new Promise(r => setTimeout(r, 500 * t));
+    await new Promise(r => setTimeout(r, 700 * t));
     rentCinematicStage = 'flying'; render();
     audioManager.playSfx('moneyTransfer');
     vibrate(20);
-    await new Promise(r => setTimeout(r, 900 * t));
+    await new Promise(r => setTimeout(r, 1500 * t));
     rentCinematicStage = 'received'; render();
     const ratio = txn.breakdown.total / Math.max(txn.payerBalanceBefore, 1);
     if (ratio >= 0.25) audioManager.playSfx('bigRent'); else audioManager.playSfx('rentReceived');
     vibrate(30);
-    await new Promise(r => setTimeout(r, 900 * t));
+    await new Promise(r => setTimeout(r, 1800 * t));
     rentCinematicStage = 'done'; render();
-    await new Promise(r => setTimeout(r, 350 * t));
+    await new Promise(r => setTimeout(r, 600 * t));
   } finally {
     rentCinematicActive = false;
     rentCinematicStage = 'appear';
