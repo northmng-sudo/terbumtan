@@ -6838,7 +6838,21 @@ async function runBuildingAnimation(tileId, playerId, type) {
   const seed = Array.from({length: particleCount}, () => ({ dx: (Math.random()-0.5)*60, dy: -20-Math.random()*46, rot: Math.random()*360, delay: Math.random()*180 }));
   const level = currentRoom ? houseLevel(currentRoom, tileId) : (type === 'corp' ? 4 : 1);
   buildingAnim = { tileId, playerId, type, level, stage: 'siteprep', particleSeed: seed, isLocal };
-  const t = reducedMotion ? 0.18 : (isLocal ? 1 : 0.55); // spectators get a shorter 1.5-2s version
+  // Every construction stage change below forces a full board re-render
+  // (this was already true before this animation touched purchase/house
+  // events too, not just rare corporation ones — see maybeTriggerBuildAnimation).
+  // On Android that full re-render is expensive, so mobile gets a
+  // noticeably shorter timeline here to keep the total main-thread time
+  // spent animating a single construction down, on top of the existing
+  // spectator-vs-local speedup.
+  const t = reducedMotion ? 0.18 : (isMobileView ? 0.4 : (isLocal ? 1 : 0.55));
+  // Camera zoom/pan work (getBoundingClientRect + transform writes) is skipped
+  // on mobile for ordinary purchases/house builds — it's the part of this
+  // cinematic that's purely a "nice to have" on a small screen, and cutting
+  // it removes extra forced-layout reads from every stage transition, which
+  // is what was making the whole board feel stuck/slow to appear on phones.
+  // Corporation completions stay full cinematic everywhere since they're rare.
+  const wantsCamera = type === 'corp' || !isMobileView;
   try {
     // Camera zooms toward the tile for every construction type, not just
     // corporations. Non-corp types use the dedicated 'construction' mode
@@ -6851,8 +6865,10 @@ async function runBuildingAnimation(tileId, playerId, type) {
     // camera back to overview the instant construction begins. A distinct
     // mode keeps the two camera "owners" from stomping on each other while
     // still letting a 'corporation' cinematic (priority 5) interrupt this one.
-    if (type === 'corp') focusCameraOnTile(tileId, { mode: 'corporation', scale: reducedMotion ? 1.1 : 1.3 });
-    else focusCameraOnTile(tileId, { mode: 'construction', scale: reducedMotion ? 1.08 : 1.16 });
+    if (wantsCamera) {
+      if (type === 'corp') focusCameraOnTile(tileId, { mode: 'corporation', scale: reducedMotion ? 1.1 : 1.3 });
+      else focusCameraOnTile(tileId, { mode: 'construction', scale: reducedMotion ? 1.08 : 1.16 });
+    }
     render();
     playConstructionSound('siteprep');
     await new Promise(r => setTimeout(r, 450 * t));
@@ -6863,8 +6879,10 @@ async function runBuildingAnimation(tileId, playerId, type) {
     await new Promise(r => setTimeout(r, (type === 'corp' ? 650 : 550) * t));
 
     buildingAnim.stage = 'frame'; render();
-    if (type === 'corp') focusCameraOnBuilding(tileId, { mode: 'corporation', scale: reducedMotion ? 1.15 : 1.46 });
-    else focusCameraOnBuilding(tileId, { mode: 'construction', scale: reducedMotion ? 1.1 : (type === 'purchase' ? 1.34 : 1.28) });
+    if (wantsCamera) {
+      if (type === 'corp') focusCameraOnBuilding(tileId, { mode: 'corporation', scale: reducedMotion ? 1.15 : 1.46 });
+      else focusCameraOnBuilding(tileId, { mode: 'construction', scale: reducedMotion ? 1.1 : (type === 'purchase' ? 1.34 : 1.28) });
+    }
     playConstructionSound('frame');
     await new Promise(r => setTimeout(r, (type === 'corp' ? 1200 : 800) * t));
 
