@@ -1260,7 +1260,7 @@
   }
   .env-night-active.board-viewport::after { box-shadow: inset 0 0 0 2px rgba(212,175,55,0.55), inset 0 0 24px rgba(120,160,255,0.25); }
 
-
+  .camera-dim-overlay {
     position: absolute; inset: 0; z-index: 30; pointer-events: none;
     background: rgba(2,10,8,0.4);
     animation: dimFadeIn 0.4s ease forwards;
@@ -2739,7 +2739,15 @@ function getPlayerColorInfo(colorHex) { return PLAYER_COLORS.find(c => c.color =
 const TOKENS = TOKEN_TYPES.map(t => t.id);
 function renderTokenGlyph(tokenId, extraClass) {
   const tt = getTokenType(tokenId);
-  return `<img class="token-asset-img ${extraClass||''}" src="${tt.asset}" alt="${tt.name}">`;
+  const cls = `token-asset-img ${extraClass||''}`;
+  // If the PNG asset is missing/misnamed on the deployed site (case-sensitive
+  // hosting, a file never uploaded, etc.) the <img> fails silently and the
+  // token/avatar would otherwise render as nothing visible at all. Every
+  // token already has a hand-drawn inline SVG (used elsewhere for the token
+  // picker); fall back to that on image error instead of showing a blank
+  // spot, so a player's token is always visible even if the .png is broken.
+  return `<img class="${cls}" src="${tt.asset}" alt="${tt.name}" onerror="this.style.display='none'; var s=this.nextElementSibling; if (s && s.classList.contains('token-glyph-fallback')) s.style.display='block';">` +
+    `<svg class="${cls} token-glyph-fallback" viewBox="0 0 100 100" style="display:none; color:var(--token-ring, var(--ring-color, #e8c468));" aria-hidden="true">${tt.svg}</svg>`;
 }
 const GROUP_COLORS = {
   agriculture: '#8BC34A', commerce: '#2196F3', real_estate: '#2E7D32', logistics: '#FF9800',
