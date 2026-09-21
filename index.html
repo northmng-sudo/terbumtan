@@ -1717,6 +1717,22 @@
   .ptoken.token-hop { animation: tokenHop 0.26s cubic-bezier(.33,.1,.4,1); }
   .ptoken.token-hop-reduced { animation: tokenHopReduced 0.15s ease; }
   @media (prefers-reduced-motion: reduce) { .ptoken.token-idle .token-base { animation: none; } .ptoken.token-current-turn .token-base { animation: none; } .token-turn-indicator { animation: none; } }
+  @media (max-width: 768px) {
+    /* tokenGlowPulse animates `filter: drop-shadow(...)` every frame, which
+       forces a repaint (not just a cheap composite like transform/opacity)
+       and runs continuously for whichever token's turn it is — on phones
+       this is a real, ongoing cost. Swap it for a static highlighted ring
+       on mobile so the current-turn token still stands out, with nothing
+       animating every frame. */
+    .ptoken.token-current-turn .token-base {
+      animation: none;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5)) drop-shadow(0 0 7px var(--token-ring, #e8c468));
+    }
+    /* Idle "breathing" runs on every other token at once (up to 7 on an
+       8-player board) — cheap individually, but it's one more thing
+       continuously animating on a phone, so it's off there too. */
+    .ptoken.token-idle .token-base { animation: none; }
+  }
 
   .ptoken.token-rent-pay .token-base { animation: tokenSwayBack 0.9s ease-in-out; }
   .ptoken.token-rent-receive .token-base { animation: tokenProudLift 0.9s ease-in-out; }
