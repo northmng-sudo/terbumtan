@@ -1205,6 +1205,18 @@
   @media (min-width: 769px) {
     .board-frame { width: 100%; height: 100%; }
   }
+  .mobile-board-loading {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; width: 100%; height: 100vh; height: 100dvh;
+    background: radial-gradient(ellipse at center, #123028 0%, #081713 100%);
+    color: #e8f5ee; font-size: 14px; letter-spacing: 0.3px;
+  }
+  .mbl-spinner {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 3px solid rgba(232,245,238,0.2); border-top-color: #ffd400;
+    animation: mblSpin 0.8s linear infinite;
+  }
+  @keyframes mblSpin { to { transform: rotate(360deg); } }
   .board-camera {
     position: absolute; inset: 0;
     transform-origin: 0 0;
@@ -7376,11 +7388,18 @@ function renderUpgradeIcons(tile, level, idx, ownerIdx) {
     const topPct = (by / 941 * 100).toFixed(2);
     const widthPct = (w / 1672 * 100).toFixed(2);
     const heightPct = (w / 941 * 100).toFixed(2);
+    // corp-burst (rotating conic-gradient) and corp-particles are infinite
+    // CSS animations that keep running for as long as the corporation sits
+    // on the board — with several corporations built over a game, that's a
+    // permanent, compounding paint/composite cost. Cheap enough on desktop,
+    // but expensive enough on phones to explain the game feeling slower
+    // overall than before this building system existed, so mobile keeps
+    // just the static glow ring and building art.
+    const decor = isMobileView ? '' : `<span class="corp-burst"></span><span class="corp-particles"><i></i><i></i><i></i><i></i><i></i><i></i></span>`;
     return `<div class="upgrade-icon upgrade-corp ${isNew ? 'upgrade-appear' : ''}" data-idx="${idx}" data-tile-id="${idx}"
       style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --glow:${glow}; --depth:${tile.depth + 0.5};">
-      <span class="corp-burst"></span>
+      ${decor}
       <span class="upgrade-glow-ring"></span>
-      <span class="corp-particles"><i></i><i></i><i></i><i></i><i></i><i></i></span>
       <img src="corporation-hq.png" alt="Corporation HQ" onerror="this.style.display='none'" style="${zoneClip(bx,by,w,w)}">
     </div>`;
   }
@@ -7448,6 +7467,18 @@ function renderBuildings(level) {
   return html;
 }
 
+// The very first paint of the game view on mobile forces the same heavy
+// renderGame() work as every other render, but with nothing on screen yet
+// it reads as "the board isn't showing" for however many seconds that first
+// build takes on a slower phone. This shows a lightweight loading state
+// immediately, lets the browser actually paint it (two rAFs so the browser
+// has a frame to flush to the screen before the heavy work starts), then
+// re-enters render() to do the real work. Runs once per room.
+let mobileGameFirstPaintRoom = null;
+function renderMobileBoardLoading() {
+  return `<div class="mobile-board-loading"><div class="mbl-spinner"></div><div class="mbl-text">Тоглоомын хавтан ачаалж байна…</div></div>`;
+}
+
 /* ---------- RENDER ---------- */
 function render() {
   const app = document.getElementById('app');
@@ -7463,6 +7494,12 @@ function render() {
   if (view === 'waiting') { maybeStartLobbyMusic(); app.innerHTML = renderWaiting(); attachWaitingEvents(); return; }
   if (view === 'game') {
     lobbyMusicStarted = false;
+    if (isMobileView && currentRoom && mobileGameFirstPaintRoom !== currentRoom.roomCode) {
+      mobileGameFirstPaintRoom = currentRoom.roomCode;
+      app.innerHTML = renderMobileBoardLoading();
+      requestAnimationFrame(() => requestAnimationFrame(() => render()));
+      return;
+    }
     if (currentRoom) {
       maybeTriggerGameResults(currentRoom);
       if (!gameResults.isOpen) {
