@@ -6830,6 +6830,30 @@ function showCorpNotice() {
   setTimeout(() => { el.remove(); }, 2000);
 }
 
+// Patches just the construction-fx subtree for the tile currently animating,
+// instead of the full render() every stage change used to force. Mirrors the
+// patchTokenStep() approach used for per-step token movement: cheap DOM
+// surgery on Android where a full board re-render per stage was making
+// tokens and the building-under-construction visibly lag behind.
+function patchBuildingAnimStage() {
+  try {
+    if (!buildingAnim || !currentRoom) return false;
+    const { tileId, playerId } = buildingAnim;
+    const tile = BOARD_CONFIG[tileId];
+    if (!tile) return false;
+    const owner = currentRoom.players.find(p => p.id === playerId);
+    if (!owner) return false;
+    const wrap = document.querySelector('.construction-anim-wrap[data-tile-id="' + tileId + '"]');
+    if (!wrap) return false;
+    wrap.innerHTML = renderBuildingConstructionOverlay(tile, tileId, owner, buildingAnim, currentRoom);
+    return true;
+  } catch (e) { return false; }
+}
+function bumpBuildingStage(stage) {
+  buildingAnim.stage = stage;
+  if (!patchBuildingAnimStage()) render();
+}
+
 async function runBuildingAnimation(tileId, playerId, type) {
   if (buildingAnimationActive) return;
   buildingAnimationActive = true;
@@ -6873,12 +6897,12 @@ async function runBuildingAnimation(tileId, playerId, type) {
     playConstructionSound('siteprep');
     await new Promise(r => setTimeout(r, 450 * t));
 
-    buildingAnim.stage = 'foundation'; render();
+    bumpBuildingStage('foundation');
     playConstructionSound('foundation');
     if (isLocal) vibrate(15);
     await new Promise(r => setTimeout(r, (type === 'corp' ? 650 : 550) * t));
 
-    buildingAnim.stage = 'frame'; render();
+    bumpBuildingStage('frame');
     if (wantsCamera) {
       if (type === 'corp') focusCameraOnBuilding(tileId, { mode: 'corporation', scale: reducedMotion ? 1.15 : 1.46 });
       else focusCameraOnBuilding(tileId, { mode: 'construction', scale: reducedMotion ? 1.1 : (type === 'purchase' ? 1.34 : 1.28) });
@@ -6886,12 +6910,12 @@ async function runBuildingAnimation(tileId, playerId, type) {
     playConstructionSound('frame');
     await new Promise(r => setTimeout(r, (type === 'corp' ? 1200 : 800) * t));
 
-    buildingAnim.stage = 'facade'; render();
+    bumpBuildingStage('facade');
     playConstructionSound('facade');
     if (isLocal) { audioManager.playSfx(type === 'purchase' ? 'companyPurchase' : 'buildingRise'); vibrate([25, 30, 40]); }
     await new Promise(r => setTimeout(r, (type === 'corp' ? 900 : 700) * t));
 
-    buildingAnim.stage = 'ceremony'; render();
+    bumpBuildingStage('ceremony');
     playConstructionSound('ceremony');
     if (type === 'corp') { playFanfareSound(); showCorpNotice(); audioManager.playSfx('corporationVictory'); vibrate([50, 40, 80]); }
     else if (isLocal && type === 'purchase') { showCompanyBuiltNotice(tileId, playerId); }
@@ -9029,7 +9053,10 @@ function renderGame() {
       const isPurchaseConstructing = isConstructing && buildingAnim.type === 'purchase';
       if (!isPurchaseConstructing) buildingsToRender.push({ tile, level, idx, depth: tile.depth });
       if (isConstructing) {
-        constructionHtml = renderBuildingConstructionOverlay(tile, idx, owner, buildingAnim, room);
+        // Wrapped in a stable, tile-id-tagged element so later stage changes
+        // can patch just this subtree's innerHTML (see patchBuildingAnimStage)
+        // instead of forcing a full board re-render on every stage tick.
+        constructionHtml = `<div class="construction-anim-wrap" data-tile-id="${idx}">${renderBuildingConstructionOverlay(tile, idx, owner, buildingAnim, room)}</div>`;
       } else {
         upgradesToRender.push({ tile, level, idx, depth: tile.depth + 0.5, ownerIdx, owner });
       }
