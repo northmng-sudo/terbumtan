@@ -1635,13 +1635,19 @@
   .lcp-hint { margin-top: 8px; font-size: 8.5px; color: var(--sb-muted, #9AA6BE); word-break: break-all; max-height: 60px; overflow-y: auto; }
   @media (max-width: 768px) {
     .dlp-icon { display: none; }
-    .business-name { font-size: clamp(4px, 1.05vw, 6.5px); line-height: 1.02; font-weight: 800; letter-spacing: -0.2px; -webkit-line-clamp: 2; }
-    .business-price { font-size: clamp(3.2px, 0.8vw, 5px); margin-top: 0.5px; }
+    /* Sized off the board-frame's actual on-screen pixel width (--bf-w, kept in
+       sync by syncBoardFrameSize()) rather than raw vw: on many Android phones
+       the board is letterboxed narrower than the viewport (limited height, so
+       width is derived from height via the board's aspect-ratio), so a vw-based
+       font-size assumes a wider tile than actually exists and overflows it.
+       var(--bf-w, 100vw) falls back to 100vw before the first JS sync runs. */
+    .business-name { font-size: clamp(4px, calc(var(--bf-w, 100vw) * 0.0105), 6.5px); line-height: 1.02; font-weight: 800; letter-spacing: -0.2px; -webkit-line-clamp: 2; }
+    .business-price { font-size: clamp(3.2px, calc(var(--bf-w, 100vw) * 0.008), 5px); margin-top: 0.5px; }
     .dlp-inner { width: 96%; height: 96%; }
   }
   @media (max-width: 480px) {
-    .business-name { font-size: clamp(3.5px, 1vw, 5.5px); -webkit-line-clamp: 1; }
-    .business-price { font-size: clamp(3px, 0.75vw, 4.2px); }
+    .business-name { font-size: clamp(3.5px, calc(var(--bf-w, 100vw) * 0.01), 5.5px); -webkit-line-clamp: 1; }
+    .business-price { font-size: clamp(3px, calc(var(--bf-w, 100vw) * 0.0075), 4.2px); }
   }
 
   .ptoken {
@@ -1723,14 +1729,15 @@
     padding: 5px 9px; font-size: 10.5px; font-weight: 700; line-height: 1.25;
     text-align: center; z-index: 30; pointer-events: none;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    animation: bubblePop 0.25s cubic-bezier(.3,1.4,.4,1), bubbleFade 0.4s ease 2.5s forwards;
+    animation: speechBubblePop 0.25s cubic-bezier(.3,1.4,.4,1), bubbleFade 0.4s ease 2.5s forwards;
     box-shadow: 0 4px 10px rgba(0,0,0,0.35);
   }
   .speech-bubble::after {
     content: ''; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%);
     border: 6px solid transparent; border-top-color: var(--bubble-ring, var(--gold));
   }
-  @keyframes bubblePop { from { opacity: 0; transform: translate(-50%, -80%) scale(0.6); } to { opacity: 1; transform: translate(-50%, -100%) scale(1); } }
+  @keyframes bubblePop { from { opacity: 0; transform: translateX(-50%) scale(0.6); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+  @keyframes speechBubblePop { from { opacity: 0; transform: translate(-50%, -100%) scale(0.6); } to { opacity: 1; transform: translate(-50%, -100%) scale(1); } }
   @keyframes bubbleFade { to { opacity: 0; } }
 
   .emoji-reaction-pop {
@@ -6453,6 +6460,8 @@ function syncBoardFrameSize() {
   if (fh > vh) { fh = vh; fw = vh * ratio; }
   frame.style.width = Math.round(fw) + 'px';
   frame.style.height = Math.round(fh) + 'px';
+  frame.style.setProperty('--bf-w', Math.round(fw) + 'px');
+  viewport.style.setProperty('--bf-w', Math.round(fw) + 'px');
 }
 
 let lastKnownFrameRect = null;
@@ -6975,6 +6984,43 @@ function maybeTriggerMoveAnimation(room) {
     animateTokenMove(ap.playerId, ap.from, ap.steps);
   }
 }
+// Lightweight per-step token reposition used during movement so we don't have
+// to rebuild the entire board/sidebar HTML (full render()) 260ms apart. A full
+// render() on every hop is expensive DOM work and was the main cause of visible
+// stutter while a token is moving, especially on Android. This only touches the
+// moving player's existing .ptoken element (position + a restarted hop class).
+function patchTokenStep(playerId, pos) {
+  const room = currentRoom;
+  if (!room || !BOARD_CONFIG || !BOARD_CONFIG[pos]) return false;
+  const el = document.querySelector('.ptoken[data-player-id="' + playerId + '"]');
+  if (!el) return false;
+  const tile = BOARD_CONFIG[pos];
+  const clampPct = v => Math.min(97, Math.max(3, v));
+  const TOKEN_SLOT_OFFSETS = {
+    1: [[0, 0]],
+    2: [[-0.18, 0], [0.18, 0]],
+    3: [[-0.2, 0.12], [0.2, 0.12], [0, -0.16]],
+    4: [[-0.18, 0.14], [0.18, 0.14], [-0.18, -0.14], [0.18, -0.14]],
+    5: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [0, -0.16]],
+    6: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [-0.12, -0.16], [0.12, -0.16]],
+    7: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [-0.18, -0.16], [0, -0.16], [0.18, -0.16]],
+    8: [[-0.24, 0.14], [-0.08, 0.14], [0.08, 0.14], [0.24, 0.14], [-0.24, -0.16], [-0.08, -0.16], [0.08, -0.16], [0.24, -0.16]],
+  };
+  const TILE_REF_W = 110, TILE_REF_H = 62;
+  const sameTile = room.players.filter(o => !o.bankrupt && displayPos(room, o) === pos).sort((a, b) => a.id.localeCompare(b.id));
+  const slot = Math.max(0, sameTile.findIndex(o => o.id === playerId));
+  const groupSize = sameTile.length;
+  const offsets = TOKEN_SLOT_OFFSETS[Math.min(8, groupSize)] || TOKEN_SLOT_OFFSETS[1];
+  const off = offsets[slot % offsets.length] || [0, 0];
+  const left = clampPct((tile.tokenX + off[0] * TILE_REF_W) / 1672 * 100);
+  const top = clampPct((tile.tokenY + off[1] * TILE_REF_H) / 941 * 100);
+  el.style.left = left + '%';
+  el.style.top = top + '%';
+  el.classList.remove('token-hop', 'token-hop-reduced');
+  void el.offsetWidth; // force reflow so the hop animation restarts each step
+  el.classList.add(reducedMotion ? 'token-hop-reduced' : 'token-hop');
+  return true;
+}
 async function animateTokenMove(playerId, from, steps) {
   if (!Number.isFinite(steps) || steps <= 0) return;
   if (!BOARD_CONFIG || BOARD_CONFIG.length === 0) return;
@@ -6989,7 +7035,10 @@ async function animateTokenMove(playerId, from, steps) {
       if (!BOARD_CONFIG[nextPos]) break;
       animOverride = { playerId, pos: nextPos };
       finalPos = nextPos;
-      render();
+      // First hop does a full render (sets up the mover's hop/current-turn
+      // classes and keeps sidebar/camera state correct); subsequent hops just
+      // reposition the one token element to avoid rebuilding the whole screen.
+      if (i === 1 || !patchTokenStep(playerId, nextPos)) render();
       followPlayerStep(playerId, nextPos);
       await new Promise(res => setTimeout(res, stepDur));
       playStepSound();
