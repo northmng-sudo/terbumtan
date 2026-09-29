@@ -1525,6 +1525,84 @@
   }
   @keyframes craneLower { 0% { top: 0; } 60% { top: 65%; } 100% { top: 55%; } }
 
+  /* ===== SECTOR-SPECIFIC BUILDING SPRITE SHEET (6 frames, 1 file/sector) ===== */
+  .sector-build-frame { overflow: visible; }
+  /* One frame cropped out of a 2172x724 (362x724 x6) sprite sheet via
+     background-position, never stretched: background-size:600% 100% makes
+     each 20%-wide step land exactly on one 362px frame regardless of how
+     large the element itself is rendered (tile size, device pixel ratio,
+     zoom, ...), which a fixed-pixel crop could not guarantee. */
+  .construction-sprite {
+    position: relative; z-index: 2; display: block; pointer-events: none;
+    aspect-ratio: 362 / 724;
+    background-repeat: no-repeat;
+    background-size: 600% 100%;
+    background-position-y: center;
+    transform-origin: center bottom;
+  }
+  .construction-sprite-silhouette {
+    /* Last-resort fallback when neither the sector sprite nor the generic
+       construction sprite can load: a plain building shape, no image, no
+       emoji, so a company under construction never renders as literally
+       nothing. */
+    background: linear-gradient(180deg, rgba(210,200,180,0.55) 0%, rgba(150,140,120,0.65) 100%);
+    border-radius: 3px 3px 1px 1px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+  }
+  @keyframes framePulse { 0% { opacity: 0.55; } 100% { opacity: 1; } }
+  .sector-fx { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+  /* bank: soft golden wash across the facade */
+  .sector-fx-bank {
+    background: radial-gradient(ellipse at 50% 70%, rgba(255,214,99,0.45) 0%, transparent 68%);
+    animation: sectorGlowPulse 1s ease-in-out infinite;
+  }
+  @keyframes sectorGlowPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+  /* mining: small amber sparks kicking up off the frame */
+  .sector-fx-mining i {
+    position: absolute; bottom: 20%; width: 3px; height: 3px; border-radius: 50%;
+    background: #ffb020; box-shadow: 0 0 4px 1px #ffb020;
+    animation: sectorSparkPop 0.7s ease-out infinite;
+  }
+  .sector-fx-mining i:nth-child(1) { left: 30%; animation-delay: 0s; }
+  .sector-fx-mining i:nth-child(2) { left: 52%; animation-delay: 0.22s; }
+  .sector-fx-mining i:nth-child(3) { left: 68%; animation-delay: 0.44s; }
+  @keyframes sectorSparkPop { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-14px); opacity: 0; } }
+  /* telecom: expanding blue signal ring */
+  .sector-fx-telecom {
+    left: 50%; top: 15%; width: 40%; height: 40%; transform: translateX(-50%);
+    border-radius: 50%; border: 2px solid rgba(80,180,255,0.75);
+    animation: sectorSignalRing 1.3s ease-out infinite;
+  }
+  @keyframes sectorSignalRing { 0% { transform: translateX(-50%) scale(0.5); opacity: 0.9; } 100% { transform: translateX(-50%) scale(1.8); opacity: 0; } }
+  /* fuel: canopy lights switching on in sequence */
+  .sector-fx-fuel i {
+    position: absolute; top: 8%; width: 4px; height: 4px; border-radius: 50%;
+    background: #fff2b0; box-shadow: 0 0 5px 1px #ffe27a; opacity: 0;
+    animation: sectorLightOn 0.4s ease-out forwards;
+  }
+  .sector-fx-fuel i:nth-child(1) { left: 25%; animation-delay: 0s; }
+  .sector-fx-fuel i:nth-child(2) { left: 48%; animation-delay: 0.15s; }
+  .sector-fx-fuel i:nth-child(3) { left: 70%; animation-delay: 0.3s; }
+  @keyframes sectorLightOn { to { opacity: 1; } }
+  /* retail: glass atrium / shop-window glow */
+  .sector-fx-retail i {
+    position: absolute; bottom: 15%; width: 5%; height: 18%; border-radius: 1px;
+    background: rgba(255,244,200,0.85); opacity: 0;
+    animation: sectorLightOn 0.35s ease-out forwards;
+  }
+  .sector-fx-retail i:nth-child(1) { left: 22%; animation-delay: 0s; }
+  .sector-fx-retail i:nth-child(2) { left: 40%; animation-delay: 0.1s; }
+  .sector-fx-retail i:nth-child(3) { left: 58%; animation-delay: 0.2s; }
+  .sector-fx-retail i:nth-child(4) { left: 74%; animation-delay: 0.3s; }
+  /* manufacturing: light running through a pipe/vent line */
+  .sector-fx-manufacturing {
+    left: 10%; right: 10%; top: 45%; height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #ff9a3c 15%, transparent 30%);
+    background-size: 300% 100%;
+    animation: sectorPipeRun 1s linear infinite;
+  }
+  @keyframes sectorPipeRun { from { background-position: 0% 0; } to { background-position: -300% 0; } }
+
   .player-flag {
     position: absolute; left: 62%; bottom: 55%; width: 2px; height: 22px;
     background: #8a6d1f;
@@ -6882,6 +6960,15 @@ function bumpBuildingStage(stage) {
   if (!patchBuildingAnimStage()) render();
 }
 
+// Per-type stage durations (ms, before the `t` speed multiplier). 'purchase'
+// matches the sector sprite sheet's explicit timeline (400/450/550/550/500);
+// 'corp' and 'house' keep their original pacing since they don't use the
+// sprite-frame system.
+const STAGE_DURATION_MS = {
+  corp:     { siteprep: 450, foundation: 650, frame: 1200, facade: 900, ceremony: 900 },
+  purchase: { siteprep: 400, foundation: 450, frame: 550,  facade: 550, ceremony: 500 },
+  house:    { siteprep: 450, foundation: 550, frame: 800,  facade: 700, ceremony: 700 },
+};
 async function runBuildingAnimation(tileId, playerId, type) {
   if (buildingAnimationActive) return;
   buildingAnimationActive = true;
@@ -6923,12 +7010,12 @@ async function runBuildingAnimation(tileId, playerId, type) {
     }
     render();
     playConstructionSound('siteprep');
-    await new Promise(r => setTimeout(r, 450 * t));
+    await new Promise(r => setTimeout(r, STAGE_DURATION_MS[type].siteprep * t));
 
     bumpBuildingStage('foundation');
     playConstructionSound('foundation');
     if (isLocal) vibrate(15);
-    await new Promise(r => setTimeout(r, (type === 'corp' ? 650 : 550) * t));
+    await new Promise(r => setTimeout(r, STAGE_DURATION_MS[type].foundation * t));
 
     bumpBuildingStage('frame');
     if (wantsCamera) {
@@ -6936,19 +7023,23 @@ async function runBuildingAnimation(tileId, playerId, type) {
       else focusCameraOnBuilding(tileId, { mode: 'construction', scale: reducedMotion ? 1.1 : (type === 'purchase' ? 1.34 : 1.28) });
     }
     playConstructionSound('frame');
-    await new Promise(r => setTimeout(r, (type === 'corp' ? 1200 : 800) * t));
+    await new Promise(r => setTimeout(r, STAGE_DURATION_MS[type].frame * t));
 
     bumpBuildingStage('facade');
     playConstructionSound('facade');
     if (isLocal) { audioManager.playSfx(type === 'purchase' ? 'companyPurchase' : 'buildingRise'); vibrate([25, 30, 40]); }
-    await new Promise(r => setTimeout(r, (type === 'corp' ? 900 : 700) * t));
+    await new Promise(r => setTimeout(r, STAGE_DURATION_MS[type].facade * t));
 
     bumpBuildingStage('ceremony');
     playConstructionSound('ceremony');
     if (type === 'corp') { playFanfareSound(); showCorpNotice(); audioManager.playSfx('corporationVictory'); vibrate([50, 40, 80]); }
-    else if (isLocal && type === 'purchase') { showCompanyBuiltNotice(tileId, playerId); }
+    else if (isLocal && type === 'purchase') {
+      showCompanyBuiltNotice(tileId, playerId);
+      const sectorAsset = resolveSectorSpriteSrc(BOARD_CONFIG[tileId]);
+      if (sectorAsset) playSectorCeremonySound(sectorAsset.key);
+    }
     else if (isLocal) { showHouseBuiltNotice(tileId, level, playerId); }
-    await new Promise(r => setTimeout(r, (type === 'corp' ? 900 : 700) * t));
+    await new Promise(r => setTimeout(r, STAGE_DURATION_MS[type].ceremony * t));
 
     buildingAnim.stage = 'completed'; render();
   } finally {
@@ -7283,6 +7374,168 @@ const BUILDING_ICON_SHAPES = {
 const BUILDING_FILE_MAP = { mining: 'mine' };
 let seenBuildings = new Set();
 
+// ===== SECTOR-SPECIFIC BUILDING ART (frame-00..frame-05 sprite sequences) =====
+// Replaces the single generic building image with a per-sector 6-frame
+// construction sequence. Each folder is expected to hold frame-00.png
+// as ONE 2172x724 sprite sheet per sector, 6 frames of 362x724 laid out
+// left-to-right (site prep -> foundation -> frame -> facade -> near-complete
+// -> finished). A single frame is cropped via CSS background-position on a
+// background-size:600% 100% element, never the six-separate-file layout
+// tried earlier — that path 404'd because those per-frame files don't
+// exist in the repo.
+const SECTOR_BUILDING_SPRITES = {
+  bank: "assets/buildings/bank-construction-sprite.png",
+  mining: "assets/buildings/mining-construction-sprite.png",
+  telecom: "assets/buildings/telecom-construction-sprite.png",
+  construction: "assets/buildings/construction-construction-sprite.png",
+  fuel: "assets/buildings/fuel-construction-sprite.png",
+  retail: "assets/buildings/retail-construction-sprite.png",
+  manufacturing: "assets/buildings/manufacturing-construction-sprite.png",
+};
+// Mongolian-label -> asset-key map, exactly as specified.
+const SECTOR_KEY_MAP = {
+  "Банк": "bank",
+  "Уул уурхай": "mining",
+  "Харилцаа холбоо": "telecom",
+  "Барилга": "construction",
+  "Шатахуун": "fuel",
+  "Худалдаа": "retail",
+  "Үйлдвэрлэл": "manufacturing",
+};
+// This codebase already tags every property tile with a `buildingType`
+// (bank/mining/telecom/technology/construction/fuel/retail/factory/
+// agriculture — see BOARD_CONFIG), which is a more precise, already-present
+// key than re-deriving a sector from the tile's Mongolian sectorName text.
+// Map that existing field straight onto the asset keys above.
+const BUILDING_TYPE_TO_SECTOR_ASSET_KEY = {
+  bank: 'bank',
+  mining: 'mining',
+  telecom: 'telecom',
+  technology: 'telecom', // closest existing sector art to "technology" tiles
+  construction: 'construction',
+  fuel: 'fuel',
+  retail: 'retail',
+  factory: 'manufacturing',
+  // agriculture intentionally has no dedicated sector art yet -> falls through the chain below
+};
+const SPRITE_FRAME_POSITIONS = ['0%', '20%', '40%', '60%', '80%', '100%'];
+
+// This page is one plain static index.html served straight from the repo
+// root on GitHub Pages (no Vite/bundler, no import.meta.env.BASE_URL here),
+// so a path with no leading "/" resolves relative to the page itself and
+// needs no base-path handling. Kept relative on purpose — a hardcoded
+// leading "/assets/..." would 404 if this repo is ever served from a
+// project subpath instead of a custom domain root.
+//
+// Load state per sprite src, filled in by preloadSectorSprites() at boot
+// and consulted here so a 404 is discovered once (via a real <img> load
+// probe, since a CSS background-image failure fires no JS event we could
+// otherwise catch) and never retried in a loop:
+//   undefined -> not checked yet (treated as available, optimistic)
+//   'ok'      -> confirmed loadable
+//   'failed'  -> confirmed 404 / load error
+let spriteLoadState = {};
+function probeSpriteAsset(src) {
+  if (!src || spriteLoadState[src] !== undefined) return;
+  spriteLoadState[src] = 'pending';
+  try {
+    const img = new Image();
+    img.onload = () => { spriteLoadState[src] = 'ok'; try { render(); } catch (e) {} };
+    img.onerror = () => { spriteLoadState[src] = 'failed'; try { render(); } catch (e) {} };
+    img.src = src;
+  } catch (e) { spriteLoadState[src] = 'failed'; }
+}
+function preloadSectorSprites() {
+  Object.values(SECTOR_BUILDING_SPRITES).forEach(probeSpriteAsset);
+}
+// Fallback chain: 1) the tile's own sector sprite, 2) the generic
+// "construction" sector sprite, 3) null -> caller draws a plain CSS
+// silhouette instead of an <img> (no emoji, no broken-image icon).
+function resolveSectorSpriteSrc(tile) {
+  const assetKey = tile && BUILDING_TYPE_TO_SECTOR_ASSET_KEY[tile.buildingType];
+  const primary = assetKey && SECTOR_BUILDING_SPRITES[assetKey];
+  if (primary && spriteLoadState[primary] !== 'failed') { probeSpriteAsset(primary); return { key: assetKey, src: primary }; }
+  const generic = SECTOR_BUILDING_SPRITES.construction;
+  if (generic && spriteLoadState[generic] !== 'failed') { probeSpriteAsset(generic); return { key: 'construction', src: generic }; }
+  return null;
+}
+// Stage -> frame index: this animation already runs the same six named
+// stages (siteprep/foundation/frame/facade/ceremony/completed) the sector
+// sprite sheet expects, so no separate timeline is needed.
+const SECTOR_STAGE_FRAME = { siteprep: 0, foundation: 1, frame: 2, facade: 3, ceremony: 4, completed: 5 };
+// Renders the cropped-frame element: a background-image sprite when one is
+// available, or a plain CSS silhouette (no image, no emoji) as the last
+// resort. `extraStyle` lets callers add positioning without another wrapper.
+function renderSpriteFrame(tile, frameIndex, extraClass, extraStyle) {
+  const resolved = resolveSectorSpriteSrc(tile);
+  const n = Math.max(0, Math.min(5, frameIndex));
+  const posX = SPRITE_FRAME_POSITIONS[n];
+  if (resolved) {
+    return `<div class="construction-sprite sector-frame-img ${extraClass || ''}" style="background-image:url('${resolved.src}'); background-position-x:${posX}; ${extraStyle || ''}"></div>`;
+  }
+  return `<div class="construction-sprite construction-sprite-silhouette ${extraClass || ''}" style="${extraStyle || ''}"></div>`;
+}
+
+// Small, cheap per-sector flourishes layered on top of the frame image
+// during the later build stages. Each reuses existing lightweight CSS
+// primitives (spans/keyframes) rather than new per-sector asset files, and
+// is skipped entirely once reducedMotion / stage === 'completed'.
+function sectorEffectHtml(sectorKey, stage) {
+  // Bounded to a few seconds per purchase, but still skipped on mobile to
+  // stay consistent with keeping phones free of extra concurrent animation.
+  if (reducedMotion || isMobileView || stage === 'siteprep' || stage === 'foundation' || stage === 'completed') return '';
+  const late = stage === 'facade' || stage === 'ceremony';
+  switch (sectorKey) {
+    case 'bank':
+      return late ? `<span class="sector-fx sector-fx-bank"></span>` : '';
+    case 'mining':
+      return `<span class="sector-fx sector-fx-mining"><i></i><i></i><i></i></span>`;
+    case 'telecom':
+      return late ? `<span class="sector-fx sector-fx-telecom"></span>` : '';
+    case 'construction':
+      return (stage === 'frame' || stage === 'facade') ? `<span class="crane-arm sector-fx-crane"><span class="crane-hook"></span></span>` : '';
+    case 'fuel':
+      return late ? `<span class="sector-fx sector-fx-fuel"><i></i><i></i><i></i></span>` : '';
+    case 'retail':
+      return late ? `<span class="sector-fx sector-fx-retail"><i></i><i></i><i></i><i></i></span>` : '';
+    case 'manufacturing':
+      return `<span class="sector-fx sector-fx-manufacturing"></span>`;
+    default:
+      return '';
+  }
+}
+// One short, sector-flavored tone at the ceremony stage, on top of the
+// existing generic construction sounds. Follows the same synth + try/catch
+// + reducedMotion-respecting pattern as playConstructionSound.
+function playSectorCeremonySound(sectorKey) {
+  if (reducedMotion || !sectorKey) return;
+  try {
+    if (!playHammerSound._ctx) playHammerSound._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = playHammerSound._ctx;
+    const presets = {
+      bank: [{ f: 1046, t: 'sine' }, { f: 1318, t: 'sine' }],       // soft coin chime
+      mining: [{ f: 180, t: 'sawtooth' }, { f: 90, t: 'square' }],   // metallic clank
+      telecom: [{ f: 880, t: 'sine' }, { f: 1760, t: 'sine' }],      // signal blip
+      construction: [{ f: 140, t: 'square' }],                       // crane clunk
+      fuel: [{ f: 300, t: 'triangle' }, { f: 450, t: 'triangle' }],  // canopy hum
+      retail: [{ f: 987, t: 'sine' }, { f: 1244, t: 'sine' }],       // glass chime
+      manufacturing: [{ f: 220, t: 'sawtooth' }],                    // factory pulse
+    };
+    const notes = presets[sectorKey];
+    if (!notes) return;
+    notes.forEach((n, i) => {
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.type = n.t; osc.frequency.value = n.f;
+      const t0 = ctx.currentTime + i * 0.11;
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.06, t0 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t0); osc.stop(t0 + 0.3);
+    });
+  } catch (e) {}
+}
+
 const PLAYER_GLOW_COLORS = ['#ef4444', '#3b82f6', '#22c55e', '#a855f7'];
 let seenUpgrades = new Set();
 
@@ -7300,22 +7553,34 @@ function renderBuildingConstructionOverlay(tile, idx, owner, anim, room) {
   const clipStyle = `clip-path: inset(${100 - revealPct}% 0 0 0);`;
 
   if (anim.type === 'purchase') {
-    const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-    const w = tile.buildingWidth * 1.5;
+    // Bottom-center anchored, sized to the tile's own building box (no 1.5x
+    // inflation) so the sprite never bleeds into a neighboring tile or over
+    // the token/name — matches the corp/house anchoring convention below.
+    const w = tile.buildingWidth;
     const bx = tile.buildingX - w / 2;
-    const by = tile.buildingY - w / 2;
+    const by = tile.buildingY - w;
     const leftPct = (bx / 1672 * 100).toFixed(2);
     const topPct = (by / 941 * 100).toFixed(2);
     const widthPct = (w / 1672 * 100).toFixed(2);
     const heightPct = (w / 941 * 100).toFixed(2);
-    const showBuilding = stage === 'frame' || stage === 'facade' || stage === 'ceremony';
-    return `<div class="construction-fx" style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%;">
+    const rotation = tile.buildingRotation || 0; // per-tile side-of-board perspective, 0 = flat
+    const resolvedSprite = resolveSectorSpriteSrc(tile);
+    const sectorKey = resolvedSprite ? resolvedSprite.key : null;
+    const frameIdx = SECTOR_STAGE_FRAME[stage] != null ? SECTOR_STAGE_FRAME[stage] : 0;
+    const sectorFxHtml = sectorEffectHtml(sectorKey, stage);
+    // A little dust/spark on every frame change (not just the early stages),
+    // per the sprite sheet's own timeline spec.
+    const frameChangeDust = (stage !== 'completed') ? seed.slice(0, isMobileView ? 3 : 5).map((p) =>
+      `<span class="dust-mote" style="--dx:${p.dx * 0.3}px; --delay:${p.delay * 0.2}ms;"></span>`).join('') : '';
+    const spriteHtml = renderSpriteFrame(tile, frameIdx, 'stage-' + stage,
+      'width:100%; height:100%; transform-origin:center bottom; animation:framePulse 0.1s ease-out both;');
+    return `<div class="construction-fx sector-build-frame sector-${sectorKey || 'generic'}" style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; transform:rotate(${rotation}deg); transform-origin:center bottom;">
       <span class="construction-ground-marker ${stage==='siteprep'?'active':''}"></span>
       <span class="construction-contact-shadow" style="opacity:${Math.min(1, revealPct/60)};"></span>
-      ${stage === 'siteprep' ? `<span class="tile-prep-glow"></span>` : ''}
-      ${dustHtml}
+      ${frameChangeDust}
       ${stage === 'foundation' || stage === 'frame' ? `<span class="hammer-icon"></span>` : ''}
-      ${showBuilding ? `<img class="house-rising-img ${stage === 'ceremony' ? 'stage-settled' : 'stage-rising'}" src="${fileName}.png" alt="" onerror="this.style.display='none'" style="${clipStyle}">` : ''}
+      ${spriteHtml}
+      ${sectorFxHtml}
       ${stage === 'ceremony' ? `<span class="player-flag" style="--flag-color:${flagColor};"></span><span class="build-flash"></span><span class="build-light-sweep"></span>` : ''}
       ${goldParticlesHtml}
     </div>`;
@@ -7452,10 +7717,14 @@ function computeClipPathPct(zonePoints, boxX, boxY, boxW, boxH) {
 }
 
 function renderBuildingIcon(tile, level, idx) {
-  const fileName = BUILDING_FILE_MAP[tile.buildingType] || tile.buildingType;
-  const w = tile.buildingWidth * 1.5;
+  // Persistent post-construction badge \u2014 uses the same sector sprite's
+  // finished frame (frame-05) that the construction animation ends on, so
+  // there's no visual jump once the animation hands off to this. Bottom
+  // anchored and sized to the tile's own building box (no inflation),
+  // matching the construction overlay and the corp/house convention.
+  const w = tile.buildingWidth;
   const x = tile.buildingX - w / 2;
-  const y = tile.buildingY - w / 2;
+  const y = tile.buildingY - w;
   const leftPct = (x / 1672 * 100).toFixed(2);
   const topPct = (y / 941 * 100).toFixed(2);
   const widthPct = (w / 1672 * 100).toFixed(2);
@@ -7465,11 +7734,13 @@ function renderBuildingIcon(tile, level, idx) {
   const flagHtml = level >= 4 ? `<span class="building-flag-icon">\ud83c\udfc1</span>` : '';
   const clipPath = '';
   const debugHtml = debugMode ? `<span class="badge-debug-id">${idx}</span>` : '';
+  const rotation = tile.buildingRotation || 0;
+  const finishedSpriteHtml = renderSpriteFrame(tile, 5, '', 'width:100%; height:100%;');
   return `<div data-idx="${idx}" data-tile-id="${idx}"
     class="tile-building-badge level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}"
-    style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --depth:${tile.depth}; ${clipPath}">
+    style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --depth:${tile.depth}; transform:rotate(${rotation}deg); transform-origin:center bottom; ${clipPath}">
     <span class="badge-ring"></span>
-    <img src="${fileName}.png" alt="${tile.name}" loading="lazy" onerror="this.style.display='none'">
+    ${finishedSpriteHtml}
     ${flagHtml}
     ${debugHtml}
   </div>`;
@@ -10513,6 +10784,7 @@ window.addEventListener('orientationchange', () => {
 render();
 initAuth();
 preloadBoardImages();
+preloadSectorSprites();
 </script>
 </body>
 </html>
