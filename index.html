@@ -1666,11 +1666,22 @@
   .pc-construction-area { position: relative; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: 0; }
   /* 260x520 = the sprite's real 1:2 (362x724) aspect ratio, so the image
      fills this box edge-to-edge at its cap instead of floating small
-     inside extra whitespace. Height stays vh-based so it still shrinks
-     gracefully on short viewports; 520px is the ceiling, not a fixed size. */
-  .pc-construction-visual { position: relative; width: 46%; max-width: 260px; height: 62vh; max-height: 520px; flex: 1; min-height: 0; }
+     inside extra whitespace. `flex:1; min-height:0` (NOT a fixed vh height
+     -- an earlier version used height:62vh here, which sizes against the
+     whole browser viewport regardless of how much room this box actually
+     has inside the modal, and overflowed the deed card / title right off
+     the visible area whenever the two were stacked together) lets
+     flexbox hand this element whatever space is actually left after its
+     siblings, up to the 520px ceiling, and shrink below that on a short
+     screen instead of pushing other content out of view. */
+  .pc-construction-visual { position: relative; width: 46%; max-width: 260px; max-height: 520px; flex: 1; min-height: 0; }
   .pc-construction-visual .construction-sprite { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; transform: translateX(-50%); }
-  .pc-side-visual { flex: 0 0 auto; width: 46%; max-width: 260px; height: 62vh; max-height: 520px; min-height: 110px; opacity: 0.92;
+  /* The side-visual accompanies a text panel (money/deed card) as a
+     SIBLING in the same column, not the sole content of the phase, so it
+     stays modestly sized (this is not one of the "make it 520px" hero
+     moments) precisely so the deed card's title/rows below it always have
+     room and never get clipped by the stage's overflow:hidden. */
+  .pc-side-visual { flex: 0 0 auto; width: 34%; max-width: 140px; height: 30vh; max-height: 210px; min-height: 100px; opacity: 0.92;
     filter: drop-shadow(0 6px 14px rgba(0,0,0,0.35)); }
   .pc-phase-entering .pc-side-visual { animation: pcSideVisualIn 0.5s cubic-bezier(.2,.8,.3,1) both; }
   @keyframes pcSideVisualIn { 0% { opacity: 0; transform: translateY(8px) scale(0.94); } 100% { opacity: 0.92; transform: translateY(0) scale(1); } }
@@ -1684,7 +1695,7 @@
   .pc-progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
     width: 40%; animation: pcSweep 1.4s linear infinite; }
   @keyframes pcSweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(280%); } }
-  .pc-reward-panel { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+  .pc-reward-panel { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; min-height: 0; height: 100%; }
   .pc-phase-entering .pc-reward-panel { animation: pcFadeUp 0.45s ease-out both; }
   .pc-reward-title { font-family: 'Cinzel', serif; font-weight: 800; font-size: clamp(15px, 2.2vw, 20px); color: var(--gold-light); text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
   .pc-reward-sub { font-size: 12px; color: rgba(255,242,207,0.7); }
@@ -7635,7 +7646,7 @@ function renderPropertyCinematic() {
     </div>`;
   } else if (pc.phase === 'reward') {
     bodyHtml = `<div class="pc-reward-panel">
-      <div class="pc-construction-visual pc-reward-visual" style="width:62%; max-width:260px; height:52vh; max-height:520px; min-height:140px; flex:0 0 auto;">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }), 'large')}</div>
+      <div class="pc-construction-visual pc-reward-visual" style="width:62%; max-width:260px; max-height:520px; min-height:120px; flex:1 1 auto;">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }), 'large')}</div>
       <div class="pc-reward-title">ШИНЭ ХӨРӨНГӨ ТАНЫ ЭЗЭМШИЛД ОРЛОО</div>
       <div class="pc-reward-sub">${pc.tile.name} • Суурь орлого: ₮${fmt(pc.tile.rent)}</div>
       <div class="pc-wealth-grid">
@@ -7938,7 +7949,18 @@ let seenBuildings = new Set();
 // itself (tile.buildingWidth) by the same idea, since a wider footprint
 // also yields a wider sprite once the aspect ratio is applied.
 const SPRITE_HEIGHT_FACTOR = 1.8;
-const BUILDING_FOOTPRINT_SCALE = 1.2;
+// Doubled from 1.2 on explicit request ("1 дахин том болго ... сүндэрлэн
+// боссон мэт" -- make it look like the building is towering). Since
+// h = w * SPRITE_HEIGHT_FACTOR, doubling this one number doubles BOTH the
+// box's width and height together, preserving the same 1:1.8 shape. This
+// reintroduces the neighbor-tile overlap risk the original 1.2 value was
+// deliberately chosen to avoid (see the comment above) -- on this board's
+// tight ~90px tile spacing, a building this size may visually reach into
+// a neighboring tile's own building slot on some edges. The sprite is
+// still centered and never stretched, so nothing looks broken even if
+// that happens; if tiles end up visibly colliding on the live board, dial
+// this back toward 1.6-1.8 instead of the full 2.4.
+const BUILDING_FOOTPRINT_SCALE = 2.4;
 // Two renditions per sector: "small" (half-size sheet, ~70-100KB WebP) for
 // the on-board mini construction animation where a frame only ever shows
 // at tile-box size (~90-150px tall), and "large" (full 2172x724 WebP,
