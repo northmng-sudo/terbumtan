@@ -1620,6 +1620,9 @@
   .pc-construction-area { position: relative; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: 0; }
   .pc-construction-visual { position: relative; width: 46%; max-width: 220px; flex: 1; min-height: 0; }
   .pc-construction-visual .construction-sprite { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; transform: translateX(-50%); }
+  .pc-side-visual { flex: 0 0 auto; width: 34%; max-width: 130px; height: 34vh; max-height: 190px; min-height: 110px; opacity: 0.92;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.35)); animation: pcSideVisualIn 0.5s cubic-bezier(.2,.8,.3,1) both; }
+  @keyframes pcSideVisualIn { 0% { opacity: 0; transform: translateY(8px) scale(0.94); } 100% { opacity: 0.92; transform: translateY(0) scale(1); } }
   .pc-ground-glow { position: absolute; left: 50%; bottom: 0; width: 120%; height: 14px; transform: translateX(-50%);
     background: radial-gradient(ellipse, rgba(245,202,85,0.35), transparent 70%); }
   .pc-progress-wrap { width: min(86%, 480px); margin-top: 12px; }
@@ -7322,7 +7325,7 @@ let propertyCinematic = null;
 let propertyCinematicActive = false;
 let pendingPurchaseCinematicData = null;
 let propertyCinematicSkipFn = null;
-const PROPERTY_CINEMATIC_FRAME_MS = { siteprep: 650, foundation: 700, frame: 850, facade: 850, ceremony: 750 };
+const PROPERTY_CINEMATIC_FRAME_MS = { siteprep: 750, foundation: 800, frame: 950, facade: 950, ceremony: 800 };
 const PROPERTY_CINEMATIC_FRAME_LABEL = {
   siteprep: 'ГАЗРЫН БЭЛТГЭЛ',
   foundation: 'СУУРЬ ЦУТГАЖ БАЙНА',
@@ -7392,21 +7395,29 @@ async function startPropertyCinematic(tileId, playerId, price, cashBefore, cashA
     return;
   }
   const skipTimer = setTimeout(() => { if (propertyCinematic) { propertyCinematic.canSkip = true; render(); } }, 1500);
-  const mul = short ? 0.45 : 1;
+  // NOTE: earlier versions applied `mul` (the short-mode multiplier) ON TOP
+  // of an already-shortened ternary value for these four phases — e.g.
+  // (short ? 500 : 950) * (short ? 0.45 : 1) collapsed 'short' mode down to
+  // ~225ms, a double reduction. Each phase below now picks ONE explicit
+  // duration for full vs short and nothing more; `mul` is reserved for the
+  // construction frame loop only. Durations are also deliberately generous
+  // now (reveal/money/deed run 1.8–2.6s each) after real playthroughs
+  // showed the whole cinematic flashing by too fast to actually read.
+  const mul = short ? 0.6 : 1;
   try {
-    await cinematicWait((short ? 500 : 950) * mul);
+    await cinematicWait(short ? 900 : 1800);
     if (propertyCinematic.skipRequested) throw 0;
 
     propertyCinematic.phase = 'money'; render();
     animatePropertyCinematicCounters();
     playConstructionSound('siteprep');
-    await cinematicWait((short ? 650 : 1400) * mul);
+    await cinematicWait(short ? 1300 : 2600);
     if (propertyCinematic.skipRequested) throw 0;
 
     propertyCinematic.phase = 'deed'; render();
     playHammerSound();
     if (owner.id === myId) vibrate(15);
-    await cinematicWait((short ? 600 : 1400) * mul);
+    await cinematicWait(short ? 1300 : 2600);
     if (propertyCinematic.skipRequested) throw 0;
 
     propertyCinematic.phase = 'construction';
@@ -7426,7 +7437,7 @@ async function startPropertyCinematic(tileId, playerId, price, cashBefore, cashA
     playFanfareSound();
     if (sectorAsset) playSectorCeremonySound(sectorAsset.key);
     if (owner.id === myId) vibrate([30, 40, 60]);
-    await cinematicWait((short ? 800 : 1900) * mul);
+    await cinematicWait(short ? 1300 : 2400);
   } catch (e) {
     // Skipped mid-sequence: jump straight to the settled frame-5 + reward
     // state. Money and ownership were already applied server-side long
@@ -7478,10 +7489,18 @@ function renderPropertyCinematic() {
   const particlesHtml = pc.seed.map(p => `<span style="--px:${p.px}; --py:${p.py}; --pdelay:${p.delay};"></span>`).join('');
   const skipHtml = pc.canSkip ? `<button class="pc-skip-btn" onclick="requestSkipPropertyCinematic()">АЛГАСАХ ▶</button>` : '';
   let bodyHtml = '';
+  // A small, quiet rendering of the property (frame 0 — site outline, no
+  // construction effects yet) shown alongside reveal/money/deed so the
+  // buyer sees WHAT they bought throughout the cinematic, not just its
+  // name in the header. Kept modest-sized here; the construction phase
+  // below gives it the big, full treatment once building actually starts.
+  const sideVisualHtml = `<div class="pc-construction-visual pc-side-visual">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'siteprep' }))}</div>`;
   if (pc.phase === 'reveal') {
-    bodyHtml = `<div class="pc-money-panel"><div class="pc-money-label">Баталгаажуулж байна...</div></div>`;
+    bodyHtml = `${sideVisualHtml}
+    <div class="pc-money-panel"><div class="pc-money-label">Баталгаажуулж байна...</div></div>`;
   } else if (pc.phase === 'money') {
-    bodyHtml = `<div class="pc-money-panel">
+    bodyHtml = `${sideVisualHtml}
+    <div class="pc-money-panel">
       <div class="pc-money-label">Бэлэн мөнгө</div>
       <div class="pc-money-row">
         <span class="pc-money-before">₮${fmt(pc.cashBefore)}</span>
@@ -7496,7 +7515,8 @@ function renderPropertyCinematic() {
       </div>
     </div>`;
   } else if (pc.phase === 'deed') {
-    bodyHtml = `<div class="pc-deed-card">
+    bodyHtml = `${sideVisualHtml}
+    <div class="pc-deed-card">
       <span class="pc-stamp">БАТАЛГААЖЛАА</span>
       <div class="pc-deed-title">ЭЗЭМШИХ ЭРХИЙН БАТАЛГАА</div>
       <div class="pc-deed-row"><span>Эзэмшигч</span><span>${pc.owner.name}</span></div>
