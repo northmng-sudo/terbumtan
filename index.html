@@ -62,6 +62,19 @@
     --radius-medium: 16px;
   }
   * { box-sizing: border-box; }
+  /* Android Chrome/WebView silently inflates font-size on small text blocks
+     ("font boosting"/text autosizing) to try to keep them "readable" --
+     it does this per-element based on the element's box width vs the
+     viewport, with NO way to opt out per-element, only globally. The board
+     tile name labels are small boxes with small deliberate font sizes, so
+     on Android this boosting was scaling their text well past the tile's
+     box and letting it overlap/collide with neighboring text -- exactly
+     the "фонт том, гацаж харагдаж байна" report, and Android-only because
+     iOS Safari does not apply this same auto-inflation. text-size-adjust:
+     100% turns the behavior off everywhere on the page, so every font-size
+     in the CSS renders at its literal value on Android too.
+  */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   html { scroll-behavior: smooth; overflow-x: hidden; }
   body { overflow-x: hidden; }
   @media (prefers-reduced-motion: reduce) {
@@ -652,6 +665,22 @@
   }
   .tsc-selected-tag { font-size: 8px; font-weight: 800; color: var(--gold, #f5ca55); }
   @media (max-width: 480px) { .token-select-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; } .tsc-visual { width: 26px; height: 26px; } }
+  /* PHASE 2: game-mode picker in the lobby -- deliberately mirrors
+     .token-select-card's look so it reads as part of the same lobby UI
+     language, but in a 3-column row (only 3 modes) with two detail lines
+     instead of an icon. */
+  .mode-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .mode-select-card {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: rgba(255,255,255,0.04); border: 1.5px solid rgba(245,202,85,0.25); border-radius: 10px;
+    padding: 10px 6px; cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .mode-select-card:hover:not(:disabled) { border-color: rgba(245,202,85,0.55); transform: translateY(-2px); }
+  .mode-select-card.selected { border-color: var(--gold); background: rgba(245,202,85,0.12); transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.35); }
+  .mode-select-card:disabled { cursor: default; }
+  .mode-select-card:disabled:not(.selected) { opacity: 0.55; }
+  .msc-name { font-size: 11px; font-weight: 800; color: var(--sb-text, #e8e0c8); }
+  .msc-detail { font-size: 8.5px; color: rgba(255,242,207,0.6); text-align: center; line-height: 1.3; }
   .wait-player { display: flex; align-items: center; gap: 12px; background: var(--night-indigo); border: 1px solid var(--slate-line); border-radius: 10px; padding: 11px 14px; margin-bottom: 8px; animation: popIn 0.25s ease; }
   .wait-token {
     font-size: 26px; width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -3009,7 +3038,7 @@ async function startRankedGameFromMatch() {
   const oppPlayer = { id: oppId, name: mmState.opponent.name, token: oppAvatar, color: TOKEN_COLORS[TOKENS.indexOf(oppAvatar)], money: ECONOMY_CONFIG.startingCash, position: 0, jailTurns: 0, bankrupt: false, isHost: !isHostByIdOrder };
   const players = isHostByIdOrder ? [mePlayer, oppPlayer] : [oppPlayer, mePlayer];
   const room = {
-    roomCode: shortCode, started: true, gameStartedAt: Date.now(), rankedGameId: mmState.gameId, rankedMode: mmState.mode,
+    roomCode: shortCode, started: true, gameStartedAt: Date.now(), turnStartedAt: Date.now(), rankedGameId: mmState.gameId, rankedMode: mmState.mode,
     players,
     propOwner: {}, houses: {},
     currentPlayerIndex: 0, hasRolled: false, pendingAction: null,
@@ -3092,6 +3121,13 @@ const TOKEN_TYPES = [
 function getTokenType(id) { return TOKEN_TYPES.find(t => t.id === id) || TOKEN_TYPES[0]; }
 function getPlayerColorInfo(colorHex) { return PLAYER_COLORS.find(c => c.color === colorHex) || PLAYER_COLORS[0]; }
 const TOKENS = TOKEN_TYPES.map(t => t.id);
+// PHASE 1 AUDIT FIX: joinRoom() used to hard-cap human joins at 4 while
+// addBotPlayer() (and the lobby UI, which literally shows "X/8 TOGLOGCH")
+// already allowed up to 8 -- so a 5th-8th human player could never join a
+// room via code/invite link even though the game is meant to support 2-8
+// human players. Both join-time checks now reference this single constant,
+// matching the 8-player cap addBotPlayer() already enforced.
+const MAX_ROOM_PLAYERS = 8;
 // size: 'board' (default, ~60-120px on-screen -> 128px asset) or 'lobby'
 // (bigger avatar preview -> 256px asset). The original 1254x1254 PNGs were
 // being served at both sizes, so every token cost 1.2-2.4MB for a glyph
@@ -3194,7 +3230,7 @@ const BOARD_CONFIG = [
     "id": 1,
     "type": "property",
     "name": "Органик ферм",
-    "price": 90,
+    "price": 180,
     "rent": 25,
     "colorGroup": "agriculture",
     "polygon": [
@@ -3275,7 +3311,7 @@ const BOARD_CONFIG = [
     "id": 2,
     "type": "property",
     "name": "Сүүний үйлдвэр",
-    "price": 115,
+    "price": 230,
     "rent": 35,
     "colorGroup": "agriculture",
     "polygon": [
@@ -3356,7 +3392,7 @@ const BOARD_CONFIG = [
     "id": 3,
     "type": "property",
     "name": "Хүнсний цогцолбор",
-    "price": 140,
+    "price": 280,
     "rent": 45,
     "colorGroup": "agriculture",
     "polygon": [
@@ -3437,7 +3473,7 @@ const BOARD_CONFIG = [
     "id": 4,
     "type": "property",
     "name": "Сүлжээ дэлгүүр",
-    "price": 90,
+    "price": 180,
     "rent": 25,
     "colorGroup": "commerce",
     "polygon": [
@@ -3518,7 +3554,7 @@ const BOARD_CONFIG = [
     "id": 5,
     "type": "property",
     "name": "Бөөний худалдааны төв",
-    "price": 115,
+    "price": 230,
     "rent": 35,
     "colorGroup": "commerce",
     "polygon": [
@@ -3633,7 +3669,7 @@ const BOARD_CONFIG = [
     "id": 7,
     "type": "property",
     "name": "Тансаг худалдааны төв",
-    "price": 140,
+    "price": 280,
     "rent": 45,
     "colorGroup": "commerce",
     "polygon": [
@@ -3758,7 +3794,7 @@ const BOARD_CONFIG = [
     "id": 9,
     "type": "property",
     "name": "Орон сууцны хотхон",
-    "price": 150,
+    "price": 300,
     "rent": 50,
     "colorGroup": "real_estate",
     "polygon": [
@@ -3839,7 +3875,7 @@ const BOARD_CONFIG = [
     "id": 10,
     "type": "property",
     "name": "Бизнесийн цамхаг",
-    "price": 190,
+    "price": 380,
     "rent": 68,
     "colorGroup": "real_estate",
     "polygon": [
@@ -3920,7 +3956,7 @@ const BOARD_CONFIG = [
     "id": 11,
     "type": "property",
     "name": "Тансаг зэрэглэлийн хотхон",
-    "price": 225,
+    "price": 450,
     "rent": 85,
     "colorGroup": "real_estate",
     "polygon": [
@@ -4001,7 +4037,7 @@ const BOARD_CONFIG = [
     "id": 12,
     "type": "property",
     "name": "Ачаа тээврийн төв",
-    "price": 150,
+    "price": 300,
     "rent": 50,
     "colorGroup": "logistics",
     "polygon": [
@@ -4082,7 +4118,7 @@ const BOARD_CONFIG = [
     "id": 13,
     "type": "property",
     "name": "Логистикийн терминал",
-    "price": 190,
+    "price": 380,
     "rent": 68,
     "colorGroup": "logistics",
     "polygon": [
@@ -4198,7 +4234,7 @@ const BOARD_CONFIG = [
     "id": 15,
     "type": "property",
     "name": "Олон улсын тээврийн сүлжээ",
-    "price": 225,
+    "price": 450,
     "rent": 85,
     "colorGroup": "logistics",
     "polygon": [
@@ -4323,7 +4359,7 @@ const BOARD_CONFIG = [
     "id": 17,
     "type": "property",
     "name": "Шатахуун түгээх сүлжээ",
-    "price": 240,
+    "price": 480,
     "rent": 90,
     "colorGroup": "energy",
     "polygon": [
@@ -4404,7 +4440,7 @@ const BOARD_CONFIG = [
     "id": 18,
     "type": "property",
     "name": "Нарны цахилгаан станц",
-    "price": 280,
+    "price": 560,
     "rent": 115,
     "colorGroup": "energy",
     "polygon": [
@@ -4485,7 +4521,7 @@ const BOARD_CONFIG = [
     "id": 19,
     "type": "property",
     "name": "Салхин эрчим хүчний парк",
-    "price": 325,
+    "price": 650,
     "rent": 140,
     "colorGroup": "energy",
     "polygon": [
@@ -4566,7 +4602,7 @@ const BOARD_CONFIG = [
     "id": 20,
     "type": "property",
     "name": "Үүрэн холбооны сүлжээ",
-    "price": 240,
+    "price": 480,
     "rent": 90,
     "colorGroup": "technology",
     "polygon": [
@@ -4647,7 +4683,7 @@ const BOARD_CONFIG = [
     "id": 21,
     "type": "property",
     "name": "Дата төв",
-    "price": 280,
+    "price": 560,
     "rent": 115,
     "colorGroup": "technology",
     "polygon": [
@@ -4762,7 +4798,7 @@ const BOARD_CONFIG = [
     "id": 23,
     "type": "property",
     "name": "Технологийн парк",
-    "price": 325,
+    "price": 650,
     "rent": 140,
     "colorGroup": "technology",
     "polygon": [
@@ -4887,7 +4923,7 @@ const BOARD_CONFIG = [
     "id": 25,
     "type": "property",
     "name": "Арилжааны банк",
-    "price": 350,
+    "price": 700,
     "rent": 150,
     "colorGroup": "finance",
     "polygon": [
@@ -4968,7 +5004,7 @@ const BOARD_CONFIG = [
     "id": 26,
     "type": "property",
     "name": "Хөрөнгө оруулалтын сан",
-    "price": 410,
+    "price": 820,
     "rent": 185,
     "colorGroup": "finance",
     "polygon": [
@@ -5049,7 +5085,7 @@ const BOARD_CONFIG = [
     "id": 27,
     "type": "property",
     "name": "Олон улсын санхүүгийн төв",
-    "price": 475,
+    "price": 950,
     "rent": 220,
     "colorGroup": "finance",
     "polygon": [
@@ -5130,7 +5166,7 @@ const BOARD_CONFIG = [
     "id": 28,
     "type": "property",
     "name": "Нүүрсний уурхай",
-    "price": 350,
+    "price": 700,
     "rent": 150,
     "colorGroup": "mining",
     "polygon": [
@@ -5211,7 +5247,7 @@ const BOARD_CONFIG = [
     "id": 29,
     "type": "property",
     "name": "Зэсийн баяжуулах үйлдвэр",
-    "price": 410,
+    "price": 820,
     "rent": 185,
     "colorGroup": "mining",
     "polygon": [
@@ -5329,7 +5365,7 @@ const BOARD_CONFIG = [
     "id": 31,
     "type": "property",
     "name": "Алтны уурхай",
-    "price": 475,
+    "price": 950,
     "rent": 220,
     "colorGroup": "mining",
     "polygon": [
@@ -5534,9 +5570,48 @@ const ECONOMY_CONFIG = {
     rankedMinutes: 35,
     maxRounds: 30,
   },
+  // PHASE 3: the wealth-percentage tax rate used to be a bare 0.08 literal
+  // inline inside resolvePropertyOrTax()'s `sp.taxPercent || 0.08` fallback
+  // -- moved here so it's a single named, centralized value instead of a
+  // magic number, matching the spec's "Татвар: Том татвар = нийт
+  // хөрөнгийн 8%" exactly.
+  bigTaxPercent: 0.08,
 };
 function getTierCosts(tier) { return ECONOMY_CONFIG.tierCosts[tier] || ECONOMY_CONFIG.tierCosts.small; }
 function getMortgageValue(sp) { return Math.round(sp.price * ECONOMY_CONFIG.mortgageRate); }
+
+// PHASE 2 — GAME MODES. Each mode is a set of multipliers/overrides layered
+// on top of the existing ECONOMY_CONFIG (Phase 3 will centralize the base
+// numbers further; these are the mode-specific deltas the spec calls for).
+// `family` matches today's existing defaults exactly (startingCash 2500,
+// matchLimits 35min/30rounds) so picking it changes nothing for anyone
+// already playing. turnTimerSeconds pre-wires the per-mode AFK timer that
+// Phase 8 formalizes; it's harmless to use already since the Phase-1 AFK
+// fix just needs a number of seconds.
+const GAME_MODES = {
+  family: {
+    id: 'family', label: 'Гэр бүлийн горим', shortLabel: 'Гэр бүл',
+    minPlayers: 2, maxPlayers: 8, durationMinutes: 35, turnLimit: 30, turnTimerSeconds: 35,
+    startingMoney: 2500, rentMultiplier: 1, fineMultiplier: 1, priceMultiplier: 1, buildCostMultiplier: 1,
+    easyBuild: false, tutorialDefault: null, safeChatDefault: false, bankBailout: 0,
+  },
+  child: {
+    id: 'child', label: 'Хүүхдийн горим', shortLabel: 'Хүүхдийн',
+    minPlayers: 2, maxPlayers: 6, durationMinutes: 20, turnLimit: 16, turnTimerSeconds: 45,
+    startingMoney: 3000, rentMultiplier: 0.85, fineMultiplier: 0.7, priceMultiplier: 1, buildCostMultiplier: 1,
+    easyBuild: false, tutorialDefault: true, safeChatDefault: true, bankBailout: 200,
+  },
+  quick: {
+    id: 'quick', label: 'Хурдан тоглолт', shortLabel: 'Хурдан',
+    minPlayers: 2, maxPlayers: 6, durationMinutes: 18, turnLimit: 14, turnTimerSeconds: 20,
+    startingMoney: 2000, rentMultiplier: 1.2, fineMultiplier: 1, priceMultiplier: 0.9, buildCostMultiplier: 0.85,
+    easyBuild: true, tutorialDefault: false, safeChatDefault: false, bankBailout: 0,
+  },
+};
+const DEFAULT_GAME_MODE = 'family';
+function getGameModeConfig(room) {
+  return (room && GAME_MODES[room.gameMode]) || GAME_MODES[DEFAULT_GAME_MODE];
+}
 
 
 
@@ -5919,15 +5994,24 @@ function storePlayerId(roomCode, playerId) {
   try { localStorage.setItem('ikhKhorongoRoomId_' + roomCode, playerId); } catch (e) {}
 }
 
-async function createRoom(name, avatarToken) {
+async function createRoom(name, avatarToken, gameMode) {
   const code = randCode();
   const token = avatarToken || TOKENS[0];
   const hostPlayer = newPlayer(name, token, true);
   myId = hostPlayer.id;
   storePlayerId(code, myId);
   iAmHostOfCurrentRoom = true;
+  const mode = GAME_MODES[gameMode] ? gameMode : DEFAULT_GAME_MODE;
+  const modeCfg = GAME_MODES[mode];
   const room = {
     roomCode: code, started: false,
+    // PHASE 2: game-mode fields, exactly as spec'd (gameMode, maxPlayers,
+    // durationMinutes, turnLimit, startingMoney, tutorialEnabled,
+    // safeChatEnabled), all host-changeable in the lobby via setGameMode().
+    gameMode: mode, maxPlayers: modeCfg.maxPlayers, durationMinutes: modeCfg.durationMinutes,
+    turnLimit: modeCfg.turnLimit, startingMoney: modeCfg.startingMoney,
+    tutorialEnabled: modeCfg.tutorialDefault === null ? true : modeCfg.tutorialDefault,
+    safeChatEnabled: modeCfg.safeChatDefault,
     players: [hostPlayer],
     propOwner: {}, houses: {},
     currentPlayerIndex: 0, hasRolled: false, pendingAction: null,
@@ -5936,6 +6020,22 @@ async function createRoom(name, avatarToken) {
   };
   await saveRoom(room);
   currentRoom = room; view = 'waiting'; startPolling(); render();
+}
+// PHASE 2: host-only, lobby-only mode switch. Other players see the change
+// arrive through the same realtime/poll sync every other room-state change
+// already uses -- no separate signaling needed.
+async function setGameMode(gameMode) {
+  if (!iAmHostOfCurrentRoom || !GAME_MODES[gameMode]) return;
+  const room = await getRoom(currentRoom.roomCode);
+  if (!room || room.started) return;
+  const modeCfg = GAME_MODES[gameMode];
+  if (room.players.length > modeCfg.maxPlayers) { errorMsg = '\u042d\u043d\u044d \u0433\u043e\u0440\u0438\u043c\u0434 \u0445\u044d\u0442\u044d\u0440\u0445\u044d\u0433 \u0442\u043e\u0433\u043b\u043e\u0433\u0447 \u0431\u0430\u0439\u043d\u0430 (\u0434\u044d\u044d\u0434 \u0442\u0430\u043b \u043d\u044c ' + modeCfg.maxPlayers + ').'; render(); return; }
+  room.gameMode = gameMode; room.maxPlayers = modeCfg.maxPlayers; room.durationMinutes = modeCfg.durationMinutes;
+  room.turnLimit = modeCfg.turnLimit; room.startingMoney = modeCfg.startingMoney;
+  room.tutorialEnabled = modeCfg.tutorialDefault === null ? true : modeCfg.tutorialDefault;
+  room.safeChatEnabled = modeCfg.safeChatDefault;
+  pushLog(room, `\u0413\u043e\u0440\u0438\u043c: ${modeCfg.label}`);
+  await saveRoom(room); currentRoom = room; render();
 }
 
 async function joinRoom(code, name, avatarToken) {
@@ -5950,7 +6050,8 @@ async function joinRoom(code, name, avatarToken) {
     startPolling(); render(); return;
   }
   if (room.started) { errorMsg = '\u042d\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043e\u043c \u0430\u043b\u044c \u0445\u044d\u0434\u0438\u0439\u043d \u044d\u0445\u044d\u043b\u0441\u044d\u043d \u0431\u0430\u0439\u043d\u0430.'; render(); return; }
-  if (room.players.length >= 4) { errorMsg = '\u04e8\u0440\u04e9\u04e9 \u0434\u04af\u04af\u0440\u0441\u044d\u043d \u0431\u0430\u0439\u043d\u0430 (\u0434\u044d\u044d\u0434 \u0442\u0430\u043b \u043d\u044c 4 \u0442\u043e\u0433\u043b\u043e\u0433\u0447).'; render(); return; }
+  const roomCap = room.maxPlayers || MAX_ROOM_PLAYERS;
+  if (room.players.length >= roomCap) { errorMsg = '\u04e8\u0440\u04e9\u04e9 \u0434\u04af\u04af\u0440\u0441\u044d\u043d \u0431\u0430\u0439\u043d\u0430 (\u0434\u044d\u044d\u0434 \u0442\u0430\u043b \u043d\u044c ' + roomCap + ' \u0442\u043e\u0433\u043b\u043e\u0433\u0447).'; render(); return; }
   const usedTokens = room.players.map(p => p.token);
   const freeToken = (avatarToken && !usedTokens.includes(avatarToken)) ? avatarToken : TOKENS.find(t => !usedTokens.includes(t));
   const player = newPlayer(name, freeToken, false);
@@ -5960,7 +6061,7 @@ async function joinRoom(code, name, avatarToken) {
   const fresh = await getRoom(code);
   if (!fresh) { errorMsg = '\u041d\u044d\u0433\u0434\u044d\u0445\u044d\u0434 \u0430\u043b\u0434\u0430\u0430 \u0433\u0430\u0440\u0447\u043b\u0430\u0430, \u0434\u0430\u0445\u0438\u043d \u043e\u0440\u043e\u043b\u0434\u043e\u043d\u043e \u0443\u0443.'; render(); return; }
   if (fresh.started) { errorMsg = '\u042d\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043e\u043c \u0430\u043b\u044c \u0445\u044d\u0434\u0438\u0439\u043d \u044d\u0445\u044d\u043b\u0441\u044d\u043d \u0431\u0430\u0439\u043d\u0430.'; render(); return; }
-  if (fresh.players.some(p => p.id === player.id) || fresh.players.length >= 4) { currentRoom = fresh; view = 'waiting'; startPolling(); render(); return; }
+  if (fresh.players.some(p => p.id === player.id) || fresh.players.length >= (fresh.maxPlayers || MAX_ROOM_PLAYERS)) { currentRoom = fresh; view = 'waiting'; startPolling(); render(); return; }
   fresh.players.push(player);
   pushChatMessage(fresh, null, 'system', `${name} \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u043e\u0434 \u043d\u044d\u0433\u0434\u043b\u044d\u044d`);
   await saveRoom(fresh);
@@ -5970,7 +6071,7 @@ async function joinRoom(code, name, avatarToken) {
 const BOT_NAMES = ['\u0411\u0430\u0442\u0430\u0430-\u0411\u041e\u0422', '\u0421\u0430\u0440\u0430\u043d\u0442\u0443\u044f-\u0411\u041e\u0422', '\u0413\u0430\u043d\u0431\u0430\u0430\u0442\u0430\u0440-\u0411\u041e\u0422', '\u041e\u044e\u0443\u043d\u0430-\u0411\u041e\u0422', '\u0422\u04e9\u043c\u04e9\u0440-\u0411\u041e\u0422', '\u0417\u0430\u044f-\u0411\u041e\u0422', '\u0411\u043e\u043b\u043e\u0440-\u0411\u041e\u0422'];
 async function addBotPlayer() {
   const room = await getRoom(currentRoom.roomCode);
-  if (!room || room.started || room.players.length >= 8) return;
+  if (!room || room.started || room.players.length >= (room.maxPlayers || MAX_ROOM_PLAYERS)) return;
   const usedTokens = room.players.map(p => p.token);
   const freeToken = TOKENS.find(t => !usedTokens.includes(t));
   if (!freeToken) return;
@@ -6032,7 +6133,7 @@ async function runBotTurn() {
     currentRoom = room;
     if (room.pendingAction && room.pendingAction.type === 'buy' && room.pendingAction.playerId === bot.id) {
       const tile = BOARD_CONFIG[room.pendingAction.spaceIndex];
-      const price = getEffectivePrice(bot, tile);
+      const price = getEffectivePrice(bot, tile, room);
       const shouldBuy = bot.money - price >= price * 0.8; // keep a reasonable cash buffer
       await new Promise(r => setTimeout(r, 900));
       if (shouldBuy) await buyProperty(); else await skipBuy();
@@ -6053,11 +6154,117 @@ async function runBotTurn() {
   }
 }
 
+// PHASE 1 AUDIT FIX: nothing in the codebase ever handled a human player
+// disconnecting or going idle mid-turn -- there was no presence/heartbeat
+// tracking and no turn timer, so if the current player's tab closed or
+// their connection dropped, `isMyTurn()`'s client-side gate meant literally
+// no one else could act for them and the whole room stalled forever. This
+// mirrors runBotTurn()'s existing, already-battle-tested pattern (only the
+// HOST's client drives it, to avoid every viewer racing to act at once;
+// temporarily borrowing myId to satisfy each action's own ownership check,
+// then restoring it) but drives the AFK player through exactly the
+// spec'd "safe auto-action" steps instead of bot strategy: resolve a
+// pending card with no side-choice, roll if they haven't, skip (never buy
+// or build) a pending purchase/build decision, then end their turn. A
+// window's length now comes from the room's game mode (spec: 45s/35s/20s
+// for child/family/quick -- see GAME_MODES.*.turnTimerSeconds), falling
+// back to 35s for anything without a recognized mode (e.g. ranked rooms).
+const AFK_TURN_TIMEOUT_MS_DEFAULT = 35000;
+function getAfkTimeoutMs(room) { return (getGameModeConfig(room).turnTimerSeconds || 35) * 1000; }
+let afkAutoActionRunning = false;
+async function maybeRunAfkAutoAction() {
+  if (afkAutoActionRunning || botTurnRunning) return;
+  if (!iAmHostOfCurrentRoom) return; // only the host's client enforces this, same as runBotTurn()
+  const room0 = currentRoom;
+  if (!room0 || !room0.started || room0.winnerId) return;
+  const afkPlayer = room0.players[room0.currentPlayerIndex];
+  if (!afkPlayer || afkPlayer.isBot || afkPlayer.bankrupt) return;
+  if (!room0.turnStartedAt || Date.now() - room0.turnStartedAt < getAfkTimeoutMs(room0)) return;
+  afkAutoActionRunning = true;
+  const realMyId = myId;
+  try {
+    let room = await getRoom(room0.roomCode);
+    if (!room || !room.started || room.winnerId) return;
+    const cur = room.players[room.currentPlayerIndex];
+    // Re-check against the FRESH state: the player may have come back (any
+    // real action of theirs refreshes turnStartedAt -- see rollDice()/
+    // endTurn()) in the time between this render() tick queuing the check
+    // and this fetch actually landing.
+    if (!cur || cur.id !== afkPlayer.id || cur.isBot || cur.bankrupt) return;
+    if (!room.turnStartedAt || Date.now() - room.turnStartedAt < getAfkTimeoutMs(room)) return;
+    myId = cur.id;
+    pushLog(room, `${cur.name} холболтойгүй тул автоматаар үргүүллэгдлэв.`);
+    await saveRoom(room); currentRoom = room; render();
+
+    // 1) An unresolved card with no meaningful choice for the AFK player.
+    room = await getRoom(room0.roomCode); if (!room) return; currentRoom = room;
+    if (room.cardDraw && !room.cardDraw.resolved && room.cardDraw.playerId === cur.id) {
+      const card = findCardById(room.cardDraw.deckType, room.cardDraw.cardId);
+      const player = room.players.find(p => p.id === cur.id);
+      if (card && player) { try { applyCardEffect(room, card, player, null); } finally { room.cardDraw.resolved = true; room.cardDraw = null; await saveRoom(room); currentRoom = room; render(); } }
+    }
+
+    // 2) A pending buy/build decision -- safe default is always to decline.
+    room = await getRoom(room0.roomCode); if (!room) return; currentRoom = room;
+    if (room.pendingAction && room.pendingAction.playerId === cur.id) {
+      if (room.pendingAction.type === 'buy') await skipBuy();
+      else if (room.pendingAction.type === 'build') await skipBuild();
+    }
+
+    // 3) Dice not yet rolled this turn.
+    room = await getRoom(room0.roomCode); if (!room) return; currentRoom = room;
+    if (!room.hasRolled && room.players[room.currentPlayerIndex] && room.players[room.currentPlayerIndex].id === cur.id) {
+      await rollDice();
+      await new Promise(r => setTimeout(r, reducedMotion ? 200 : 1200));
+      // Rolling can itself trigger a new card draw or buy prompt -- resolve
+      // those the same safe way before ending the turn.
+      room = await getRoom(room0.roomCode); if (!room) return; currentRoom = room;
+      if (room.cardDraw && !room.cardDraw.resolved && room.cardDraw.playerId === cur.id) {
+        const card = findCardById(room.cardDraw.deckType, room.cardDraw.cardId);
+        const player = room.players.find(p => p.id === cur.id);
+        if (card && player) { try { applyCardEffect(room, card, player, null); } finally { room.cardDraw.resolved = true; room.cardDraw = null; await saveRoom(room); currentRoom = room; render(); } }
+      }
+      room = await getRoom(room0.roomCode); if (!room) return; currentRoom = room;
+      if (room.pendingAction && room.pendingAction.playerId === cur.id) {
+        if (room.pendingAction.type === 'buy') await skipBuy();
+        else if (room.pendingAction.type === 'build') await skipBuild();
+        room = await getRoom(room0.roomCode); if (!room) return; currentRoom = room;
+      }
+    }
+
+    // 4) Nothing left blocking -- end their turn (never build for them).
+    if (room.players[room.currentPlayerIndex] && room.players[room.currentPlayerIndex].id === cur.id && !room.pendingAction && (!room.cardDraw || room.cardDraw.resolved)) {
+      await endTurn();
+    }
+  } finally {
+    myId = realMyId;
+    afkAutoActionRunning = false;
+    render();
+  }
+}
+
+// PHASE 1 AUDIT FIX: toggleReadyState() let every non-host player flip a
+// `ready` flag, but startGame() never actually looked at it -- it only
+// checked player COUNT, so the ready-up UI was purely cosmetic and the host
+// could start while other players were still mid-setup (picking a token,
+// reading the rules, etc). notReady() below is the single source of truth
+// for both this gate and the start button's disabled state.
+function notReadyPlayers(room) {
+  return room.players.filter(p => !p.isHost && !p.isBot && !p.ready);
+}
 async function startGame() {
   const room = await getRoom(currentRoom.roomCode);
   if (!room || room.players.length < 2) return;
+  if (notReadyPlayers(room).length > 0) return;
+  // PHASE 2: apply the room's chosen game-mode starting money to every
+  // seated player right at kickoff -- not at join time -- so a mode switch
+  // made anytime before start (even after players already joined/picked
+  // tokens) still takes effect correctly for everyone.
+  const startingMoney = room.startingMoney || ECONOMY_CONFIG.startingCash;
+  room.players.forEach(p => { p.money = startingMoney; });
   room.started = true;
   room.gameStartedAt = Date.now();
+  room.turnStartedAt = Date.now();
   room.log.push('\u0422\u043e\u0433\u043b\u043e\u043e\u043c \u044d\u0445\u044d\u043b\u043b\u044d\u044d! ' + room.players[0].name + '-\u0438\u0439\u043d \u044d\u044d\u043b\u0436.');
   await saveRoom(room);
   currentRoom = room; view = 'game'; render();
@@ -6401,6 +6608,19 @@ function ensureRoundCandles(room) {
 function checkWinner(room) { const active = room.players.filter(p => !p.bankrupt); if (active.length === 1) room.winnerId = active[0].id; }
 
 function bankrupt(room, player) {
+  // PHASE 2: child mode's one-time bank bailout (spec: \u20ae200\u0441\u0430\u044f before
+  // going bankrupt). Only fires once per player (usedBankBailout), and only
+  // actually saves them if the grant covers the deficit -- otherwise they
+  // still go bankrupt afterward, just with the bailout logged first.
+  const modeCfg = getGameModeConfig(room);
+  if (modeCfg.bankBailout > 0 && !player.usedBankBailout && player.money < 0) {
+    player.usedBankBailout = true;
+    const grant = modeCfg.bankBailout;
+    player.money += grant;
+    pushLog(room, `${player.name} \u0431\u0430\u043d\u043a\u043d\u044b \u043d\u044d\u0433 \u0443\u0434\u0430\u0430\u0433\u0438\u0439\u043d \u0442\u0443\u0441\u043b\u0430\u043c\u0436 \u20ae${fmt(grant)} \u0430\u0432\u0430\u0432.`);
+    recordWealthChange(room, { playerId: player.id, type: 'bank_bailout', amount: grant, description: '\u0411\u0430\u043d\u043a\u043d\u044b \u043d\u044d\u0433 \u0443\u0434\u0430\u0430\u0433\u0438\u0439\u043d \u0442\u0443\u0441\u043b\u0430\u043c\u0436' });
+    if (player.money >= 0) return; // saved -- not bankrupt after all
+  }
   player.bankrupt = true;
   Object.keys(room.propOwner).forEach(k => { if (room.propOwner[k] === player.id) { delete room.propOwner[k]; if (room.houses) delete room.houses[k]; } });
   pushLog(room, `${player.name} \u0434\u0430\u043c\u043f\u0443\u0443\u0440\u043b\u0430\u0430!`);
@@ -6424,7 +6644,8 @@ function buildCost(sp, room) {
   const base = (currentLevel + 1 >= 4) ? costs.corporationCost : costs.houseCost;
   if (!room) return base;
   const mult = getActiveMultiplier(room, sp, 'buildingCost');
-  let cost = base * mult;
+  // PHASE 2: quick mode builds at 85% of standard cost.
+  let cost = base * mult * getGameModeConfig(room).buildCostMultiplier;
   const ownerId = room.propOwner[sp.id];
   if (sp.sector === 'real_estate' && ownerId && ownsFullGroup(room, ownerId, sp.id)) cost *= 0.85;
   return Math.round(cost / 10) * 10;
@@ -6453,7 +6674,9 @@ function calculateRentBreakdown(room, sp, idx, ownerId) {
   }
   const preMarket = baseRent + buildingBonus + sectorBonus + industryBonus;
   const marketMultiplier = getActiveMultiplier(room, sp, 'income');
-  const total = Math.round(preMarket * marketMultiplier);
+  // PHASE 2: child mode rents 15% less, quick mode 20% more.
+  const modeRentMultiplier = getGameModeConfig(room).rentMultiplier;
+  const total = Math.round(preMarket * marketMultiplier * modeRentMultiplier);
   const marketBonus = total - preMarket;
   return { baseRent, buildingBonus, sectorBonus, sectorBonusPct, industryBonus, industryBonusLabel, marketMultiplier, marketBonus, total, level };
 }
@@ -6500,8 +6723,10 @@ function resolvePropertyOrTax(room, player, idx) {
     let taxAmount = sp.amount;
     if (sp.taxType === 'percent_wealth') {
       const wealth = computePlayerWealth(room, player);
-      taxAmount = Math.round(wealth.total * (sp.taxPercent || 0.08));
+      taxAmount = Math.round(wealth.total * (sp.taxPercent || ECONOMY_CONFIG.bigTaxPercent));
     }
+    // PHASE 2: child mode's "Торгууль 30% бага" applies to tax/fine tiles.
+    taxAmount = Math.round(taxAmount * getGameModeConfig(room).fineMultiplier);
     player.money -= taxAmount;
     pushLog(room, `${player.name} \u0442\u0430\u0442\u0432\u0430\u0440 \u20ae${fmt(taxAmount)} \u0442\u04e9\u043b\u04e9\u0432.`);
     recordWealthChange(room, { playerId: player.id, type: 'tax', amount: -taxAmount, tileId: idx, description: `\u0422\u0430\u0442\u0432\u0430\u0440 \u20ae${fmt(taxAmount)} \u0442\u04e9\u043b\u04e9\u0432` });
@@ -6612,6 +6837,7 @@ function tickMarketEffects(room) {
 async function rollDice() {
   const room = await getRoom(currentRoom.roomCode);
   if (!room || !isMyTurn(room) || room.hasRolled || room.pendingAction || (room.cardDraw && !room.cardDraw.resolved) || wealthModalOpen) return;
+  room.turnStartedAt = Date.now(); // any real roll is activity -- refresh the AFK-timeout clock (covers the doubles "go again" path, which doesn't go through endTurn())
   audioManager.playSfx('diceRoll'); vibrate(25);
   const player = room.players[room.currentPlayerIndex];
 
@@ -6660,9 +6886,13 @@ async function rollDice() {
   await saveRoom(room); currentRoom = room; justRolled = true; render();
 }
 
-function getEffectivePrice(player, sp) {
-  if (player && player.commerceDiscountAvailable) return Math.round(sp.price * 0.9 / 10) * 10;
-  return sp.price;
+function getEffectivePrice(player, sp, room) {
+  // PHASE 2: quick mode prices companies at 90% of standard. room is
+  // optional (bot AI and the deed-panel preview may not always have it
+  // handy) -- falls back to the family-mode multiplier of 1 when omitted.
+  const modeMult = room ? getGameModeConfig(room).priceMultiplier : 1;
+  if (player && player.commerceDiscountAvailable) return Math.round(sp.price * 0.9 * modeMult / 10) * 10;
+  return Math.round(sp.price * modeMult / 10) * 10;
 }
 
 async function buyProperty() {
@@ -6671,7 +6901,7 @@ async function buyProperty() {
   const idx = room.pendingAction.spaceIndex;
   const player = room.players.find(p => p.id === myId);
   const sp = BOARD_CONFIG[idx];
-  const price = getEffectivePrice(player, sp);
+  const price = getEffectivePrice(player, sp, room);
   const usedDiscount = player.commerceDiscountAvailable;
   if (player.money < price) { room.pendingAction = null; await saveRoom(room); currentRoom = room; render(); return; }
   player.money -= price; room.propOwner[idx] = player.id;
@@ -6728,6 +6958,7 @@ async function endTurn() {
   let next = room.currentPlayerIndex;
   do { next = (next + 1) % room.players.length; } while (room.players[next].bankrupt);
   room.currentPlayerIndex = next; room.hasRolled = false; room.lastDice = null; room.consecutiveDoubles = 0;
+  room.turnStartedAt = Date.now();
   room.turnCount = (room.turnCount || 0) + 1;
   if (room.turnCount % room.players.length === 0) {
     tickMarketEffects(room); ensureRoundCandles(room);
@@ -6746,14 +6977,28 @@ async function endTurn() {
     }
   }
   pushLog(room, `\u2014 ${room.players[next].name}-\u0438\u0439\u043d \u044d\u044d\u043b\u0436 \u2014`);
+  // PHASE 1 AUDIT FIX: checkMatchTimeLimit() already implements the correct
+  // time-limit/round-limit ending (with the exact net-worth -> income ->
+  // corp-count -> cash tie-break order the game is meant to use) but was
+  // dead code -- nothing in the codebase ever called it, so a match could
+  // never end by clock or round cap, only by elimination. Checking it once
+  // per turn-advance, right where turnCount just moved forward, is the
+  // natural hook: it's a no-op (returns immediately) until gameStartedAt/
+  // turnCount actually cross the configured limit.
+  checkMatchTimeLimit(room);
   await saveRoom(room); currentRoom = room; render();
 }
 function checkMatchTimeLimit(room) {
   if (room.winnerId) return;
   const roundN = Math.floor((room.turnCount || 0) / room.players.length) + 1;
   const elapsedMin = room.gameStartedAt ? (Date.now() - room.gameStartedAt) / 60000 : 0;
-  const timeUp = elapsedMin >= ECONOMY_CONFIG.matchLimits.rankedMinutes;
-  const roundsUp = roundN > ECONOMY_CONFIG.matchLimits.maxRounds;
+  // PHASE 2: a room-level gameMode (family/child/quick) carries its own
+  // duration/round targets (room.durationMinutes/turnLimit, set by
+  // createRoom()/setGameMode()); ranked matchmaking rooms don't set those
+  // fields at all, so they keep falling back to ECONOMY_CONFIG.matchLimits
+  // exactly as before.
+  const timeUp = elapsedMin >= (room.durationMinutes || ECONOMY_CONFIG.matchLimits.rankedMinutes);
+  const roundsUp = roundN > (room.turnLimit || ECONOMY_CONFIG.matchLimits.maxRounds);
   if (!timeUp && !roundsUp) return;
   const active = room.players.filter(p => !p.bankrupt);
   if (active.length === 0) return;
@@ -6770,6 +7015,16 @@ function checkMatchTimeLimit(room) {
 
 let roomChannel = null;
 let roomPollInterval = null;
+// PHASE 1 AUDIT FIX: leaving the results screen back to the main menu
+// (resultsMenuBtn) reset `view` but never tore down the realtime
+// subscription/poll interval that startPolling() had set up for that room
+// -- both kept running in the background (only ever replaced, never
+// cleared, by the NEXT startPolling() call) until the tab was closed. Minor
+// resource leak, not a correctness bug, but easy to close properly.
+function stopPolling() {
+  if (roomChannel) { supabaseClient.removeChannel(roomChannel); roomChannel = null; }
+  if (roomPollInterval) { clearInterval(roomPollInterval); roomPollInterval = null; }
+}
 function startPolling() {
   if (roomChannel) supabaseClient.removeChannel(roomChannel);
   if (roomPollInterval) clearInterval(roomPollInterval);
@@ -7123,7 +7378,9 @@ function canBuildOnTile(tile, room, player) {
   if (ownerId !== player.id) return false;
   const level = houseLevel(room, tile.id);
   if (level >= 4) return false;
-  return level > 0 || ownsFullGroup(room, player.id, tile.id);
+  // PHASE 2: quick mode drops the "own the full color group" requirement
+  // for the first house (spec: "Барилга барих шаардлага хялбар").
+  return level > 0 || getGameModeConfig(room).easyBuild || ownsFullGroup(room, player.id, tile.id);
 }
 
 function getTileVisualState(tile, room, currentPlayer, me) {
@@ -8498,7 +8755,7 @@ function render() {
     } else {
       attachGameEvents();
       maybeFlashMoney(currentRoom);
-      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); maybeShowCardResultToast(currentRoom); watchChatMessages(currentRoom); watchBankruptcies(currentRoom); watchWealthChanges(currentRoom); if (iAmHostOfCurrentRoom && isBotTurn(currentRoom) && !botTurnRunning) runBotTurn(); }
+      if (currentRoom) { maybeShowBuyModal(currentRoom); maybeShowCardModal(currentRoom); maybeShowCardResultToast(currentRoom); watchChatMessages(currentRoom); watchBankruptcies(currentRoom); watchWealthChanges(currentRoom); if (iAmHostOfCurrentRoom && isBotTurn(currentRoom) && !botTurnRunning) runBotTurn(); if (iAmHostOfCurrentRoom && !isBotTurn(currentRoom) && !afkAutoActionRunning) maybeRunAfkAutoAction(); }
       if (rentCinematicActive) animateRentCounters();
     }
     return;
@@ -9060,7 +9317,7 @@ function renderWaiting() {
       <div class="wr-table-center">
         <div class="wr-table-code-label">\u04e8\u0420\u04e8\u041e\u041d\u0418\u0419 \u041a\u041e\u0414</div>
         <div class="wr-table-code">${room.roomCode}</div>
-        <div class="wr-table-count">${room.players.length}/8 \u0422\u041e\u0413\u041b\u041e\u0413\u0427</div>
+        <div class="wr-table-count">${room.players.length}/${room.maxPlayers || 8} \u0422\u041e\u0413\u041b\u041e\u0413\u0427</div>
       </div>
     </div>
 
@@ -9078,11 +9335,14 @@ function renderWaiting() {
       </div>
     </div>
 
+    <div class="wr-glass-panel wr-mode-panel">${renderGameModePicker(room, isHost)}</div>
+
     <div class="wr-glass-panel wr-token-panel">${renderTokenSelectGrid(room)}</div>
 
     <div class="wr-bottom-action">
       ${isHost
-        ? `<button class="btn btn-primary wr-start-btn" id="startBtn" ${room.players.length<2?'disabled':''}>\u0422\u041e\u0413\u041b\u041e\u041e\u041c \u042d\u0425\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`
+        ? (() => { const nr = notReadyPlayers(room); const canStart = room.players.length >= 2 && nr.length === 0;
+            return `<button class="btn btn-primary wr-start-btn" id="startBtn" ${canStart ? '' : 'disabled'}>${nr.length > 0 ? ('\u0411\u042d\u041b\u042d\u041d \u0425\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430 (' + nr.length + ')') : '\u0422\u041e\u0413\u041b\u041e\u041e\u041c \u042d\u0425\u041b\u04ae\u04ae\u041b\u042d\u0425'}</button>`; })()
         : `<button class="wr-ready-btn ${meReady?'wr-ready':''}" id="readyToggleBtn" data-ready-for="${myId}">${meReady?'\u2713 \u0411\u042d\u041b\u042d\u041d':'\u0411\u042d\u041b\u042d\u041d \u0411\u041e\u041b\u041e\u0425'}</button>`}
     </div>
 
@@ -9092,9 +9352,29 @@ function renderWaiting() {
         <div class="wr-seat-token">${renderTokenGlyph(p.token)}<span class="wr-seat-ready-dot ${p.ready?'wr-ready':''}"></span>${p.isBot ? '<span class="wr-seat-bot-tag">BOT</span>' : ''}</div>
         <div class="wr-seat-name">${p.name}</div>
       </div>`).join('')}
-      ${(isHost && room.players.length < 8) ? `<div class="wr-carousel-card wr-carousel-addbot" data-add-bot="1"><div class="wr-seat-empty-ring">+</div><div class="wr-seat-addbot-label">\u0411\u041e\u0422</div></div>` : ''}
+      ${(isHost && room.players.length < (room.maxPlayers || 8)) ? `<div class="wr-carousel-card wr-carousel-addbot" data-add-bot="1"><div class="wr-seat-empty-ring">+</div><div class="wr-seat-addbot-label">\u0411\u041e\u0422</div></div>` : ''}
     </div>
-    ${!isHost ? `<button class="wr-sticky-ready-btn ${meReady?'wr-ready':''}" id="readyToggleBtnMobile" data-ready-for="${myId}">${meReady?'\u2713 \u0411\u042d\u041b\u042d\u041d':'\u0411\u042d\u041b\u042d\u041d \u0411\u041e\u041b\u041e\u0425'}</button>` : `<button class="btn btn-primary wr-sticky-ready-btn" id="startBtnMobile" ${room.players.length<2?'disabled':''}>\u0422\u041e\u0413\u041b\u041e\u041e\u041c \u042d\u0425\u041b\u04ae\u04ae\u041b\u042d\u0425</button>`}
+    ${!isHost ? `<button class="wr-sticky-ready-btn ${meReady?'wr-ready':''}" id="readyToggleBtnMobile" data-ready-for="${myId}">${meReady?'\u2713 \u0411\u042d\u041b\u042d\u041d':'\u0411\u042d\u041b\u042d\u041d \u0411\u041e\u041b\u041e\u0425'}</button>` : (() => { const nr = notReadyPlayers(room); const canStart = room.players.length >= 2 && nr.length === 0;
+        return `<button class="btn btn-primary wr-sticky-ready-btn" id="startBtnMobile" ${canStart ? '' : 'disabled'}>${nr.length > 0 ? ('\u0411\u042d\u041b\u042d\u041d \u0425\u04af\u043b\u044d\u044d\u0436 \u0431\u0430\u0439\u043d\u0430 (' + nr.length + ')') : '\u0422\u041e\u0413\u041b\u041e\u041e\u041c \u042d\u0425\u041b\u04ae\u04ae\u041b\u042d\u0425'}</button>`; })()}
+  </div>`;
+}
+// PHASE 2: mode picker shown in the lobby. Host gets clickable cards
+// (data-mode-select) that call setGameMode(); non-host players see the same
+// cards but disabled, read-only, so they can see what the host picked
+// (synced automatically through the room state they already poll/subscribe
+// to) without being able to change it themselves.
+function renderGameModePicker(room, isHost) {
+  const activeMode = GAME_MODES[room.gameMode] ? room.gameMode : DEFAULT_GAME_MODE;
+  return `<div class="mode-select-section">
+    <div class="tss-title">◈ ТОГЛООМЫН ГОРИМ ◈</div>
+    <div class="mode-select-grid">
+      ${Object.values(GAME_MODES).map(m => `<button class="mode-select-card ${m.id === activeMode ? 'selected' : ''}" data-mode-select="${m.id}" ${isHost ? '' : 'disabled'} title="${m.label}">
+        <span class="msc-name">${m.shortLabel}</span>
+        <span class="msc-detail">${m.minPlayers}–${m.maxPlayers} тоглогч · ${m.durationMinutes} мин</span>
+        <span class="msc-detail">${fmt(m.startingMoney)} эхлэх мөнгө</span>
+        ${m.id === activeMode ? `<span class="tsc-selected-tag">Сонгогдсон</span>` : ''}
+      </button>`).join('')}
+    </div>
   </div>`;
 }
 function renderTokenSelectGrid(room) {
@@ -9188,6 +9468,9 @@ function attachWaitingEvents() {
   };
   document.querySelectorAll('.token-select-card[data-token-select]').forEach(btn => {
     btn.onclick = () => selectPlayerToken(btn.dataset.tokenSelect);
+  });
+  document.querySelectorAll('.mode-select-card[data-mode-select]:not([disabled])').forEach(btn => {
+    btn.onclick = () => setGameMode(btn.dataset.modeSelect);
   });
 }
 
@@ -9965,7 +10248,7 @@ function renderGameResultsCinematic(room) {
     <div class="results-progress">${stageOrder.slice(0, 5).map((s, i) => `<span class="results-dot ${i <= stageIdx ? 'active' : ''}"></span>`).join('')}</div>
     <div class="results-content">${bodyHtml}</div>
     ${showButtons ? `<div class="results-actions">
-      <button class="btn btn-primary" id="resultsReplayBtn">\u0414\u0410\u0425\u0418\u041d \u0422\u041e\u0413\u041b\u041e\u0425</button>
+      ${iAmHostOfCurrentRoom ? `<button class="btn btn-primary" id="resultsReplayBtn">\u0414\u0410\u0425\u0418\u041d \u0422\u041e\u0413\u041b\u041e\u0425</button>` : ''}
       <button class="btn btn-secondary" id="resultsMenuBtn">\u04ae\u041d\u0414\u0421\u042d\u041d \u0426\u042d\u0421</button>
       <button class="btn btn-secondary" id="resultsDetailsBtn">\u0422\u041e\u0413\u041b\u041e\u041b\u0422\u042b\u041d \u0414\u042d\u041b\u0413\u042d\u0420\u042d\u041d\u0413\u04ae\u0419</button>
     </div>` : ''}
@@ -9975,7 +10258,7 @@ function renderGameResultsCinematic(room) {
 function attachResultsEvents() {
   if (gameResults.stage === 'counting') animateResultsCounters();
   const replayBtn = document.getElementById('resultsReplayBtn'); if (replayBtn) replayBtn.onclick = confirmReplay;
-  const menuBtn = document.getElementById('resultsMenuBtn'); if (menuBtn) menuBtn.onclick = () => { gameResults.isOpen = false; view = 'landing'; render(); };
+  const menuBtn = document.getElementById('resultsMenuBtn'); if (menuBtn) menuBtn.onclick = () => { gameResults.isOpen = false; stopPolling(); currentRoom = null; view = 'landing'; render(); };
   const detailsBtn = document.getElementById('resultsDetailsBtn'); if (detailsBtn) detailsBtn.onclick = () => showFullLogModal(currentRoom);
 }
 function animateRentCounters() {
@@ -10648,7 +10931,7 @@ function renderBuyModal(room) {
   const houseCost = tierCosts.houseCost;
   const corpCost = tierCosts.corporationCost;
   const groupColor = GROUP_COLORS[sp.colorGroup] || 'var(--gold)';
-  const effPrice = getEffectivePrice(me, sp);
+  const effPrice = getEffectivePrice(me, sp, room);
   const hasDiscount = effPrice < sp.price;
   const canAfford = me.money >= effPrice;
   const remaining = me.money - effPrice;
@@ -11097,6 +11380,11 @@ function computeAchievements(room) {
 }
 
 async function confirmReplay() {
+  // PHASE 1 AUDIT FIX: any player clicking "rematch" used to reset money/
+  // ownership/positions for the WHOLE room with no host check -- someone
+  // still reading the results screen could have their game reset out from
+  // under them by a non-host player. Host-only now, matching startGame().
+  if (!iAmHostOfCurrentRoom) return;
   if (!confirm('\u0428\u0438\u043d\u044d\u044d\u0440 \u0442\u043e\u0433\u043b\u043e\u0445 \u0443\u0443? \u041e\u0434\u043e\u043e\u0433\u0438\u0439\u043d \u0442\u043e\u0433\u043b\u043e\u043b\u0442\u044b\u043d \u04af\u0440 \u0434\u04af\u043d \u0430\u043b\u0433\u0430\u0433\u0434\u0430\u043d\u0430.')) return;
   const room = await getRoom(currentRoom.roomCode);
   if (!room) return;
@@ -11105,6 +11393,7 @@ async function confirmReplay() {
   room.decks = null; ensureDecks(room);
   room.currentPlayerIndex = 0; room.hasRolled = false; room.lastDice = null;
   room.diceRollId = null; room.animPath = null; room.cardDraw = null; room.winnerId = null; room.turnCount = 0;
+  room.turnStartedAt = Date.now();
   room.pendingAction = null; room.log = []; room.lastRentTransaction = null; room.lastResolvedCard = null;
   pushLog(room, '\u0428\u0438\u043d\u044d \u0442\u043e\u0433\u043b\u043e\u043b\u0442 \u044d\u0445\u044d\u043b\u043b\u044d\u044d!');
   await saveRoom(room); currentRoom = room;
