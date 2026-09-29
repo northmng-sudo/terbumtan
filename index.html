@@ -1540,6 +1540,113 @@
   }
   @keyframes craneLower { 0% { top: 0; } 60% { top: 65%; } 100% { top: 55%; } }
 
+  /* ===== PROPERTY ACQUISITION CINEMATIC ===== */
+  .property-cinematic-backdrop {
+    position: fixed; inset: 0; z-index: 2950; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 35%, rgba(8,60,45,0.55) 0%, rgba(2,10,8,0.86) 62%, rgba(0,0,0,0.94) 100%);
+    backdrop-filter: blur(2px);
+    animation: pcBackdropIn 0.35s ease-out both;
+    padding: 16px;
+  }
+  @keyframes pcBackdropIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+  .property-cinematic-backdrop.pc-returning { animation: pcBackdropOut 0.5s ease-in both; }
+  @keyframes pcBackdropOut { 0% { opacity: 1; } 100% { opacity: 0; } }
+  .property-cinematic-stage {
+    position: relative; width: min(72vw, 900px); height: min(68vh, 650px);
+    border-radius: 22px; overflow: hidden;
+    background: linear-gradient(180deg, #0c2a20 0%, #071c15 60%, #04120d 100%);
+    border: 2px solid rgba(245,202,85,0.55);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 30px 70px rgba(0,0,0,0.6), 0 0 90px rgba(34,197,139,0.18);
+    display: flex; flex-direction: column;
+    animation: pcStageGrow 0.5s cubic-bezier(.2,.9,.25,1.1) both;
+  }
+  @keyframes pcStageGrow { 0% { transform: scale(0.55); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .pc-returning .property-cinematic-stage { animation: pcStageShrink 0.5s ease-in both; }
+  @keyframes pcStageShrink { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.5); opacity: 0; } }
+  .pc-city-backdrop {
+    position: absolute; inset: 0; opacity: 0.14; filter: blur(3px) saturate(0.6);
+    background: radial-gradient(circle at 30% 20%, rgba(245,202,85,0.25), transparent 55%),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 34px);
+    pointer-events: none;
+  }
+  .pc-light-ring { position: absolute; left: 50%; top: 50%; width: 70%; padding-top: 70%; transform: translate(-50%,-50%);
+    border-radius: 50%; border: 1px solid rgba(245,202,85,0.18); pointer-events: none; }
+  .pc-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .pc-particles span { position: absolute; left: var(--px, 50%); top: var(--py, 50%); width: 3px; height: 3px; border-radius: 50%;
+    background: var(--gold-light); opacity: 0; animation: pcParticleFloat 3.2s ease-in-out infinite; animation-delay: var(--pdelay, 0s); }
+  @keyframes pcParticleFloat { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: 0.7; } 100% { opacity: 0; transform: translateY(-60px); } }
+  .pc-header { text-align: center; padding: 16px 20px 6px; position: relative; z-index: 1; }
+  .pc-eyebrow { font-family: 'Cinzel', serif; font-size: clamp(13px, 2vw, 18px); font-weight: 800; letter-spacing: 2px;
+    color: var(--gold-light); text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
+  .pc-company-name { font-size: clamp(17px, 2.4vw, 24px); font-weight: 800; color: var(--cream); margin-top: 4px; }
+  .pc-sector-name { font-size: 12px; color: rgba(255,242,207,0.65); margin-top: 2px; }
+  .pc-body { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 6px 20px 14px; z-index: 1; min-height: 0; }
+  .pc-money-panel { display: flex; flex-direction: column; align-items: center; gap: 4px; animation: pcFadeUp 0.4s ease-out both; }
+  @keyframes pcFadeUp { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+  .pc-money-label { font-size: 11px; letter-spacing: 1.5px; color: rgba(255,242,207,0.6); text-transform: uppercase; }
+  .pc-money-row { display: flex; align-items: baseline; gap: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: clamp(18px, 2.6vw, 26px); }
+  .pc-money-before { color: rgba(255,242,207,0.45); text-decoration: line-through; text-decoration-color: rgba(255,242,207,0.3); }
+  .pc-money-arrow { color: var(--gold); font-size: 0.8em; }
+  .pc-money-after { color: var(--cream); }
+  .pc-money-delta { margin-top: 2px; font-size: 13px; font-weight: 700; color: var(--gold-light); background: rgba(245,202,85,0.12);
+    border: 1px solid rgba(245,202,85,0.3); border-radius: 20px; padding: 3px 12px; }
+  .pc-money-explain { margin-top: 6px; font-size: 11px; color: rgba(255,242,207,0.55); display: flex; flex-direction: column; gap: 2px; text-align: center; }
+  .pc-stamp {
+    position: absolute; top: 8px; right: 10px; padding: 5px 12px; border-radius: 8px;
+    border: 1.5px solid var(--gold); color: var(--gold-light); font-family: 'Cinzel', serif; font-weight: 800; font-size: 11px; letter-spacing: 1px;
+    transform: rotate(-8deg) scale(0.4); opacity: 0; animation: pcStampIn 0.4s cubic-bezier(.3,1.6,.5,1) 0.05s both;
+  }
+  @keyframes pcStampIn { 0% { transform: rotate(-8deg) scale(2.2); opacity: 0; } 60% { opacity: 1; } 100% { transform: rotate(-8deg) scale(1); opacity: 1; } }
+  .pc-deed-card {
+    width: min(78%, 360px); background: linear-gradient(180deg, rgba(255,242,207,0.08), rgba(255,242,207,0.03));
+    border: 1px solid rgba(245,202,85,0.4); border-radius: 14px; padding: 14px 18px; position: relative;
+    animation: pcFadeUp 0.4s ease-out both; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+  }
+  .pc-deed-title { text-align: center; font-family: 'Cinzel', serif; font-weight: 800; font-size: 13px; letter-spacing: 1.5px; color: var(--gold-light); margin-bottom: 8px; }
+  .pc-deed-row { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,242,207,0.85); padding: 3px 0; border-bottom: 1px dashed rgba(255,242,207,0.12); }
+  .pc-deed-row span:first-child { color: rgba(255,242,207,0.5); }
+  .pc-deed-seal { position: absolute; bottom: -10px; right: 14px; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--seal-color, var(--gold)); box-shadow: 0 0 0 3px rgba(0,0,0,0.4), 0 0 14px rgba(245,202,85,0.5);
+    display: flex; align-items: center; justify-content: center; font-size: 14px; animation: pcSealDrop 0.35s cubic-bezier(.3,1.7,.4,1) both; }
+  @keyframes pcSealDrop { 0% { transform: translateY(-14px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+  .pc-construction-area { position: relative; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: 0; }
+  .pc-construction-visual { position: relative; width: 46%; max-width: 220px; flex: 1; min-height: 0; }
+  .pc-construction-visual .construction-sprite { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; transform: translateX(-50%); }
+  .pc-ground-glow { position: absolute; left: 50%; bottom: 0; width: 120%; height: 14px; transform: translateX(-50%);
+    background: radial-gradient(ellipse, rgba(245,202,85,0.35), transparent 70%); }
+  .pc-progress-wrap { width: min(86%, 480px); margin-top: 12px; }
+  .pc-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,242,207,0.7); margin-bottom: 4px; }
+  .pc-progress-track { height: 8px; border-radius: 5px; background: rgba(4,26,22,0.8); border: 1px solid rgba(245,202,85,0.2); overflow: hidden; }
+  .pc-progress-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--emerald-light), var(--gold)); position: relative;
+    transition: width 0.35s ease-out; }
+  .pc-progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    width: 40%; animation: pcSweep 1.4s linear infinite; }
+  @keyframes pcSweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(280%); } }
+  .pc-reward-panel { display: flex; flex-direction: column; align-items: center; gap: 10px; animation: pcFadeUp 0.45s ease-out both; text-align: center; }
+  .pc-reward-title { font-family: 'Cinzel', serif; font-weight: 800; font-size: clamp(15px, 2.2vw, 20px); color: var(--gold-light); text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
+  .pc-reward-sub { font-size: 12px; color: rgba(255,242,207,0.7); }
+  .pc-wealth-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(90%, 520px); margin-top: 4px; }
+  .pc-wealth-cell { display: flex; flex-direction: column; gap: 2px; padding: 8px 6px; border-radius: 10px; background: rgba(255,242,207,0.05); border: 1px solid rgba(245,202,85,0.15); }
+  .pc-wealth-cell-label { font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,242,207,0.5); }
+  .pc-wealth-cell-value { font-family: 'JetBrains Mono', monospace; font-size: clamp(11px, 1.6vw, 14px); font-weight: 700; color: var(--cream); }
+  .pc-skip-btn {
+    position: absolute; right: 14px; bottom: 14px; z-index: 2; padding: 7px 16px; border-radius: 20px;
+    background: rgba(0,0,0,0.35); border: 1px solid rgba(255,242,207,0.35); color: rgba(255,242,207,0.85);
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer;
+    animation: pcFadeUp 0.3s ease-out both;
+  }
+  .pc-skip-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+  .pc-flag { position: absolute; left: 50%; bottom: 40%; width: 2px; height: 26px; background: var(--flag-pole, #ddd); transform: translateX(-50%); }
+  .pc-flag::after { content: ''; position: absolute; top: 0; left: 2px; width: 16px; height: 11px; background: var(--flag-color, var(--gold)); clip-path: polygon(0 0, 100% 15%, 0 100%); }
+  @media (max-width: 768px) {
+    .property-cinematic-backdrop { padding: 0; align-items: stretch; }
+    .property-cinematic-stage { width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; border-width: 0;
+      padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    .pc-construction-visual { width: 50%; max-width: none; }
+    .pc-wealth-grid { grid-template-columns: 1fr 1fr; }
+    .pc-skip-btn { right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); }
+  }
+
   /* ===== SECTOR-SPECIFIC BUILDING SPRITE SHEET (6 frames, 1 file/sector) ===== */
   .sector-build-frame { overflow: visible; }
   /* One frame cropped out of a 2172x724 (362x724 x6) sprite sheet via
@@ -5432,7 +5539,7 @@ let justRolled = false;
 let debugMode = false;
 
 /* ===== SETTINGS (audio/vibration/environment) ===== */
-const DEFAULT_SETTINGS = { sfxEnabled: true, musicEnabled: true, vibrationEnabled: true, environmentEnabled: true, sfxVolume: 0.75, musicVolume: 0.35, chatSoundEnabled: true, reactionsEnabled: true, cinematicIntensity: 'full' };
+const DEFAULT_SETTINGS = { sfxEnabled: true, musicEnabled: true, vibrationEnabled: true, environmentEnabled: true, sfxVolume: 0.75, musicVolume: 0.35, chatSoundEnabled: true, reactionsEnabled: true, cinematicIntensity: 'full', propertyCinematicMode: 'full' };
 let gameSettings = loadSettings();
 function loadSettings() {
   try {
@@ -6444,6 +6551,13 @@ async function buyProperty() {
   const discNote = usedDiscount ? ` (${SECTOR_INFO.commerce.bonusName})` : '';
   pushLog(room, `${player.name} "${sp.name}"-\u0433 \u20ae${price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432${discNote}.`);
   recordWealthChange(room, { playerId: player.id, type: 'buy_company', amount: -price, tileId: idx, companyId: idx, description: `"${sp.name}"-\u0433 \u20ae${price}-\u0440 \u0445\u0443\u0434\u0430\u043b\u0434\u0430\u0436 \u0430\u0432\u0430\u0432${discNote}` });
+  // The property-acquisition cinematic (see startPropertyCinematic) needs the
+  // EXACT price paid (which can be discounted) and the player's exact
+  // before/after cash to show an honest money breakdown. maybeTriggerBuildAnimation
+  // only sees the room AFTER this save (ownership already changed), so it
+  // can't recover the exact price on its own \u2014 stash it here, at the one
+  // place that actually knows it, for that function to pick up.
+  pendingPurchaseCinematicData = { tileId: parseInt(idx, 10), playerId: player.id, price, cashBefore: player.money + price, cashAfter: player.money };
   room.pendingAction = null;
   await saveRoom(room); currentRoom = room; render();
   audioManager.playSfx('companyPurchase'); vibrate([30, 40, 30]);
@@ -6690,7 +6804,7 @@ function setCameraRaw(tx, ty, scale, tileId) {
     const vp = getViewport();
     if (!vp || !isMobileView) return;
     if (!vp.contains(e.target)) return;
-    if (buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive || isAnimatingMovement) return;
+    if (buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive || propertyCinematic || isAnimatingMovement) return;
     activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     moveDist = 0;
     if (activePointers.size === 1) {
@@ -7160,13 +7274,272 @@ function maybeTriggerBuildAnimation(room) {
     if (!prevOwner && nowOwner) {
       knownLevels = currentLevels; knownOwners = currentOwners;
       const owner = room.players.find(p => p.id === nowOwner);
+      // The small on-board construction sprite still runs for EVERY client
+      // (buyer and spectators alike) exactly as before \u2014 it's what leaves
+      // the correct frame-5 building behind on the tile for realtime sync,
+      // refresh/reconnect, and other players. The new full-screen property
+      // cinematic below is purely an extra local presentation layered on
+      // top of that for the buyer; it never touches money or ownership.
       runBuildingAnimation(parseInt(idx, 10), owner ? owner.id : null, 'purchase');
       if (gameSettings.reactionsEnabled) suggestContextualReaction('buy_company', 'buy-' + idx + '-' + nowOwner);
       if (owner) showDirectorBanner(`${BOARD_CONFIG[idx].name} \u0448\u0438\u043d\u044d \u044d\u0437\u044d\u043c\u0448\u0438\u0433\u0447\u0442\u044d\u0439 \u0431\u043e\u043b\u043b\u043e\u043e`, { dedupeKey: 'ownerbanner-' + idx });
+      if (owner && owner.id === myId && gameSettings.propertyCinematicMode !== 'off') {
+        const tileIdNum = parseInt(idx, 10);
+        const data = (pendingPurchaseCinematicData && pendingPurchaseCinematicData.tileId === tileIdNum && pendingPurchaseCinematicData.playerId === owner.id)
+          ? pendingPurchaseCinematicData : null;
+        pendingPurchaseCinematicData = null;
+        const price = data ? data.price : BOARD_CONFIG[tileIdNum].price;
+        const cashBefore = data ? data.cashBefore : owner.money + price;
+        const cashAfter = data ? data.cashAfter : owner.money;
+        startPropertyCinematic(tileIdNum, owner.id, price, cashBefore, cashAfter);
+      }
       return;
     }
   }
   knownLevels = currentLevels; knownOwners = currentOwners;
+}
+
+// ===== PROPERTY ACQUISITION CINEMATIC =====
+// A full-screen, LOCAL-ONLY presentation layered on top of an ALREADY
+// CONFIRMED purchase. By the time this ever runs, buyProperty() has long
+// since deducted the money, set room.propOwner and awaited saveRoom() —
+// this only reads that already-settled state and shows it back to the
+// buyer. It never changes money or ownership, never re-runs on refresh
+// (it's not part of persisted room state, only knownOwners diffing), and
+// is purely additive to the existing on-board construction sprite system
+// (runBuildingAnimation('purchase')), which keeps running unchanged for
+// every client so the real synced building still lands correctly for
+// spectators, refresh and reconnect.
+let propertyCinematic = null;
+let propertyCinematicActive = false;
+let pendingPurchaseCinematicData = null;
+let propertyCinematicSkipFn = null;
+const PROPERTY_CINEMATIC_FRAME_MS = { siteprep: 450, foundation: 500, frame: 600, facade: 600, ceremony: 500 };
+const PROPERTY_CINEMATIC_FRAME_LABEL = {
+  siteprep: 'ГАЗРЫН БЭЛТГЭЛ',
+  foundation: 'СУУРЬ ЦУТГАЖ БАЙНА',
+  frame: 'КАРКАС УГСАРЧ БАЙНА',
+  facade: 'БАРИЛГА БОСГОЖ БАЙНА',
+  ceremony: 'ДУУСГАХ АЖИЛ',
+  completed: 'АШИГЛАЛТАД ОРЛОО',
+};
+const PROPERTY_CINEMATIC_FRAME_PCT = { siteprep: 0, foundation: 20, frame: 40, facade: 65, ceremony: 85, completed: 100 };
+function requestSkipPropertyCinematic() {
+  if (!propertyCinematic || propertyCinematic.skipRequested || !propertyCinematic.canSkip) return;
+  propertyCinematic.skipRequested = true;
+  if (propertyCinematicSkipFn) { const fn = propertyCinematicSkipFn; propertyCinematicSkipFn = null; fn(); }
+}
+function cinematicWait(ms) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => { if (done) return; done = true; if (propertyCinematicSkipFn === finish) propertyCinematicSkipFn = null; resolve(); };
+    propertyCinematicSkipFn = finish;
+    setTimeout(finish, ms);
+  });
+}
+async function startPropertyCinematic(tileId, playerId, price, cashBefore, cashAfter) {
+  if (propertyCinematicActive || !currentRoom) return;
+  const tile = BOARD_CONFIG[tileId];
+  const owner = currentRoom.players.find(p => p.id === playerId);
+  if (!tile || !owner) return;
+  propertyCinematicActive = true;
+  const sectorAsset = resolveSectorSpriteSrc(tile);
+  const mode = gameSettings.propertyCinematicMode || 'full';
+  const skipAll = mode === 'off' || reducedMotion;
+  const short = mode === 'short';
+  const wealthAfter = computePlayerWealth(currentRoom, owner);
+  const companyAssetsAfter = wealthAfter.companyValue + wealthAfter.houseValue + wealthAfter.corporationValue;
+  const companyAssetsBefore = companyAssetsAfter - price;
+  const seed = Array.from({ length: isMobileView ? 8 : 14 }, () => ({
+    px: (10 + Math.random() * 80).toFixed(1) + '%', py: (10 + Math.random() * 70).toFixed(1) + '%', delay: (Math.random() * 3).toFixed(2) + 's',
+  }));
+  propertyCinematic = {
+    tileId, tile, owner, sectorKey: sectorAsset ? sectorAsset.key : null,
+    price, cashBefore, cashAfter, companyAssetsBefore, companyAssetsAfter, totalWealth: wealthAfter.total,
+    phase: 'reveal', stage: 'siteprep', canSkip: false, skipRequested: false, seed,
+  };
+  render();
+  if (skipAll) {
+    // prefers-reduced-motion, or the cinematic turned off in settings: per
+    // spec §13, skip straight to a plain 300ms fade into the finished
+    // frame-5 state and the purchase summary — no camera, clone or shake.
+    propertyCinematic.phase = 'reward'; propertyCinematic.stage = 'completed';
+    render();
+    await cinematicWait(300);
+    propertyCinematic.phase = 'return'; render();
+    await cinematicWait(300);
+    propertyCinematic = null; propertyCinematicActive = false; render();
+    return;
+  }
+  const skipTimer = setTimeout(() => { if (propertyCinematic) { propertyCinematic.canSkip = true; render(); } }, 1500);
+  const mul = short ? 0.45 : 1;
+  try {
+    await cinematicWait(700 * mul);
+    if (propertyCinematic.skipRequested) throw 0;
+
+    propertyCinematic.phase = 'money'; render();
+    animatePropertyCinematicCounters();
+    playConstructionSound('siteprep');
+    await cinematicWait((short ? 500 : 850) * mul);
+    if (propertyCinematic.skipRequested) throw 0;
+
+    propertyCinematic.phase = 'deed'; render();
+    playHammerSound();
+    if (owner.id === myId) vibrate(15);
+    await cinematicWait((short ? 450 : 900) * mul);
+    if (propertyCinematic.skipRequested) throw 0;
+
+    propertyCinematic.phase = 'construction';
+    const stages = ['siteprep', 'foundation', 'frame', 'facade', 'ceremony'];
+    for (const stage of stages) {
+      propertyCinematic.stage = stage;
+      if (!patchPropertyCinematicConstruction()) render();
+      playConstructionSound(stage);
+      if (stage === 'foundation' && owner.id === myId) vibrate(15);
+      await cinematicWait(PROPERTY_CINEMATIC_FRAME_MS[stage] * mul);
+      if (propertyCinematic.skipRequested) throw 0;
+    }
+    propertyCinematic.stage = 'completed';
+
+    propertyCinematic.phase = 'reward'; render();
+    animatePropertyCinematicCounters();
+    playFanfareSound();
+    if (sectorAsset) playSectorCeremonySound(sectorAsset.key);
+    if (owner.id === myId) vibrate([30, 40, 60]);
+    await cinematicWait((short ? 600 : 1300) * mul);
+  } catch (e) {
+    // Skipped mid-sequence: jump straight to the settled frame-5 + reward
+    // state. Money and ownership were already applied server-side long
+    // before this cinematic started, so nothing needs to be redone —
+    // skipping only changes what's shown locally, per spec §10.
+    propertyCinematic.stage = 'completed';
+    propertyCinematic.phase = 'reward';
+    render();
+  } finally {
+    clearTimeout(skipTimer);
+  }
+  propertyCinematic.phase = 'return'; render();
+  await cinematicWait(500);
+  propertyCinematic = null; propertyCinematicActive = false; render();
+}
+// Patches just the construction-frame subtree during the frame-by-frame
+// build sequence, mirroring patchBuildingAnimStage()'s approach for the
+// on-board sprite — avoids a full board re-render for every one of the 5
+// frame changes.
+function patchPropertyCinematicConstruction() {
+  try {
+    if (!propertyCinematic) return false;
+    const wrap = document.querySelector('.pc-construction-wrap');
+    if (!wrap) return false;
+    wrap.innerHTML = renderPropertyCinematicConstructionInner(propertyCinematic);
+    const fill = document.querySelector('.pc-progress-fill');
+    if (fill) fill.style.width = (PROPERTY_CINEMATIC_FRAME_PCT[propertyCinematic.stage] || 0) + '%';
+    const label = document.querySelector('.pc-progress-stage-label');
+    if (label) label.textContent = PROPERTY_CINEMATIC_FRAME_LABEL[propertyCinematic.stage] || '';
+    const pct = document.querySelector('.pc-progress-pct');
+    if (pct) pct.textContent = (PROPERTY_CINEMATIC_FRAME_PCT[propertyCinematic.stage] || 0) + '%';
+    return true;
+  } catch (e) { return false; }
+}
+function renderPropertyCinematicConstructionInner(pc) {
+  const frameIdx = SECTOR_STAGE_FRAME[pc.stage] != null ? SECTOR_STAGE_FRAME[pc.stage] : 0;
+  const sectorFx = (pc.phase === 'construction') ? sectorEffectHtml(pc.sectorKey, pc.stage) : '';
+  const flagHtml = (pc.stage === 'ceremony' || pc.stage === 'completed')
+    ? `<span class="pc-flag" style="--flag-color:${pc.owner.color || '#f5ca55'};"></span>` : '';
+  return `${renderSpriteFrame(pc.tile, frameIdx, '', 'animation:framePulse 0.12s ease-out both;')}
+    <span class="pc-ground-glow"></span>
+    ${flagHtml}
+    ${sectorFx}`;
+}
+function renderPropertyCinematic() {
+  const pc = propertyCinematic;
+  if (!pc) return '';
+  const backdropClass = pc.phase === 'return' ? 'pc-returning' : '';
+  const particlesHtml = pc.seed.map(p => `<span style="--px:${p.px}; --py:${p.py}; --pdelay:${p.delay};"></span>`).join('');
+  const skipHtml = pc.canSkip ? `<button class="pc-skip-btn" onclick="requestSkipPropertyCinematic()">АЛГАСАХ ▶</button>` : '';
+  let bodyHtml = '';
+  if (pc.phase === 'reveal') {
+    bodyHtml = `<div class="pc-money-panel"><div class="pc-money-label">Баталгаажуулж байна...</div></div>`;
+  } else if (pc.phase === 'money') {
+    bodyHtml = `<div class="pc-money-panel">
+      <div class="pc-money-label">Бэлэн мөнгө</div>
+      <div class="pc-money-row">
+        <span class="pc-money-before">₮${fmt(pc.cashBefore)}</span>
+        <span class="pc-money-arrow">→</span>
+        <span class="pc-money-after count-value" data-count-from="${pc.cashBefore}" data-count-to="${pc.cashAfter}">₮${fmt(pc.cashBefore)}</span>
+      </div>
+      <div class="pc-money-delta">−₮${fmt(pc.price)}</div>
+      <div class="pc-money-explain">
+        <span>Бэлэн мөнгө −₮${fmt(pc.price)}</span>
+        <span>Компанийн хөрөнгө +₮${fmt(pc.price)}</span>
+        <span>Нийт хөрөнгө өөрчлөгөөгүй</span>
+      </div>
+    </div>`;
+  } else if (pc.phase === 'deed') {
+    bodyHtml = `<div class="pc-deed-card">
+      <span class="pc-stamp">БАТАЛГААЖЛАА</span>
+      <div class="pc-deed-title">ЭЗЭМШИХ ЭРХИЙН БАТАЛГАА</div>
+      <div class="pc-deed-row"><span>Эзэмшигч</span><span>${pc.owner.name}</span></div>
+      <div class="pc-deed-row"><span>Компани</span><span>${pc.tile.name}</span></div>
+      <div class="pc-deed-row"><span>Салбар</span><span>${pc.tile.sectorName || ''}</span></div>
+      <div class="pc-deed-row"><span>Худалдсан үнэ</span><span>₮${fmt(pc.price)}</span></div>
+      <div class="pc-deed-row" style="border-bottom:none;"><span>Суурь орлого</span><span>₮${fmt(pc.tile.rent)}</span></div>
+      <span class="pc-deed-seal" style="--seal-color:${pc.owner.color || '#f5ca55'};"></span>
+    </div>`;
+  } else if (pc.phase === 'construction') {
+    const pct = PROPERTY_CINEMATIC_FRAME_PCT[pc.stage] || 0;
+    bodyHtml = `<div class="pc-construction-area">
+      <div class="pc-construction-visual pc-construction-wrap">${renderPropertyCinematicConstructionInner(pc)}</div>
+      <div class="pc-progress-wrap">
+        <div class="pc-progress-label"><span class="pc-progress-stage-label">${PROPERTY_CINEMATIC_FRAME_LABEL[pc.stage] || ''}</span><span class="pc-progress-pct">${pct}%</span></div>
+        <div class="pc-progress-track"><div class="pc-progress-fill" style="width:${pct}%;"></div></div>
+      </div>
+    </div>`;
+  } else if (pc.phase === 'reward') {
+    bodyHtml = `<div class="pc-reward-panel">
+      <div class="pc-construction-visual" style="max-width:150px; flex:0 0 30%;">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }))}</div>
+      <div class="pc-reward-title">ШИНЭ ХӨРӨНГӨ ТАНЫ ЭЗЭМШИЛД ОРЛОО</div>
+      <div class="pc-reward-sub">${pc.tile.name} • Суурь орлого: ₮${fmt(pc.tile.rent)}</div>
+      <div class="pc-wealth-grid">
+        <div class="pc-wealth-cell"><span class="pc-wealth-cell-label">Бэлэн мөнгө</span><span class="pc-wealth-cell-value count-value" data-count-from="${pc.cashBefore}" data-count-to="${pc.cashAfter}">₮${fmt(pc.cashAfter)}</span></div>
+        <div class="pc-wealth-cell"><span class="pc-wealth-cell-label">Компанийн хөрөнгө</span><span class="pc-wealth-cell-value count-value" data-count-from="${pc.companyAssetsBefore}" data-count-to="${pc.companyAssetsAfter}">₮${fmt(pc.companyAssetsAfter)}</span></div>
+        <div class="pc-wealth-cell"><span class="pc-wealth-cell-label">Нийт хөрөнгө</span><span class="pc-wealth-cell-value">₮${fmt(pc.totalWealth)}</span></div>
+      </div>
+    </div>`;
+  } else if (pc.phase === 'return') {
+    bodyHtml = `<div class="pc-reward-panel"><div class="pc-reward-sub">${pc.tile.name}</div></div>`;
+  }
+  return `<div class="property-cinematic-backdrop ${backdropClass}" role="dialog" aria-modal="true" aria-label="Худалдан авалт">
+    <div class="property-cinematic-stage" style="--seal-color:${pc.owner.color || '#f5ca55'};">
+      <div class="pc-city-backdrop" aria-hidden="true"></div>
+      <span class="pc-light-ring" aria-hidden="true"></span>
+      <div class="pc-particles" aria-hidden="true">${particlesHtml}</div>
+      <div class="pc-header">
+        <div class="pc-eyebrow">ШИНЭ ХӨРӨНГӨ ХУДАЛДАН АВЛАА</div>
+        <div class="pc-company-name">${pc.tile.name}</div>
+        <div class="pc-sector-name">${pc.tile.sectorName || ''}</div>
+      </div>
+      <div class="pc-body">${bodyHtml}</div>
+      ${skipHtml}
+    </div>
+  </div>`;
+}
+function animatePropertyCinematicCounters() {
+  const els = document.querySelectorAll('.property-cinematic-stage .count-value[data-count-from]');
+  if (els.length === 0) return;
+  const dur = reducedMotion ? 200 : 800;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - t, 3);
+    els.forEach(el => {
+      const from = parseFloat(el.dataset.countFrom) || 0;
+      const to = parseFloat(el.dataset.countTo) || 0;
+      el.textContent = '₮' + fmt(Math.round(from + (to - from) * eased));
+    });
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 
 let movingPlayerId = null;
@@ -8773,7 +9146,7 @@ function renderMobileBottomSheet(room, currentPlayer, me) {
 }
 
 function renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, rolling) {
-  const locked = isAnimatingMovement || buildingAnimationActive || rentCinematicActive || wealthModalOpen || (room.cardDraw && !room.cardDraw.resolved);
+  const locked = isAnimatingMovement || buildingAnimationActive || rentCinematicActive || !!propertyCinematic || wealthModalOpen || (room.cardDraw && !room.cardDraw.resolved);
   const pending = room.pendingAction && room.pendingAction.playerId === myId;
   const rollDisabled = !myTurn || room.hasRolled || room.pendingAction || locked;
   const endDisabled = !myTurn || !room.hasRolled || room.pendingAction || locked;
@@ -9579,6 +9952,7 @@ function renderGame() {
     ${isMobileView ? renderMobileBottomSheet(room, currentPlayer, me) : ''}
     ${isMobileView && !chatOpen ? renderMobileActionDock(room, myTurn, me, currentPlayer, d1, d2, diceRollingNow) : ''}
     ${rentCinematicActive && rentCinematicTxn ? renderRentCinematic(room, rentCinematicTxn) : ''}
+    ${propertyCinematic ? renderPropertyCinematic() : ''}
     ${!isMobileView ? renderChatWidget(room) : ''}
     ${renderDirectorBanner()}
     ${renderFinalShowdownOverlay()}
@@ -10066,7 +10440,7 @@ let lastRentTxnId = null;
 function maybeTriggerRentCinematic(room) {
   const txn = room && room.lastRentTransaction;
   if (!txn || txn.id === lastRentTxnId) return;
-  if (isAnimatingMovement || buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive) return;
+  if (isAnimatingMovement || buyModalOpen || cardModalOpen || buildingAnimationActive || rentCinematicActive || propertyCinematic) return;
   lastRentTxnId = txn.id;
   const intensity = getRentIntensity(txn);
   if (gameSettings.reactionsEnabled && intensity.key !== 'normal') {
@@ -10597,6 +10971,13 @@ function renderSettingsModal() {
         <button class="ci-btn ${gameSettings.cinematicIntensity==='off'?'active':''}" data-ci="off">Off</button>
       </div>
     </div>
+    <div class="settings-row settings-row-col"><span>\u0425\u0443\u0434\u0430\u043b\u0434\u0430\u043d \u0430\u0432\u0430\u043b\u0442\u044b\u043d cinematic</span>
+      <div class="cinematic-intensity-row">
+        <button class="ci-btn ${gameSettings.propertyCinematicMode==='full'?'active':''}" data-pcm="full">\u0411\u04af\u0440\u044d\u043d</button>
+        <button class="ci-btn ${gameSettings.propertyCinematicMode==='short'?'active':''}" data-pcm="short">\u0411\u043e\u0433\u0438\u043d\u043e</button>
+        <button class="ci-btn ${gameSettings.propertyCinematicMode==='off'?'active':''}" data-pcm="off">\u0423\u043d\u0442\u0440\u0430\u0430\u043b\u0442\u0442\u0430\u0439</button>
+      </div>
+    </div>
     <div class="settings-row"><span>Debug \u0433\u043e\u0440\u0438\u043c</span><button class="settings-toggle ${debugMode?'on':'off'}" id="settingsDebugToggle">${debugMode?'\u0418\u0414\u042d\u0412\u0425\u0422\u042d\u0419':'\u0423\u041d\u0422\u0410\u0420\u0410\u0410'}</button></div>
     ${debugMode ? `<div class="settings-row"><span>Label Calibration</span><button class="settings-toggle ${labelCalibrationMode?'on':'off'}" id="settingsLabelCalibToggle">${labelCalibrationMode?'\u0418\u0414\u042d\u0412\u0425\u0422\u042d\u0419':'\u0423\u041d\u0422\u0410\u0420\u0410\u0410'}</button></div>` : ''}
     <button class="btn btn-secondary" id="closeSettingsBtn" style="margin-top:14px;">\u0425\u0430\u0430\u0445</button>
@@ -10613,6 +10994,13 @@ function renderSettingsModal() {
       saveSettings();
       renderSettingsModal();
       render();
+    };
+  });
+  div.querySelectorAll('.ci-btn[data-pcm]').forEach(btn => {
+    btn.onclick = () => {
+      gameSettings.propertyCinematicMode = btn.dataset.pcm;
+      saveSettings();
+      renderSettingsModal();
     };
   });
   div.querySelectorAll('.settings-toggle[data-setting]').forEach(btn => {
@@ -10777,12 +11165,12 @@ function attachGameEvents() {
   const viewAll = document.getElementById('viewAllLogBtn'); if (viewAll) viewAll.onclick = () => showFullLogModal(currentRoom);
   document.querySelectorAll('.sb-company-card[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = () => { if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen) return; showCellDetail(idx); };
+    el.onclick = () => { if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || propertyCinematic || wealthModalOpen) return; showCellDetail(idx); };
   });
   const tooltip = document.getElementById('tile-tooltip');
   document.querySelectorAll('.tile[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen;
+    const tileInteractionDisabled = isAnimatingMovement || buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || !!propertyCinematic || wealthModalOpen;
     const selectTile = () => {
       if (tileInteractionDisabled) return;
       selectedTileId = idx;
@@ -10814,11 +11202,11 @@ function attachGameEvents() {
   });
   document.querySelectorAll('.tile-building-badge[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || propertyCinematic || wealthModalOpen) return; showCellDetail(idx); };
   });
   document.querySelectorAll('.upgrade-icon[data-idx]').forEach(el => {
     const idx = parseInt(el.dataset.idx, 10);
-    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || wealthModalOpen) return; showCellDetail(idx); };
+    el.onclick = (e) => { e.stopPropagation(); if (buyModalOpen || buildingAnimationActive || cardModalOpen || rentCinematicActive || propertyCinematic || wealthModalOpen) return; showCellDetail(idx); };
   });
 }
 
