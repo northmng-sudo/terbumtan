@@ -7379,8 +7379,20 @@ async function startPropertyCinematic(tileId, playerId, price, cashBefore, cashA
   // explicitly turning this cinematic off should skip it.
   let osReducedMotion = false;
   try { osReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
-  const skipAll = mode === 'off' || osReducedMotion;
-  const short = mode === 'short';
+  // A REAL prefers-reduced-motion: reduce is not rare -- plenty of players
+  // have "reduce motion" on system-wide for reasons unrelated to this game
+  // (battery saving, motion sensitivity, or just how their OS/browser
+  // profile is set up) and never notice it, and every one of them was
+  // silently getting the 300ms+300ms instant flash path below on EVERY
+  // purchase, no matter what they had propertyCinematicMode set to -- which
+  // reads exactly like "it flickers and vanishes immediately". Reduced
+  // motion should mean fewer/no flashy effects (camera shake, particle
+  // bursts), never "hide the information", so it now only pulls the pacing
+  // down to the already-readable 'short' timings (~7-8s total) instead of
+  // collapsing everything to a blink. Only the player's own explicit
+  // "Унтраалттай" (off) choice still gets the instant skip.
+  const skipAll = mode === 'off';
+  const short = mode === 'short' || osReducedMotion;
   const wealthAfter = computePlayerWealth(currentRoom, owner);
   const companyAssetsAfter = wealthAfter.companyValue + wealthAfter.houseValue + wealthAfter.corporationValue;
   const companyAssetsBefore = companyAssetsAfter - price;
@@ -7500,12 +7512,16 @@ function renderPropertyCinematic() {
   const particlesHtml = pc.seed.map(p => `<span style="--px:${p.px}; --py:${p.py}; --pdelay:${p.delay};"></span>`).join('');
   const skipHtml = pc.canSkip ? `<button class="pc-skip-btn" onclick="requestSkipPropertyCinematic()">АЛГАСАХ ▶</button>` : '';
   let bodyHtml = '';
-  // A small, quiet rendering of the property (frame 0 — site outline, no
-  // construction effects yet) shown alongside reveal/money/deed so the
-  // buyer sees WHAT they bought throughout the cinematic, not just its
-  // name in the header. Kept modest-sized here; the construction phase
-  // below gives it the big, full treatment once building actually starts.
-  const sideVisualHtml = `<div class="pc-construction-visual pc-side-visual">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'siteprep' }), 'small')}</div>`;
+  // A small, quiet rendering of the FINISHED building (frame 5 -- the
+  // completed sprite, not frame 0's bare concrete/foundation) shown
+  // alongside reveal/money/deed so the buyer immediately sees the actual
+  // company they bought, not an empty construction site. Construction only
+  // actually plays out frame-by-frame once the 'construction' phase below
+  // starts; showing the finished look earlier is a deliberate preview, not
+  // a claim that building has already happened. Kept modest-sized here;
+  // the construction phase gives it the big, full treatment once building
+  // actually starts.
+  const sideVisualHtml = `<div class="pc-construction-visual pc-side-visual">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }), 'small')}</div>`;
   if (pc.phase === 'reveal') {
     bodyHtml = `${sideVisualHtml}
     <div class="pc-money-panel"><div class="pc-money-label">Баталгаажуулж байна...</div></div>`;
