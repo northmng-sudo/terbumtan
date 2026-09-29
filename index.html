@@ -1533,11 +1533,20 @@
      large the element itself is rendered (tile size, device pixel ratio,
      zoom, ...), which a fixed-pixel crop could not guarantee. */
   .construction-sprite {
-    position: relative; z-index: 2; display: block; pointer-events: none;
+    /* Bottom-anchored, horizontally centered inside whatever box the tile
+       gives it, at the sprite's OWN 362:724 proportions — height fills the
+       tile's building box, width is derived from aspect-ratio rather than
+       stretched to the box's (roughly square) shape. Forcing width AND
+       height to 100% here was squashing every frame into a short, wide
+       silhouette that always read as an unfinished building, whatever
+       frame was showing. */
+    position: absolute; left: 50%; bottom: 0; z-index: 2; pointer-events: none;
+    height: 100%; width: auto;
     aspect-ratio: 362 / 724;
     background-repeat: no-repeat;
     background-size: 600% 100%;
     background-position-y: center;
+    transform: translateX(-50%);
     transform-origin: center bottom;
   }
   .construction-sprite-silhouette {
@@ -7575,7 +7584,7 @@ function renderBuildingConstructionOverlay(tile, idx, owner, anim, room) {
     const frameChangeDust = (stage !== 'completed') ? seed.slice(0, isMobileView ? 3 : 5).map((p) =>
       `<span class="dust-mote" style="--dx:${p.dx * 0.3}px; --delay:${p.delay * 0.2}ms;"></span>`).join('') : '';
     const spriteHtml = renderSpriteFrame(tile, frameIdx, 'stage-' + stage,
-      'width:100%; height:100%; transform-origin:center bottom; animation:framePulse 0.1s ease-out both;');
+      'animation:framePulse 0.1s ease-out both;');
     return `<div class="construction-fx sector-build-frame sector-${sectorKey || 'generic'}" style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; transform:rotate(${rotation}deg); transform-origin:center bottom;">
       <span class="construction-ground-marker ${stage==='siteprep'?'active':''}"></span>
       <span class="construction-contact-shadow" style="opacity:${Math.min(1, revealPct/60)};"></span>
@@ -7737,7 +7746,7 @@ function renderBuildingIcon(tile, level, idx) {
   const clipPath = '';
   const debugHtml = debugMode ? `<span class="badge-debug-id">${idx}</span>` : '';
   const rotation = tile.buildingRotation || 0;
-  const finishedSpriteHtml = renderSpriteFrame(tile, 5, '', 'width:100%; height:100%;');
+  const finishedSpriteHtml = renderSpriteFrame(tile, 5, '', '');
   return `<div data-idx="${idx}" data-tile-id="${idx}"
     class="tile-building-badge level-${Math.min(Math.max(level,0),4)} ${isNew ? 'building-appear' : ''}"
     style="left:${leftPct}%; top:${topPct}%; width:${widthPct}%; height:${heightPct}%; --depth:${tile.depth}; transform:rotate(${rotation}deg); transform-origin:center bottom; ${clipPath}">
