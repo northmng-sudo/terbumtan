@@ -10826,7 +10826,21 @@ window.addEventListener('orientationchange', () => {
 render();
 initAuth();
 preloadBoardImages();
-preloadSectorSprites();
+// preloadSectorSprites() fetches 7 full sprite-sheet PNGs (2172x724 each,
+// one per sector). Firing it immediately at boot, alongside render() and
+// initAuth(), made the very first page load (lobby/login, before anyone
+// has even entered a game) compete for bandwidth with 7 heavy images it
+// doesn't need yet — the site's first paint felt "terribly slow" as a
+// result. These sprites are only ever needed once a company is actually
+// under construction, and resolveSectorSpriteSrc() already probes/loads
+// them lazily at that point on its own, so this call is purely a warm-up
+// for smoother first construction — deferred to run after the page is
+// idle (or after a delay on older browsers) instead of blocking it.
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(preloadSectorSprites, { timeout: 4000 });
+} else {
+  setTimeout(preloadSectorSprites, 2000);
+}
 </script>
 </body>
 </html>
