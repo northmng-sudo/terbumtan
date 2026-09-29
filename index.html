@@ -7381,16 +7381,18 @@ let seenBuildings = new Set();
 // left-to-right (site prep -> foundation -> frame -> facade -> near-complete
 // -> finished). A single frame is cropped via CSS background-position on a
 // background-size:600% 100% element, never the six-separate-file layout
-// tried earlier — that path 404'd because those per-frame files don't
-// exist in the repo.
+// tried earlier. Paths are bare filenames (repo root, next to index.html,
+// confirmed by checking the actual repo) — NOT under assets/buildings/ and
+// NOT absolute (an absolute "/..." path would 404 under the
+// northmng-sudo.github.io/terbumtan/ project subpath).
 const SECTOR_BUILDING_SPRITES = {
-  bank: "assets/buildings/bank-construction-sprite.png",
-  mining: "assets/buildings/mining-construction-sprite.png",
-  telecom: "assets/buildings/telecom-construction-sprite.png",
-  construction: "assets/buildings/construction-construction-sprite.png",
-  fuel: "assets/buildings/fuel-construction-sprite.png",
-  retail: "assets/buildings/retail-construction-sprite.png",
-  manufacturing: "assets/buildings/manufacturing-construction-sprite.png",
+  bank: "./bank-construction-sprite.png",
+  mining: "./mining-construction-sprite.png",
+  telecom: "./telecom-construction-sprite.png",
+  construction: "./construction-construction-sprite.png",
+  fuel: "./fuel-construction-sprite.png",
+  retail: "./retail-construction-sprite.png",
+  manufacturing: "./manufacturing-construction-sprite.png",
 };
 // Mongolian-label -> asset-key map, exactly as specified.
 const SECTOR_KEY_MAP = {
