@@ -3219,8 +3219,8 @@ const BOARD_CONFIG = [
     "labelY": 744.2,
     "labelRotation": -33.4,
     "buildingType": "agriculture",
-    "buildingX": 738.7,
-    "buildingY": 782.69,
+    "buildingX": 734.32,
+    "buildingY": 789.39,
     "buildingWidth": 59.9,
     "buildingRotation": 0,
     "depth": 744,
@@ -3300,8 +3300,8 @@ const BOARD_CONFIG = [
     "labelY": 691.3,
     "labelRotation": -32.3,
     "buildingType": "agriculture",
-    "buildingX": 662.4,
-    "buildingY": 730.49,
+    "buildingX": 658.02,
+    "buildingY": 737.19,
     "buildingWidth": 58.8,
     "buildingRotation": 0,
     "depth": 691,
@@ -3381,8 +3381,8 @@ const BOARD_CONFIG = [
     "labelY": 641.4,
     "labelRotation": -31.3,
     "buildingType": "agriculture",
-    "buildingX": 588.1,
-    "buildingY": 682.59,
+    "buildingX": 583.72,
+    "buildingY": 689.29,
     "buildingWidth": 58.1,
     "buildingRotation": 0,
     "depth": 641,
@@ -3462,8 +3462,8 @@ const BOARD_CONFIG = [
     "labelY": 593.7,
     "labelRotation": -30.1,
     "buildingType": "retail",
-    "buildingX": 516.1,
-    "buildingY": 636.79,
+    "buildingX": 511.72,
+    "buildingY": 643.49,
     "buildingWidth": 56.6,
     "buildingRotation": 0,
     "depth": 594,
@@ -3543,8 +3543,8 @@ const BOARD_CONFIG = [
     "labelY": 547.7,
     "labelRotation": -28.9,
     "buildingType": "retail",
-    "buildingX": 446.5,
-    "buildingY": 592.19,
+    "buildingX": 442.12,
+    "buildingY": 598.89,
     "buildingWidth": 54.3,
     "buildingRotation": 0,
     "depth": 548,
@@ -3658,8 +3658,8 @@ const BOARD_CONFIG = [
     "labelY": 457.3,
     "labelRotation": -27.0,
     "buildingType": "retail",
-    "buildingX": 309.8,
-    "buildingY": 502.28,
+    "buildingX": 305.42,
+    "buildingY": 508.98,
     "buildingWidth": 52.2,
     "buildingRotation": 0,
     "depth": 457,
@@ -4912,8 +4912,8 @@ const BOARD_CONFIG = [
     "labelY": 458.7,
     "labelRotation": 26.6,
     "buildingType": "bank",
-    "buildingX": 1358.47,
-    "buildingY": 503.25,
+    "buildingX": 1362.81,
+    "buildingY": 509.97,
     "buildingWidth": 53.1,
     "buildingRotation": 0,
     "depth": 459,
@@ -4993,8 +4993,8 @@ const BOARD_CONFIG = [
     "labelY": 503.5,
     "labelRotation": 27.5,
     "buildingType": "bank",
-    "buildingX": 1289.57,
-    "buildingY": 548.65,
+    "buildingX": 1293.91,
+    "buildingY": 555.37,
     "buildingWidth": 54.2,
     "buildingRotation": 0,
     "depth": 504,
@@ -5074,8 +5074,8 @@ const BOARD_CONFIG = [
     "labelY": 548.4,
     "labelRotation": 29.2,
     "buildingType": "bank",
-    "buildingX": 1221.47,
-    "buildingY": 592.45,
+    "buildingX": 1225.81,
+    "buildingY": 599.17,
     "buildingWidth": 55.5,
     "buildingRotation": 0,
     "depth": 548,
@@ -5155,8 +5155,8 @@ const BOARD_CONFIG = [
     "labelY": 594.1,
     "labelRotation": 30.3,
     "buildingType": "mining",
-    "buildingX": 1151.37,
-    "buildingY": 636.75,
+    "buildingX": 1155.71,
+    "buildingY": 643.47,
     "buildingWidth": 58.0,
     "buildingRotation": 0,
     "depth": 594,
@@ -5236,8 +5236,8 @@ const BOARD_CONFIG = [
     "labelY": 641.6,
     "labelRotation": 31.4,
     "buildingType": "mining",
-    "buildingX": 1078.77,
-    "buildingY": 682.45,
+    "buildingX": 1083.11,
+    "buildingY": 689.17,
     "buildingWidth": 59.2,
     "buildingRotation": 0,
     "depth": 642,
@@ -5354,8 +5354,8 @@ const BOARD_CONFIG = [
     "labelY": 743.8,
     "labelRotation": 33.4,
     "buildingType": "mining",
-    "buildingX": 927.47,
-    "buildingY": 781.95,
+    "buildingX": 931.81,
+    "buildingY": 788.67,
     "buildingWidth": 59.5,
     "buildingRotation": 0,
     "depth": 744,
@@ -8030,6 +8030,27 @@ const SECTOR_BUILDING_SPRITES_LARGE = {
   retail: "retail-construction-sprite-large.webp",
   manufacturing: "manufacturing-construction-sprite-large.webp",
 };
+// The ORIGINAL, pre-optimization PNGs, confirmed present in the live repo
+// (verified directly against the GitHub contents API) regardless of whether
+// the *-small.webp/*-large.webp files above ever actually made it onto
+// GitHub Pages. This turned out to be exactly what was silently breaking
+// the construction-phase sprite: those webp filenames simply don't exist on
+// the live site (only these original PNGs do), so every sector's primary
+// AND the old generic fallback were both 404ing, which used to mean no
+// sector-specific art at all. resolveSectorSpriteSrc() now falls back to
+// the tile's OWN original PNG before ever dropping to the fully generic
+// construction art, so the sector-correct building still renders even when
+// the webp optimization files are missing -- and it will automatically
+// prefer the lighter webp again the moment those files do get uploaded.
+const SECTOR_BUILDING_SPRITES_ORIGINAL = {
+  bank: "bank-construction-sprite.png",
+  mining: "mining-construction-sprite.png",
+  telecom: "telecom-construction-sprite.png",
+  construction: "construction-construction-sprite.png",
+  fuel: "fuel-construction-sprite.png",
+  retail: "retail-construction-sprite.png",
+  manufacturing: "manufacturing-construction-sprite.png",
+};
 // Mongolian-label -> asset-key map, exactly as specified.
 const SECTOR_KEY_MAP = {
   "Банк": "bank",
@@ -8084,18 +8105,35 @@ function probeSpriteAsset(src) {
   } catch (e) { spriteLoadState[src] = 'failed'; }
 }
 function preloadSectorSprites() {
+  // Probe both the webp candidates AND their original-PNG fallbacks up
+  // front, at boot, well before any purchase can trigger a cinematic --
+  // so by the time a player actually buys a property, spriteLoadState
+  // already knows which of the two actually loads and resolveSectorSpriteSrc()
+  // picks the right one on the very first render, with no visible 404/retry
+  // delay during the construction animation itself.
   Object.values(SECTOR_BUILDING_SPRITES).forEach(probeSpriteAsset);
+  Object.values(SECTOR_BUILDING_SPRITES_LARGE).forEach(probeSpriteAsset);
+  Object.values(SECTOR_BUILDING_SPRITES_ORIGINAL).forEach(probeSpriteAsset);
 }
-// Fallback chain: 1) the tile's own sector sprite, 2) the generic
-// "construction" sector sprite, 3) null -> caller draws a plain CSS
-// silhouette instead of an <img> (no emoji, no broken-image icon).
+// Fallback chain: 1) the tile's own sector webp (small/large per `size`),
+// 2) that SAME sector's original PNG (guaranteed present in the repo even
+// when the webp optimization files never got uploaded), 3) the fully
+// generic "construction" webp, 4) the generic construction PNG, 5) null ->
+// caller draws a plain CSS silhouette instead of an <img> (no emoji, no
+// broken-image icon). Step 2 existing before the generic steps is what
+// keeps a bank tile looking like a bank (not a generic silhouette-adjacent
+// building) even while its webp is missing.
 function resolveSectorSpriteSrc(tile, size) {
   const table = size === 'large' ? SECTOR_BUILDING_SPRITES_LARGE : SECTOR_BUILDING_SPRITES;
   const assetKey = tile && BUILDING_TYPE_TO_SECTOR_ASSET_KEY[tile.buildingType];
   const primary = assetKey && table[assetKey];
   if (primary && spriteLoadState[primary] !== 'failed') { probeSpriteAsset(primary); return { key: assetKey, src: primary }; }
+  const ownOriginal = assetKey && SECTOR_BUILDING_SPRITES_ORIGINAL[assetKey];
+  if (ownOriginal && spriteLoadState[ownOriginal] !== 'failed') { probeSpriteAsset(ownOriginal); return { key: assetKey, src: ownOriginal }; }
   const generic = table.construction;
   if (generic && spriteLoadState[generic] !== 'failed') { probeSpriteAsset(generic); return { key: 'construction', src: generic }; }
+  const genericOriginal = SECTOR_BUILDING_SPRITES_ORIGINAL.construction;
+  if (genericOriginal && spriteLoadState[genericOriginal] !== 'failed') { probeSpriteAsset(genericOriginal); return { key: 'construction', src: genericOriginal }; }
   return null;
 }
 // Stage -> frame index: this animation already runs the same six named
