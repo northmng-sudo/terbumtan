@@ -6,6 +6,21 @@
 <title>Их Хөрөнгө</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=PT+Serif:wght@400;700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<!-- Хүлээлгийн өрөөний дэвсгэр зураг болон 8 token-ий зургийг HTML
+     parse хийгдэж эхлэх мөчид л шууд, өндөр prioritiy-тэйгээр татаж эхэлдэг
+     болгов (өмнө нь зөвхөн тухайн дэлгэц render хийгдсэний ДАРАА, <img>
+     tag DOM-д орсны дараа л татаж эхэлдэг байсан тул үргэлж хожимдож
+     байсан). Файлын бодит хэмжээ (KB/MB) үүгээр багасахгүй ч ядаж
+     татаж эхлэх цаг нь аль болох эрт болно. -->
+<link rel="preload" as="image" href="lobby-background-v1.png" fetchpriority="high">
+<link rel="preload" as="image" href="mongol-horse.png">
+<link rel="preload" as="image" href="eagle.png">
+<link rel="preload" as="image" href="wolf.png">
+<link rel="preload" as="image" href="golden-crown.png">
+<link rel="preload" as="image" href="treasure-key.png">
+<link rel="preload" as="image" href="business-briefcase.png">
+<link rel="preload" as="image" href="skyscraper.png">
+<link rel="preload" as="image" href="luxury-car.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
@@ -2863,7 +2878,7 @@ function renderTokenGlyph(tokenId, extraClass) {
   // token already has a hand-drawn inline SVG (used elsewhere for the token
   // picker); fall back to that on image error instead of showing a blank
   // spot, so a player's token is always visible even if the .png is broken.
-  return `<img class="${cls}" src="${tt.asset}" alt="${tt.name}" onerror="this.style.display='none'; var s=this.nextElementSibling; if (s && s.classList.contains('token-glyph-fallback')) s.style.display='block';">` +
+  return `<img class="${cls}" src="${tt.asset}" alt="${tt.name}" decoding="async" onerror="this.style.display='none'; var s=this.nextElementSibling; if (s && s.classList.contains('token-glyph-fallback')) s.style.display='block';">` +
     `<svg class="${cls} token-glyph-fallback" viewBox="0 0 100 100" style="display:none; color:var(--token-ring, var(--ring-color, #e8c468));" aria-hidden="true">${tt.svg}</svg>`;
 }
 const GROUP_COLORS = {
@@ -8394,7 +8409,7 @@ function renderWaiting() {
 
   return `<div class="wr-screen">
     <div class="wr-stage">
-      <img class="wr-bg-image" src="lobby-background-v1.png" alt="" onerror="this.style.opacity=0">
+      <img class="wr-bg-image" src="lobby-background-v1.png" alt="" fetchpriority="high" decoding="async" onerror="this.style.opacity=0">
       <div class="wr-bg-fallback"></div>
       <div class="wr-bg-overlay"></div>
       <div class="wr-bg-gradient"></div>
