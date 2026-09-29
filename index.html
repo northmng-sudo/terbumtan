@@ -12,23 +12,22 @@
      tag DOM-д орсны дараа л татаж эхэлдэг байсан тул үргэлж хожимдож
      байсан). Файлын бодит хэмжээ (KB/MB) үүгээр багасахгүй ч ядаж
      татаж эхлэх цаг нь аль болох эрт болно. -->
-<!-- board-night-v2.png doubles as the very FIRST screen's hero background
-     (the auth/login gate, view === 'auth', renders before the lobby ever
-     shows) as well as one of the two in-game board crossfade images, so it
-     needs to start loading at the same high priority as the lobby
-     background — preloading it here also means the later in-game <img>
-     for it is served from cache instead of fetching again. -->
-<link rel="preload" as="image" href="board-night-v2.png" fetchpriority="high">
-<link rel="preload" as="image" href="board-day-v2.png">
-<link rel="preload" as="image" href="lobby-background-v1.png" fetchpriority="high">
-<link rel="preload" as="image" href="mongol-horse.png">
-<link rel="preload" as="image" href="eagle.png">
-<link rel="preload" as="image" href="wolf.png">
-<link rel="preload" as="image" href="golden-crown.png">
-<link rel="preload" as="image" href="treasure-key.png">
-<link rel="preload" as="image" href="business-briefcase.png">
-<link rel="preload" as="image" href="skyscraper.png">
-<link rel="preload" as="image" href="luxury-car.png">
+<!-- Only the 2 truly critical images get a <link rel=preload>: the very
+     FIRST screen's hero background (auth gate, view === 'auth', which
+     board-night-v2 also doubles as an in-game crossfade layer for) and the
+     lobby background shown right after. Both point at the compressed WebP
+     renditions actually used by the <picture> tags below (small PNG
+     fallback stays un-preloaded; it only loads if a browser can't do
+     WebP). imagesrcset/imagesizes mirror the <picture> breakpoints so the
+     browser preloads the SAME file it will end up choosing, never both.
+     Everything else (day board image, all 8 tokens, construction sprites,
+     card art) used to be preloaded here too — that violated the "1-3
+     critical images only" budget and delayed the two images that actually
+     block first paint, so those now load on their own schedule instead:
+     tokens after room selection, day-board opportunistically, sprites
+     fully on-demand (see preloadSectorSprites / resolveSectorSpriteSrc). -->
+<link rel="preload" as="image" href="board-night-1600.webp" imagesrcset="board-night-960.webp 960w, board-night-1600.webp 1600w" imagesizes="100vw" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="lobby-bg-1600.webp" imagesrcset="lobby-bg-960.webp 960w, lobby-bg-1600.webp 1600w" imagesizes="100vw" type="image/webp" fetchpriority="high">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
@@ -2987,16 +2986,28 @@ const TOKEN_TYPES = [
 function getTokenType(id) { return TOKEN_TYPES.find(t => t.id === id) || TOKEN_TYPES[0]; }
 function getPlayerColorInfo(colorHex) { return PLAYER_COLORS.find(c => c.color === colorHex) || PLAYER_COLORS[0]; }
 const TOKENS = TOKEN_TYPES.map(t => t.id);
-function renderTokenGlyph(tokenId, extraClass) {
+// size: 'board' (default, ~60-120px on-screen -> 128px asset) or 'lobby'
+// (bigger avatar preview -> 256px asset). The original 1254x1254 PNGs were
+// being served at both sizes, so every token cost 1.2-2.4MB for a glyph
+// shown at a fraction of that resolution; the -128/-256 WebP renditions
+// are the same art pre-scaled and re-encoded, at ~5-25KB each.
+function renderTokenGlyph(tokenId, extraClass, size) {
   const tt = getTokenType(tokenId);
   const cls = `token-asset-img ${extraClass||''}`;
-  // If the PNG asset is missing/misnamed on the deployed site (case-sensitive
-  // hosting, a file never uploaded, etc.) the <img> fails silently and the
-  // token/avatar would otherwise render as nothing visible at all. Every
-  // token already has a hand-drawn inline SVG (used elsewhere for the token
-  // picker); fall back to that on image error instead of showing a blank
-  // spot, so a player's token is always visible even if the .png is broken.
-  return `<img class="${cls}" src="${tt.asset}" alt="${tt.name}" decoding="async" onerror="this.style.display='none'; var s=this.nextElementSibling; if (s && s.classList.contains('token-glyph-fallback')) s.style.display='block';">` +
+  const px = size === 'lobby' ? 256 : 128;
+  const webpSrc = tt.asset.replace(/\.png$/i, `-${px}.webp`);
+  // If neither the WebP nor the fallback PNG asset is available on the
+  // deployed site (case-sensitive hosting, a file never uploaded, etc.)
+  // the <img> fails silently and the token/avatar would otherwise render
+  // as nothing visible at all. Every token already has a hand-drawn inline
+  // SVG (used elsewhere for the token picker); fall back to that on image
+  // error instead of showing a blank spot, so a player's token is always
+  // visible even if both raster assets are broken. The <picture> itself is
+  // the element the SVG's sibling selector needs to reach past, since the
+  // <source>/<img> 404 fallback (WebP -> PNG) is handled natively by the
+  // browser and never reaches this onerror at all unless BOTH fail.
+  return `<picture><source srcset="${webpSrc}" type="image/webp">` +
+    `<img class="${cls}" src="${tt.asset}" alt="${tt.name}" width="${px}" height="${px}" loading="lazy" decoding="async" onerror="this.style.display='none'; var s=this.parentElement.nextElementSibling; if (s && s.classList.contains('token-glyph-fallback')) s.style.display='block';"></picture>` +
     `<svg class="${cls} token-glyph-fallback" viewBox="0 0 100 100" style="display:none; color:var(--token-ring, var(--ring-color, #e8c468));" aria-hidden="true">${tt.svg}</svg>`;
 }
 const GROUP_COLORS = {
@@ -7462,7 +7473,7 @@ function patchPropertyCinematicConstruction() {
     if (!propertyCinematic) return false;
     const wrap = document.querySelector('.pc-construction-wrap');
     if (!wrap) return false;
-    wrap.innerHTML = renderPropertyCinematicConstructionInner(propertyCinematic);
+    wrap.innerHTML = renderPropertyCinematicConstructionInner(propertyCinematic, 'large');
     const fill = document.querySelector('.pc-progress-fill');
     if (fill) fill.style.width = (PROPERTY_CINEMATIC_FRAME_PCT[propertyCinematic.stage] || 0) + '%';
     const label = document.querySelector('.pc-progress-stage-label');
@@ -7472,12 +7483,12 @@ function patchPropertyCinematicConstruction() {
     return true;
   } catch (e) { return false; }
 }
-function renderPropertyCinematicConstructionInner(pc) {
+function renderPropertyCinematicConstructionInner(pc, size) {
   const frameIdx = SECTOR_STAGE_FRAME[pc.stage] != null ? SECTOR_STAGE_FRAME[pc.stage] : 0;
   const sectorFx = (pc.phase === 'construction') ? sectorEffectHtml(pc.sectorKey, pc.stage) : '';
   const flagHtml = (pc.stage === 'ceremony' || pc.stage === 'completed')
     ? `<span class="pc-flag" style="--flag-color:${pc.owner.color || '#f5ca55'};"></span>` : '';
-  return `${renderSpriteFrame(pc.tile, frameIdx, '', 'animation:framePulse 0.12s ease-out both;')}
+  return `${renderSpriteFrame(pc.tile, frameIdx, '', 'animation:framePulse 0.12s ease-out both;', size)}
     <span class="pc-ground-glow"></span>
     ${flagHtml}
     ${sectorFx}`;
@@ -7494,7 +7505,7 @@ function renderPropertyCinematic() {
   // buyer sees WHAT they bought throughout the cinematic, not just its
   // name in the header. Kept modest-sized here; the construction phase
   // below gives it the big, full treatment once building actually starts.
-  const sideVisualHtml = `<div class="pc-construction-visual pc-side-visual">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'siteprep' }))}</div>`;
+  const sideVisualHtml = `<div class="pc-construction-visual pc-side-visual">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'siteprep' }), 'small')}</div>`;
   if (pc.phase === 'reveal') {
     bodyHtml = `${sideVisualHtml}
     <div class="pc-money-panel"><div class="pc-money-label">Баталгаажуулж байна...</div></div>`;
@@ -7529,7 +7540,7 @@ function renderPropertyCinematic() {
   } else if (pc.phase === 'construction') {
     const pct = PROPERTY_CINEMATIC_FRAME_PCT[pc.stage] || 0;
     bodyHtml = `<div class="pc-construction-area">
-      <div class="pc-construction-visual pc-construction-wrap">${renderPropertyCinematicConstructionInner(pc)}</div>
+      <div class="pc-construction-visual pc-construction-wrap">${renderPropertyCinematicConstructionInner(pc, 'large')}</div>
       <div class="pc-progress-wrap">
         <div class="pc-progress-label"><span class="pc-progress-stage-label">${PROPERTY_CINEMATIC_FRAME_LABEL[pc.stage] || ''}</span><span class="pc-progress-pct">${pct}%</span></div>
         <div class="pc-progress-track"><div class="pc-progress-fill" style="width:${pct}%;"></div></div>
@@ -7537,7 +7548,7 @@ function renderPropertyCinematic() {
     </div>`;
   } else if (pc.phase === 'reward') {
     bodyHtml = `<div class="pc-reward-panel">
-      <div class="pc-construction-visual" style="max-width:150px; flex:0 0 30%;">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }))}</div>
+      <div class="pc-construction-visual" style="max-width:150px; flex:0 0 30%;">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }), 'small')}</div>
       <div class="pc-reward-title">ШИНЭ ХӨРӨНГӨ ТАНЫ ЭЗЭМШИЛД ОРЛОО</div>
       <div class="pc-reward-sub">${pc.tile.name} • Суурь орлого: ₮${fmt(pc.tile.rent)}</div>
       <div class="pc-wealth-grid">
@@ -7841,14 +7852,33 @@ let seenBuildings = new Set();
 // also yields a wider sprite once the aspect ratio is applied.
 const SPRITE_HEIGHT_FACTOR = 1.8;
 const BUILDING_FOOTPRINT_SCALE = 1.2;
+// Two renditions per sector: "small" (half-size sheet, ~70-100KB WebP) for
+// the on-board mini construction animation where a frame only ever shows
+// at tile-box size (~90-150px tall), and "large" (full 2172x724 WebP,
+// ~225-325KB) for the full-screen property cinematic where a frame can be
+// shown much taller. Loading the small sheet everywhere used to cost every
+// tile animation a multi-MB PNG fetch for pixels it threw away. The
+// "construction" sector (Барилга tiles) has no dedicated art in the repo
+// yet, so it intentionally keeps pointing at a filename that 404s — the
+// existing fallback chain in resolveSectorSpriteSrc() already turns that
+// into a plain CSS silhouette rather than a broken-image icon.
 const SECTOR_BUILDING_SPRITES = {
-  bank: "./bank-construction-sprite.png",
-  mining: "./mining-construction-sprite.png",
-  telecom: "./telecom-construction-sprite.png",
+  bank: "bank-construction-sprite-small.webp",
+  mining: "mining-construction-sprite-small.webp",
+  telecom: "telecom-construction-sprite-small.webp",
   construction: "./construction-construction-sprite.png",
-  fuel: "./fuel-construction-sprite.png",
-  retail: "./retail-construction-sprite.png",
-  manufacturing: "./manufacturing-construction-sprite.png",
+  fuel: "fuel-construction-sprite-small.webp",
+  retail: "retail-construction-sprite-small.webp",
+  manufacturing: "manufacturing-construction-sprite-small.webp",
+};
+const SECTOR_BUILDING_SPRITES_LARGE = {
+  bank: "bank-construction-sprite-large.webp",
+  mining: "mining-construction-sprite-large.webp",
+  telecom: "telecom-construction-sprite-large.webp",
+  construction: "./construction-construction-sprite.png",
+  fuel: "fuel-construction-sprite-large.webp",
+  retail: "retail-construction-sprite-large.webp",
+  manufacturing: "manufacturing-construction-sprite-large.webp",
 };
 // Mongolian-label -> asset-key map, exactly as specified.
 const SECTOR_KEY_MAP = {
@@ -7909,11 +7939,12 @@ function preloadSectorSprites() {
 // Fallback chain: 1) the tile's own sector sprite, 2) the generic
 // "construction" sector sprite, 3) null -> caller draws a plain CSS
 // silhouette instead of an <img> (no emoji, no broken-image icon).
-function resolveSectorSpriteSrc(tile) {
+function resolveSectorSpriteSrc(tile, size) {
+  const table = size === 'large' ? SECTOR_BUILDING_SPRITES_LARGE : SECTOR_BUILDING_SPRITES;
   const assetKey = tile && BUILDING_TYPE_TO_SECTOR_ASSET_KEY[tile.buildingType];
-  const primary = assetKey && SECTOR_BUILDING_SPRITES[assetKey];
+  const primary = assetKey && table[assetKey];
   if (primary && spriteLoadState[primary] !== 'failed') { probeSpriteAsset(primary); return { key: assetKey, src: primary }; }
-  const generic = SECTOR_BUILDING_SPRITES.construction;
+  const generic = table.construction;
   if (generic && spriteLoadState[generic] !== 'failed') { probeSpriteAsset(generic); return { key: 'construction', src: generic }; }
   return null;
 }
@@ -7924,8 +7955,8 @@ const SECTOR_STAGE_FRAME = { siteprep: 0, foundation: 1, frame: 2, facade: 3, ce
 // Renders the cropped-frame element: a background-image sprite when one is
 // available, or a plain CSS silhouette (no image, no emoji) as the last
 // resort. `extraStyle` lets callers add positioning without another wrapper.
-function renderSpriteFrame(tile, frameIndex, extraClass, extraStyle) {
-  const resolved = resolveSectorSpriteSrc(tile);
+function renderSpriteFrame(tile, frameIndex, extraClass, extraStyle, size) {
+  const resolved = resolveSectorSpriteSrc(tile, size);
   const n = Math.max(0, Math.min(5, frameIndex));
   const posX = SPRITE_FRAME_POSITIONS[n];
   if (resolved) {
@@ -8299,7 +8330,7 @@ function renderAuthLoading() {
 function renderAuthGate() {
   return `<div class="ag-screen">
     <div class="ag-hero">
-      <img class="ag-hero-bg" src="${resolveBoardImageSrc('night')}" alt="" fetchpriority="high" decoding="async" onerror="this.style.opacity=0">
+      <picture><source media="(max-width: 768px)" srcset="board-night-960.webp" type="image/webp"><source srcset="board-night-1600.webp" type="image/webp"><img class="ag-hero-bg" src="${resolveBoardImageSrc('night')}" alt="" width="1672" height="941" fetchpriority="high" decoding="async" onerror="this.style.opacity=0"></picture>
       <div class="ag-hero-fallback"></div>
       <div class="ag-hero-gradient"></div>
       <div class="ag-hero-vignette"></div>
@@ -8822,7 +8853,7 @@ function renderWaiting() {
 
   return `<div class="wr-screen">
     <div class="wr-stage">
-      <img class="wr-bg-image" src="lobby-background-v1.png" alt="" fetchpriority="high" decoding="async" onerror="this.style.opacity=0">
+      <picture><source media="(max-width: 768px)" srcset="lobby-bg-960.webp" type="image/webp"><source srcset="lobby-bg-1600.webp" type="image/webp"><img class="wr-bg-image" src="lobby-background-v1.png" alt="" width="1672" height="941" fetchpriority="high" decoding="async" onerror="this.style.opacity=0"></picture>
       <div class="wr-bg-fallback"></div>
       <div class="wr-bg-overlay"></div>
       <div class="wr-bg-gradient"></div>
@@ -8934,7 +8965,13 @@ async function selectPlayerToken(tokenId) {
 
 function attachWaitingEvents() {
   wireQuickMuteAndSettings();
-  preloadLobbyBackground();
+  // preloadLobbyBackground() used to re-fetch the full lobby-background-v1.png
+  // (2.3MB) here via new Image() -- AFTER the waiting-room screen had already
+  // rendered its own <picture> tag for the same background, so it was a pure
+  // duplicate download of the heaviest possible variant. The <link
+  // rel=preload> in <head> plus that <picture>'s WebP sources now cover this
+  // image earlier and smaller than this call ever did; left the function
+  // defined below in case something else still wants a JS-side load probe.
   document.querySelectorAll('[data-add-bot]').forEach(el => { el.onclick = addBotPlayer; });
   document.querySelectorAll('[data-remove-bot]').forEach(el => { el.onclick = (e) => { e.stopPropagation(); removeBotPlayer(el.dataset.removeBot); }; });
   const btn = document.getElementById('startBtn'); if (btn) btn.onclick = startGame;
@@ -9934,8 +9971,8 @@ function renderGame() {
         <div class="board-viewport ${debugMode?'debug':''} ${environment.timeOfDay==='night'?'env-night-active':''}" id="boardViewport">
           <div class="board-frame" id="boardFrame">
             <div class="board-camera" id="boardCamera" style="${camTransform}">
-              <img class="board-image board-image-day ${environment.timeOfDay==='day' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('day')}" fetchpriority="high" decoding="async" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u04e9\u0434\u04e9\u0440)">
-              <img class="board-image board-image-night ${environment.timeOfDay==='night' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('night')}" fetchpriority="high" decoding="async" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u0448\u04e9\u043d\u04e9)">
+              <picture><source media="(max-width: 768px)" srcset="board-day-960.webp" type="image/webp"><source srcset="board-day-1600.webp" type="image/webp"><img class="board-image board-image-day ${environment.timeOfDay==='day' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('day')}" width="1672" height="941" fetchpriority="${environment.timeOfDay==='day' ? 'high' : 'low'}" decoding="async" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u04e9\u0434\u04e9\u0440)"></picture>
+              <picture><source media="(max-width: 768px)" srcset="board-night-960.webp" type="image/webp"><source srcset="board-night-1600.webp" type="image/webp"><img class="board-image board-image-night ${environment.timeOfDay==='night' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('night')}" width="1672" height="941" fetchpriority="${environment.timeOfDay==='night' ? 'high' : 'low'}" decoding="async" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u0448\u04e9\u043d\u04e9)"></picture>
               <div class="env-lighting env-${environment.timeOfDay} ${environment.isTransitioning ? 'env-transitioning' : ''}">
                 <div class="env-moonlight"></div>
                 <div class="env-streetlights">
@@ -11268,7 +11305,22 @@ window.addEventListener('orientationchange', () => {
 
 render();
 initAuth();
-preloadBoardImages();
+// preloadBoardImages() fetches the two FULL-SIZE original PNGs (board-day-v2
+// ~3.8MB, board-night-v2 ~2.9MB) as a plain new Image() warm-up so the later
+// crossfade never has to wait mid-game. Calling it unconditionally here, at
+// boot, meant it started racing the critical-path WebP <picture>/<link
+// rel=preload> fetches above for the SAME two images the moment the script
+// executed -- exactly the "load everything at once" regression this whole
+// pass is fixing, and worse than doing nothing since it fetches the heavy
+// PNG originals instead of the small WebP renditions the page actually
+// displays. Deferred the same way as the sector sprites below: after the
+// browser is idle, once the critical first screen has already won the
+// bandwidth race.
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(preloadBoardImages, { timeout: 4000 });
+} else {
+  setTimeout(preloadBoardImages, 2000);
+}
 // preloadSectorSprites() fetches 7 full sprite-sheet PNGs (2172x724 each,
 // one per sector). Firing it immediately at boot, alongside render() and
 // initAuth(), made the very first page load (lobby/login, before anyone
