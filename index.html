@@ -12,6 +12,14 @@
      tag DOM-д орсны дараа л татаж эхэлдэг байсан тул үргэлж хожимдож
      байсан). Файлын бодит хэмжээ (KB/MB) үүгээр багасахгүй ч ядаж
      татаж эхлэх цаг нь аль болох эрт болно. -->
+<!-- board-night-v2.png doubles as the very FIRST screen's hero background
+     (the auth/login gate, view === 'auth', renders before the lobby ever
+     shows) as well as one of the two in-game board crossfade images, so it
+     needs to start loading at the same high priority as the lobby
+     background — preloading it here also means the later in-game <img>
+     for it is served from cache instead of fetching again. -->
+<link rel="preload" as="image" href="board-night-v2.png" fetchpriority="high">
+<link rel="preload" as="image" href="board-day-v2.png">
 <link rel="preload" as="image" href="lobby-background-v1.png" fetchpriority="high">
 <link rel="preload" as="image" href="mongol-horse.png">
 <link rel="preload" as="image" href="eagle.png">
@@ -7314,7 +7322,7 @@ let propertyCinematic = null;
 let propertyCinematicActive = false;
 let pendingPurchaseCinematicData = null;
 let propertyCinematicSkipFn = null;
-const PROPERTY_CINEMATIC_FRAME_MS = { siteprep: 450, foundation: 500, frame: 600, facade: 600, ceremony: 500 };
+const PROPERTY_CINEMATIC_FRAME_MS = { siteprep: 650, foundation: 700, frame: 850, facade: 850, ceremony: 750 };
 const PROPERTY_CINEMATIC_FRAME_LABEL = {
   siteprep: 'ГАЗРЫН БЭЛТГЭЛ',
   foundation: 'СУУРЬ ЦУТГАЖ БАЙНА',
@@ -7345,7 +7353,19 @@ async function startPropertyCinematic(tileId, playerId, price, cashBefore, cashA
   propertyCinematicActive = true;
   const sectorAsset = resolveSectorSpriteSrc(tile);
   const mode = gameSettings.propertyCinematicMode || 'full';
-  const skipAll = mode === 'off' || reducedMotion;
+  // Deliberately NOT the game-wide `reducedMotion` flag here: that flag also
+  // flips true whenever the existing "Cinematic чанар" setting is
+  // "Reduced" (a phone-performance knob, unrelated to this) or was ever
+  // auto-set that way on first load. Tying this cinematic's full/skip
+  // decision to it meant a player who only wanted lighter on-board
+  // construction effects would ALSO always get this cinematic's
+  // accessibility fast-path (a bare 300ms+300ms fade), which is what made
+  // it look like it was "flashing by too fast to see". Only a genuine
+  // OS-level prefers-reduced-motion, checked fresh here, or the player
+  // explicitly turning this cinematic off should skip it.
+  let osReducedMotion = false;
+  try { osReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+  const skipAll = mode === 'off' || osReducedMotion;
   const short = mode === 'short';
   const wealthAfter = computePlayerWealth(currentRoom, owner);
   const companyAssetsAfter = wealthAfter.companyValue + wealthAfter.houseValue + wealthAfter.corporationValue;
@@ -7374,19 +7394,19 @@ async function startPropertyCinematic(tileId, playerId, price, cashBefore, cashA
   const skipTimer = setTimeout(() => { if (propertyCinematic) { propertyCinematic.canSkip = true; render(); } }, 1500);
   const mul = short ? 0.45 : 1;
   try {
-    await cinematicWait(700 * mul);
+    await cinematicWait((short ? 500 : 950) * mul);
     if (propertyCinematic.skipRequested) throw 0;
 
     propertyCinematic.phase = 'money'; render();
     animatePropertyCinematicCounters();
     playConstructionSound('siteprep');
-    await cinematicWait((short ? 500 : 850) * mul);
+    await cinematicWait((short ? 650 : 1400) * mul);
     if (propertyCinematic.skipRequested) throw 0;
 
     propertyCinematic.phase = 'deed'; render();
     playHammerSound();
     if (owner.id === myId) vibrate(15);
-    await cinematicWait((short ? 450 : 900) * mul);
+    await cinematicWait((short ? 600 : 1400) * mul);
     if (propertyCinematic.skipRequested) throw 0;
 
     propertyCinematic.phase = 'construction';
@@ -7406,7 +7426,7 @@ async function startPropertyCinematic(tileId, playerId, price, cashBefore, cashA
     playFanfareSound();
     if (sectorAsset) playSectorCeremonySound(sectorAsset.key);
     if (owner.id === myId) vibrate([30, 40, 60]);
-    await cinematicWait((short ? 600 : 1300) * mul);
+    await cinematicWait((short ? 800 : 1900) * mul);
   } catch (e) {
     // Skipped mid-sequence: jump straight to the settled frame-5 + reward
     // state. Money and ownership were already applied server-side long
@@ -8259,7 +8279,7 @@ function renderAuthLoading() {
 function renderAuthGate() {
   return `<div class="ag-screen">
     <div class="ag-hero">
-      <img class="ag-hero-bg" src="${resolveBoardImageSrc('night')}" alt="" onerror="this.style.opacity=0">
+      <img class="ag-hero-bg" src="${resolveBoardImageSrc('night')}" alt="" fetchpriority="high" decoding="async" onerror="this.style.opacity=0">
       <div class="ag-hero-fallback"></div>
       <div class="ag-hero-gradient"></div>
       <div class="ag-hero-vignette"></div>
@@ -9894,8 +9914,8 @@ function renderGame() {
         <div class="board-viewport ${debugMode?'debug':''} ${environment.timeOfDay==='night'?'env-night-active':''}" id="boardViewport">
           <div class="board-frame" id="boardFrame">
             <div class="board-camera" id="boardCamera" style="${camTransform}">
-              <img class="board-image board-image-day ${environment.timeOfDay==='day' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('day')}" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u04e9\u0434\u04e9\u0440)">
-              <img class="board-image board-image-night ${environment.timeOfDay==='night' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('night')}" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u0448\u04e9\u043d\u04e9)">
+              <img class="board-image board-image-day ${environment.timeOfDay==='day' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('day')}" fetchpriority="high" decoding="async" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u04e9\u0434\u04e9\u0440)">
+              <img class="board-image board-image-night ${environment.timeOfDay==='night' ? 'board-image-visible' : ''}" src="${resolveBoardImageSrc('night')}" fetchpriority="high" decoding="async" alt="\u0418\u0445 \u0425\u04e9\u0440\u04e9\u043d\u0433\u04e9 \u0442\u043e\u0433\u043b\u043e\u043e\u043c\u044b\u043d \u0445\u04e9\u043b\u04e9\u0433 (\u0448\u04e9\u043d\u04e9)">
               <div class="env-lighting env-${environment.timeOfDay} ${environment.isTransitioning ? 'env-transitioning' : ''}">
                 <div class="env-moonlight"></div>
                 <div class="env-streetlights">
