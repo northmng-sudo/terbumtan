@@ -18,16 +18,39 @@
      lobby background shown right after. Both point at the compressed WebP
      renditions actually used by the <picture> tags below (small PNG
      fallback stays un-preloaded; it only loads if a browser can't do
-     WebP). imagesrcset/imagesizes mirror the <picture> breakpoints so the
-     browser preloads the SAME file it will end up choosing, never both.
-     Everything else (day board image, all 8 tokens, construction sprites,
-     card art) used to be preloaded here too — that violated the "1-3
-     critical images only" budget and delayed the two images that actually
-     block first paint, so those now load on their own schedule instead:
-     tokens after room selection, day-board opportunistically, sprites
-     fully on-demand (see preloadSectorSprites / resolveSectorSpriteSrc). -->
-<link rel="preload" as="image" href="board-night-1600.webp" imagesrcset="board-night-960.webp 960w, board-night-1600.webp 1600w" imagesizes="100vw" type="image/webp" fetchpriority="high">
-<link rel="preload" as="image" href="lobby-bg-1600.webp" imagesrcset="lobby-bg-960.webp 960w, lobby-bg-1600.webp 1600w" imagesizes="100vw" type="image/webp" fetchpriority="high">
+     WebP).
+     These used to be static <link imagesrcset=...> tags mirroring the
+     <picture> breakpoints, on the theory that the browser would preload
+     the SAME file it ends up choosing. In practice several browsers
+     (Safari in particular, and some Android WebViews) don't honor
+     imagesrcset/imagesizes on a preload link and just fetch the plain
+     `href` every time -- so on a narrow/mobile screen the 1600w file got
+     preloaded while the <picture> below picked the 960w one, and the
+     preload went to waste (the exact "preloaded but not used" console
+     warning this caused). Picking the right file in a tiny inline script
+     at the same point in <head>, keyed off the same 768px breakpoint the
+     <picture> tags use, preloads the one file that will actually be used
+     on every browser, not just the ones with full preload-responsive-images
+     support. Everything else (day board image, all 8 tokens, construction
+     sprites, card art) used to be preloaded here too -- that violated the
+     "1-3 critical images only" budget and delayed the two images that
+     actually block first paint, so those now load on their own schedule
+     instead: tokens after room selection, day-board opportunistically,
+     sprites fully on-demand (see preloadSectorSprites / resolveSectorSpriteSrc). -->
+<script>
+(function () {
+  var mobile = window.innerWidth <= 768;
+  function preloadImg(base) {
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.type = 'image/webp';
+    l.href = base + (mobile ? '-960.webp' : '-1600.webp');
+    l.setAttribute('fetchpriority', 'high');
+    document.head.appendChild(l);
+  }
+  preloadImg('board-night');
+  preloadImg('lobby-bg');
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
@@ -7072,12 +7095,23 @@ function applyRemoteRoomUpdate(newState) {
   if (!newState) return;
   const prevUpdatedAt = currentRoom ? currentRoom.updatedAt : null;
   if (newState.updatedAt && newState.updatedAt === prevUpdatedAt) return; // no change since last known state
-  const withinSelfSaveGrace = (Date.now() - lastSelfSaveAt) < 2000;
+  // MULTIPLAYER SYNC FIX: this used to also swallow (update currentRoom but
+  // skip render()) anything arriving within 2s of THIS client's own last
+  // saveRoom() call, meant to avoid a redundant re-render from the realtime
+  // echo of our own write. But the check above (identical updatedAt) already
+  // catches that exact echo -- byte-for-byte the same state we just wrote
+  // locally. The 2s window instead caught a much more common case: a genuine
+  // NEW update from the OTHER player (their dice roll, their move, ending
+  // their turn) landing shortly after our own last action, which is exactly
+  // what happens in normal back-and-forth play. That update got applied to
+  // currentRoom silently with no render(), so the screen sat frozen on stale
+  // state until the next 2.5s poll tick happened to land outside the window
+  // -- this was the root cause of "the two phones don't move together" /
+  // one side lagging behind the other.
   const wasWaiting = view === 'waiting';
   currentRoom = newState;
   const gameJustStarted = wasWaiting && currentRoom.started;
   if (gameJustStarted) view = 'game';
-  if (withinSelfSaveGrace && !gameJustStarted) return; // avoid re-rendering right after our own save's realtime echo, but never suppress a critical view transition
   if (view !== 'landing') render();
 }
 
