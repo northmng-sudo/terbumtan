@@ -1533,20 +1533,22 @@
      large the element itself is rendered (tile size, device pixel ratio,
      zoom, ...), which a fixed-pixel crop could not guarantee. */
   .construction-sprite {
-    /* Bottom-anchored, horizontally centered inside whatever box the tile
-       gives it, at the sprite's OWN 362:724 proportions — height fills the
-       tile's building box, width is derived from aspect-ratio rather than
-       stretched to the box's (roughly square) shape. Forcing width AND
-       height to 100% here was squashing every frame into a short, wide
-       silhouette that always read as an unfinished building, whatever
-       frame was showing. */
-    position: absolute; left: 50%; bottom: 0; z-index: 2; pointer-events: none;
-    height: 100%; width: auto;
+    /* Bottom-anchored inside whatever box the tile gives it, at the
+       sprite's OWN 362:724 proportions — width fills the tile's building
+       footprint (matching how houses/corp HQs are sized on the same
+       tiles), height is derived from aspect-ratio rather than stretched
+       to the box's (roughly square) shape, and is allowed to rise above
+       the box (the parent has overflow:visible) since a real building is
+       taller than it is wide. Forcing width AND height to 100% was
+       squashing every frame into a short, wide silhouette that always
+       read as an unfinished building; constraining by height instead of
+       width made it render as a thin sliver at half the expected size. */
+    position: absolute; left: 0; bottom: 0; z-index: 2; pointer-events: none;
+    width: 100%; height: auto;
     aspect-ratio: 362 / 724;
     background-repeat: no-repeat;
     background-size: 600% 100%;
     background-position-y: center;
-    transform: translateX(-50%);
     transform-origin: center bottom;
   }
   .construction-sprite-silhouette {
