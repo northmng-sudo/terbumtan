@@ -1533,22 +1533,22 @@
      large the element itself is rendered (tile size, device pixel ratio,
      zoom, ...), which a fixed-pixel crop could not guarantee. */
   .construction-sprite {
-    /* The parent box (.construction-fx / .tile-building-badge) is now
-       itself built at the sprite's true 362:724 proportions (see the
-       `h = w * 724/362` box math at the call sites), so this can simply
-       fill it exactly — no separate aspect-ratio/auto sizing needed here.
-       Earlier attempts sized THIS element to a square parent box instead:
-       stretching width+height to 100% squashed every frame into a short,
-       wide silhouette; constraining by height and deriving width made it
-       a thin sliver; keeping the parent square while letting this rise
-       taller made rotated (left/right/top board edge) tiles spill
-       sideways into a neighboring tile. Fixing the box shape itself
-       avoids all three. */
-    position: absolute; left: 0; bottom: 0; z-index: 2; pointer-events: none;
-    width: 100%; height: 100%;
+    /* The parent box (.construction-fx / .tile-building-badge) is taller
+       than it is wide (SPRITE_HEIGHT_FACTOR at the call sites), but only
+       part-way toward the sprite's true 362:724 ratio — going all the way
+       there overlaps the neighboring tile on this board's tight spacing.
+       So this element fills the box's height and derives its OWN width
+       from the true aspect ratio (never stretched to the box's width),
+       staying centered inside it. That keeps every frame looking like a
+       real, undistorted building — just one that's sized a bit smaller
+       than the box, rather than one squashed to fill it. */
+    position: absolute; left: 50%; bottom: 0; z-index: 2; pointer-events: none;
+    height: 100%; width: auto;
+    aspect-ratio: 362 / 724;
     background-repeat: no-repeat;
     background-size: 600% 100%;
     background-position-y: center;
+    transform: translateX(-50%);
     transform-origin: center bottom;
   }
   .construction-sprite-silhouette {
@@ -7396,6 +7396,19 @@ let seenBuildings = new Set();
 // confirmed by checking the actual repo) — NOT under assets/buildings/ and
 // NOT absolute (an absolute "/..." path would 404 under the
 // northmng-sudo.github.io/terbumtan/ project subpath).
+// The sprite's real frame proportions are 362:724 (1:2 — much taller than
+// the roughly-square corp/house art this board's per-tile spacing was
+// designed around). Growing the building box to the FULL true ratio
+// (factor 2) reaches into the neighboring tile's building slot on this
+// board's tight ~90px edge spacing, and reads as the building sitting
+// between two tiles. This factor is the tallest the box can go without
+// that collision; the sprite inside it still keeps its true aspect ratio
+// (it's centered and narrower than the box, never stretched to fill it),
+// so it renders a bit smaller than a true 1:2 building would, as a
+// deliberate trade-off for staying inside its own tile. Adjust up (toward
+// 2) if testing on the real board shows room to spare, or down if tiles
+// still touch.
+const SPRITE_HEIGHT_FACTOR = 1.5;
 const SECTOR_BUILDING_SPRITES = {
   bank: "./bank-construction-sprite.png",
   mining: "./mining-construction-sprite.png",
@@ -7566,23 +7579,26 @@ function renderBuildingConstructionOverlay(tile, idx, owner, anim, room) {
   const clipStyle = `clip-path: inset(${100 - revealPct}% 0 0 0);`;
 
   if (anim.type === 'purchase') {
-    // Bottom-center anchored, sized to the tile's own building box (no 1.5x
-    // inflation) so the sprite never bleeds into a neighboring tile or over
-    // the token/name — matches the corp/house anchoring convention below.
-    // The box itself is built at the sprite's true 362:724 proportions
-    // (not a square) so that per-tile rotation (left/right/top board
-    // edges) swings the box's real footprint, instead of rotating a
-    // square box and having the taller sprite spill sideways into a
-    // neighboring tile.
+    // Bottom-center anchored. `buildingWidth`/the box height it implies is
+    // tuned for the old, roughly-square corp/house art; the sprite's real
+    // 362:724 shape is much taller, and this board packs tiles closely
+    // enough along each edge (~90px between neighboring tiles' anchor
+    // points) that letting the box grow to the sprite's full true height
+    // (2x its width) reaches into the next tile's building slot and reads
+    // as "sitting between two tiles". SPRITE_HEIGHT_FACTOR caps the growth
+    // to a size that still clears the old square footprint without
+    // colliding with a neighbor; the sprite itself is never stretched off
+    // its own aspect ratio (width is derived from height, not forced to
+    // fill the box), it's just smaller than a full 1:2 rendering would be.
     const w = tile.buildingWidth;
-    const h = w * (724 / 362);
+    const h = w * SPRITE_HEIGHT_FACTOR;
     const bx = tile.buildingX - w / 2;
     const by = tile.buildingY - h;
     const leftPct = (bx / 1672 * 100).toFixed(2);
     const topPct = (by / 941 * 100).toFixed(2);
     const widthPct = (w / 1672 * 100).toFixed(2);
     const heightPct = (h / 941 * 100).toFixed(2);
-    const rotation = tile.buildingRotation || 0; // per-tile side-of-board perspective, 0 = flat
+    const rotation = tile.buildingRotation || 0; // per-tile side-of-board perspective, currently always 0 in BOARD_CONFIG
     const resolvedSprite = resolveSectorSpriteSrc(tile);
     const sectorKey = resolvedSprite ? resolvedSprite.key : null;
     const frameIdx = SECTOR_STAGE_FRAME[stage] != null ? SECTOR_STAGE_FRAME[stage] : 0;
@@ -7739,13 +7755,12 @@ function renderBuildingIcon(tile, level, idx) {
   // Persistent post-construction badge \u2014 uses the same sector sprite's
   // finished frame (frame-05) that the construction animation ends on, so
   // there's no visual jump once the animation hands off to this. Bottom
-  // anchored and sized to the tile's own building box (no inflation),
-  // matching the construction overlay and the corp/house convention. The
-  // box is built at the sprite's true 362:724 proportions (not a square)
-  // so per-tile rotation swings the box's real footprint instead of
-  // spilling a taller sprite sideways out of a square box.
+  // anchored and sized to the tile's own building box, capped by
+  // SPRITE_HEIGHT_FACTOR \u2014 see the matching comment in the 'purchase'
+  // branch above for why the sprite's true 2x-width height can't be used
+  // as-is on this board (it overlaps the neighboring tile's building).
   const w = tile.buildingWidth;
-  const h = w * (724 / 362);
+  const h = w * SPRITE_HEIGHT_FACTOR;
   const x = tile.buildingX - w / 2;
   const y = tile.buildingY - h;
   const leftPct = (x / 1672 * 100).toFixed(2);
