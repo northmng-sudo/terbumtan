@@ -1533,19 +1533,19 @@
      large the element itself is rendered (tile size, device pixel ratio,
      zoom, ...), which a fixed-pixel crop could not guarantee. */
   .construction-sprite {
-    /* Bottom-anchored inside whatever box the tile gives it, at the
-       sprite's OWN 362:724 proportions — width fills the tile's building
-       footprint (matching how houses/corp HQs are sized on the same
-       tiles), height is derived from aspect-ratio rather than stretched
-       to the box's (roughly square) shape, and is allowed to rise above
-       the box (the parent has overflow:visible) since a real building is
-       taller than it is wide. Forcing width AND height to 100% was
-       squashing every frame into a short, wide silhouette that always
-       read as an unfinished building; constraining by height instead of
-       width made it render as a thin sliver at half the expected size. */
+    /* The parent box (.construction-fx / .tile-building-badge) is now
+       itself built at the sprite's true 362:724 proportions (see the
+       `h = w * 724/362` box math at the call sites), so this can simply
+       fill it exactly — no separate aspect-ratio/auto sizing needed here.
+       Earlier attempts sized THIS element to a square parent box instead:
+       stretching width+height to 100% squashed every frame into a short,
+       wide silhouette; constraining by height and deriving width made it
+       a thin sliver; keeping the parent square while letting this rise
+       taller made rotated (left/right/top board edge) tiles spill
+       sideways into a neighboring tile. Fixing the box shape itself
+       avoids all three. */
     position: absolute; left: 0; bottom: 0; z-index: 2; pointer-events: none;
-    width: 100%; height: auto;
-    aspect-ratio: 362 / 724;
+    width: 100%; height: 100%;
     background-repeat: no-repeat;
     background-size: 600% 100%;
     background-position-y: center;
@@ -7569,13 +7569,19 @@ function renderBuildingConstructionOverlay(tile, idx, owner, anim, room) {
     // Bottom-center anchored, sized to the tile's own building box (no 1.5x
     // inflation) so the sprite never bleeds into a neighboring tile or over
     // the token/name — matches the corp/house anchoring convention below.
+    // The box itself is built at the sprite's true 362:724 proportions
+    // (not a square) so that per-tile rotation (left/right/top board
+    // edges) swings the box's real footprint, instead of rotating a
+    // square box and having the taller sprite spill sideways into a
+    // neighboring tile.
     const w = tile.buildingWidth;
+    const h = w * (724 / 362);
     const bx = tile.buildingX - w / 2;
-    const by = tile.buildingY - w;
+    const by = tile.buildingY - h;
     const leftPct = (bx / 1672 * 100).toFixed(2);
     const topPct = (by / 941 * 100).toFixed(2);
     const widthPct = (w / 1672 * 100).toFixed(2);
-    const heightPct = (w / 941 * 100).toFixed(2);
+    const heightPct = (h / 941 * 100).toFixed(2);
     const rotation = tile.buildingRotation || 0; // per-tile side-of-board perspective, 0 = flat
     const resolvedSprite = resolveSectorSpriteSrc(tile);
     const sectorKey = resolvedSprite ? resolvedSprite.key : null;
@@ -7734,14 +7740,18 @@ function renderBuildingIcon(tile, level, idx) {
   // finished frame (frame-05) that the construction animation ends on, so
   // there's no visual jump once the animation hands off to this. Bottom
   // anchored and sized to the tile's own building box (no inflation),
-  // matching the construction overlay and the corp/house convention.
+  // matching the construction overlay and the corp/house convention. The
+  // box is built at the sprite's true 362:724 proportions (not a square)
+  // so per-tile rotation swings the box's real footprint instead of
+  // spilling a taller sprite sideways out of a square box.
   const w = tile.buildingWidth;
+  const h = w * (724 / 362);
   const x = tile.buildingX - w / 2;
-  const y = tile.buildingY - w;
+  const y = tile.buildingY - h;
   const leftPct = (x / 1672 * 100).toFixed(2);
   const topPct = (y / 941 * 100).toFixed(2);
   const widthPct = (w / 1672 * 100).toFixed(2);
-  const heightPct = (w / 941 * 100).toFixed(2);
+  const heightPct = (h / 941 * 100).toFixed(2);
   const isNew = !seenBuildings.has(idx);
   seenBuildings.add(idx);
   const flagHtml = level >= 4 ? `<span class="building-flag-icon">\ud83c\udfc1</span>` : '';
