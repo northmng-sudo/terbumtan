@@ -1616,7 +1616,24 @@
     color: var(--gold-light); text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
   .pc-company-name { font-size: clamp(17px, 2.4vw, 24px); font-weight: 800; color: var(--cream); margin-top: 4px; }
   .pc-sector-name { font-size: 12px; color: rgba(255,242,207,0.65); margin-top: 2px; }
-  .pc-body { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 6px 20px 14px; z-index: 1; min-height: 0; }
+  /* justify-content: flex-start (not center) + overflow-y: auto is
+     deliberate: the construction/reward visuals are a fixed 520px (see
+     .pc-construction-visual/.pc-side-visual below) and never shrink to
+     make room. If the combined content is ever taller than the stage
+     (a short laptop window, a narrow phone in landscape), content now
+     scrolls into view instead of the picture getting smaller OR text
+     silently disappearing off the top/bottom -- a flex column that both
+     centers AND scrolls clips content symmetrically from both ends in
+     every browser tested, hiding the top even while a scrollbar exists,
+     which is exactly what "text disappeared" turned out to be. */
+  .pc-body { flex: 1; position: relative; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; padding: 6px 20px 14px; z-index: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+  /* margin: auto 0 is the actual centering trick: when .pc-body-inner is
+     shorter than .pc-body, the auto top/bottom margins split the leftover
+     space evenly (visually centered, same as before); when it's taller,
+     the margins collapse to 0 and it simply starts at the top and scrolls
+     -- unlike `justify-content: center` on the scroll container itself,
+     this never clips content from the top once it overflows. */
+  .pc-body-inner { margin: auto 0; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
   /* pcFadeUp/pcStampIn/pcSealDrop/pcSideVisualIn below all used to run
      unconditionally as soon as their element existed in the DOM. Since
      every render() call regenerates this entire subtree from a fresh HTML
@@ -1663,25 +1680,25 @@
     display: flex; align-items: center; justify-content: center; font-size: 14px; }
   .pc-phase-entering .pc-deed-seal { animation: pcSealDrop 0.35s cubic-bezier(.3,1.7,.4,1) both; }
   @keyframes pcSealDrop { 0% { transform: translateY(-14px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-  .pc-construction-area { position: relative; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: 0; }
+  .pc-construction-area { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
   /* 260x520 = the sprite's real 1:2 (362x724) aspect ratio, so the image
-     fills this box edge-to-edge at its cap instead of floating small
-     inside extra whitespace. `flex:1; min-height:0` (NOT a fixed vh height
-     -- an earlier version used height:62vh here, which sizes against the
-     whole browser viewport regardless of how much room this box actually
-     has inside the modal, and overflowed the deed card / title right off
-     the visible area whenever the two were stacked together) lets
-     flexbox hand this element whatever space is actually left after its
-     siblings, up to the 520px ceiling, and shrink below that on a short
-     screen instead of pushing other content out of view. */
-  .pc-construction-visual { position: relative; width: 46%; max-width: 260px; max-height: 520px; flex: 1; min-height: 0; }
+     fills this box edge-to-edge instead of floating small inside extra
+     whitespace. This is a FIXED height, not a max-height/flex-shrink/vh
+     value: .pc-body-inner (the new wrapper above) is auto-sized and
+     centered via margin:auto, not a flex-grow child of a definite-height
+     box, so a flex:1 or vh-based height here had nothing real to measure
+     against and could collapse to 0 (the sprite itself is
+     position:absolute and contributes no height of its own). Fixed 520px
+     guarantees the image is always actually 520px tall. If that makes the
+     phase content taller than the modal on a short screen, .pc-body's own
+     overflow-y:auto lets the player scroll to see the rest -- the image
+     itself never shrinks to "solve" that. */
+  .pc-construction-visual { position: relative; width: 260px; max-width: 100%; height: 520px; flex: none; }
   .pc-construction-visual .construction-sprite { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; transform: translateX(-50%); }
-  /* The side-visual accompanies a text panel (money/deed card) as a
-     SIBLING in the same column, not the sole content of the phase, so it
-     stays modestly sized (this is not one of the "make it 520px" hero
-     moments) precisely so the deed card's title/rows below it always have
-     room and never get clipped by the stage's overflow:hidden. */
-  .pc-side-visual { flex: 0 0 auto; width: 34%; max-width: 140px; height: 30vh; max-height: 210px; min-height: 100px; opacity: 0.92;
+  /* Same fixed-size treatment as .pc-construction-visual -- this used to be
+     shrunk down to a "modest" size specifically to dodge overflow, but the
+     fix for overflow is .pc-body's scroll, not a smaller picture. */
+  .pc-side-visual { flex: none; width: 260px; max-width: 100%; height: 520px; opacity: 0.92;
     filter: drop-shadow(0 6px 14px rgba(0,0,0,0.35)); }
   .pc-phase-entering .pc-side-visual { animation: pcSideVisualIn 0.5s cubic-bezier(.2,.8,.3,1) both; }
   @keyframes pcSideVisualIn { 0% { opacity: 0; transform: translateY(8px) scale(0.94); } 100% { opacity: 0.92; transform: translateY(0) scale(1); } }
@@ -1695,7 +1712,7 @@
   .pc-progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
     width: 40%; animation: pcSweep 1.4s linear infinite; }
   @keyframes pcSweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(280%); } }
-  .pc-reward-panel { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; min-height: 0; height: 100%; }
+  .pc-reward-panel { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
   .pc-phase-entering .pc-reward-panel { animation: pcFadeUp 0.45s ease-out both; }
   .pc-reward-title { font-family: 'Cinzel', serif; font-weight: 800; font-size: clamp(15px, 2.2vw, 20px); color: var(--gold-light); text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
   .pc-reward-sub { font-size: 12px; color: rgba(255,242,207,0.7); }
@@ -1714,9 +1731,19 @@
   .pc-flag::after { content: ''; position: absolute; top: 0; left: 2px; width: 16px; height: 11px; background: var(--flag-color, var(--gold)); clip-path: polygon(0 0, 100% 15%, 0 100%); }
   @media (max-width: 768px) {
     .property-cinematic-backdrop { padding: 0; align-items: stretch; }
+    /* .pc-body's own overflow-y:auto (see above) is what makes a 520px-tall
+       fixed image safe on a phone screen shorter than that -- it scrolls
+       instead of being cut off. This used to also reset
+       .pc-construction-visual to a viewport-relative width with no height
+       override, which combined with an EARLIER version's vh-based height
+       (since removed) is what most likely made the image and surrounding
+       text vanish on phones: 100dvh here plus another vh value on the
+       image inside it fight over the same shrinking/growing mobile
+       browser chrome, and can resolve to something clipped entirely
+       outside the visible area. Sizing is fixed-pixel everywhere now, so
+       no mobile-only override is needed here any more. */
     .property-cinematic-stage { width: 100vw; height: 100vh; height: 100dvh; border-radius: 0; border-width: 0;
       padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
-    .pc-construction-visual { width: 50%; max-width: none; }
     .pc-wealth-grid { grid-template-columns: 1fr 1fr; }
     .pc-skip-btn { right: max(14px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); }
   }
@@ -3178,8 +3205,8 @@ const BOARD_CONFIG = [
     "labelY": 744.2,
     "labelRotation": -33.4,
     "buildingType": "agriculture",
-    "buildingX": 732.9,
-    "buildingY": 755.0,
+    "buildingX": 736.38,
+    "buildingY": 771.61,
     "buildingWidth": 59.9,
     "buildingRotation": 0,
     "depth": 744,
@@ -3259,8 +3286,8 @@ const BOARD_CONFIG = [
     "labelY": 691.3,
     "labelRotation": -32.3,
     "buildingType": "agriculture",
-    "buildingX": 656.6,
-    "buildingY": 702.8,
+    "buildingX": 660.08,
+    "buildingY": 719.41,
     "buildingWidth": 58.8,
     "buildingRotation": 0,
     "depth": 691,
@@ -3340,8 +3367,8 @@ const BOARD_CONFIG = [
     "labelY": 641.4,
     "labelRotation": -31.3,
     "buildingType": "agriculture",
-    "buildingX": 582.3,
-    "buildingY": 654.9,
+    "buildingX": 585.78,
+    "buildingY": 671.51,
     "buildingWidth": 58.1,
     "buildingRotation": 0,
     "depth": 641,
@@ -3421,8 +3448,8 @@ const BOARD_CONFIG = [
     "labelY": 593.7,
     "labelRotation": -30.1,
     "buildingType": "retail",
-    "buildingX": 510.3,
-    "buildingY": 609.1,
+    "buildingX": 513.78,
+    "buildingY": 625.71,
     "buildingWidth": 56.6,
     "buildingRotation": 0,
     "depth": 594,
@@ -3502,8 +3529,8 @@ const BOARD_CONFIG = [
     "labelY": 547.7,
     "labelRotation": -28.9,
     "buildingType": "retail",
-    "buildingX": 440.7,
-    "buildingY": 564.5,
+    "buildingX": 444.18,
+    "buildingY": 581.11,
     "buildingWidth": 54.3,
     "buildingRotation": 0,
     "depth": 548,
@@ -3617,8 +3644,8 @@ const BOARD_CONFIG = [
     "labelY": 457.3,
     "labelRotation": -27.0,
     "buildingType": "retail",
-    "buildingX": 304.0,
-    "buildingY": 474.6,
+    "buildingX": 307.48,
+    "buildingY": 491.21,
     "buildingWidth": 52.2,
     "buildingRotation": 0,
     "depth": 457,
@@ -3742,8 +3769,8 @@ const BOARD_CONFIG = [
     "labelY": 346.3,
     "labelRotation": 34.6,
     "buildingType": "construction",
-    "buildingX": 273.0,
-    "buildingY": 363.4,
+    "buildingX": 267.50,
+    "buildingY": 379.45,
     "buildingWidth": 51.0,
     "buildingRotation": 0,
     "depth": 346,
@@ -3823,8 +3850,8 @@ const BOARD_CONFIG = [
     "labelY": 302.5,
     "labelRotation": 33.3,
     "buildingType": "construction",
-    "buildingX": 358.8,
-    "buildingY": 321.5,
+    "buildingX": 353.30,
+    "buildingY": 337.55,
     "buildingWidth": 49.9,
     "buildingRotation": 0,
     "depth": 303,
@@ -3904,8 +3931,8 @@ const BOARD_CONFIG = [
     "labelY": 264.6,
     "labelRotation": 32.0,
     "buildingType": "construction",
-    "buildingX": 433.8,
-    "buildingY": 284.7,
+    "buildingX": 428.30,
+    "buildingY": 300.75,
     "buildingWidth": 48.5,
     "buildingRotation": 0,
     "depth": 265,
@@ -3985,8 +4012,8 @@ const BOARD_CONFIG = [
     "labelY": 228.6,
     "labelRotation": 30.3,
     "buildingType": "factory",
-    "buildingX": 505.6,
-    "buildingY": 249.9,
+    "buildingX": 500.10,
+    "buildingY": 265.95,
     "buildingWidth": 48.0,
     "buildingRotation": 0,
     "depth": 229,
@@ -4066,8 +4093,8 @@ const BOARD_CONFIG = [
     "labelY": 193.2,
     "labelRotation": 29.5,
     "buildingType": "factory",
-    "buildingX": 574.6,
-    "buildingY": 215.7,
+    "buildingX": 569.10,
+    "buildingY": 231.75,
     "buildingWidth": 46.1,
     "buildingRotation": 0,
     "depth": 193,
@@ -4182,8 +4209,8 @@ const BOARD_CONFIG = [
     "labelY": 125.3,
     "labelRotation": 28.3,
     "buildingType": "factory",
-    "buildingX": 709.4,
-    "buildingY": 149.8,
+    "buildingX": 703.90,
+    "buildingY": 165.85,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
     "depth": 125,
@@ -4307,8 +4334,8 @@ const BOARD_CONFIG = [
     "labelY": 125.5,
     "labelRotation": -28.5,
     "buildingType": "fuel",
-    "buildingX": 958.7,
-    "buildingY": 150.0,
+    "buildingX": 964.18,
+    "buildingY": 166.06,
     "buildingWidth": 42.6,
     "buildingRotation": 0,
     "depth": 125,
@@ -4388,8 +4415,8 @@ const BOARD_CONFIG = [
     "labelY": 159.0,
     "labelRotation": -29.5,
     "buildingType": "fuel",
-    "buildingX": 1027.9,
-    "buildingY": 182.5,
+    "buildingX": 1033.38,
+    "buildingY": 198.56,
     "buildingWidth": 43.5,
     "buildingRotation": 0,
     "depth": 159,
@@ -4469,8 +4496,8 @@ const BOARD_CONFIG = [
     "labelY": 193.2,
     "labelRotation": -29.7,
     "buildingType": "fuel",
-    "buildingX": 1094.0,
-    "buildingY": 215.7,
+    "buildingX": 1099.48,
+    "buildingY": 231.76,
     "buildingWidth": 45.8,
     "buildingRotation": 0,
     "depth": 193,
@@ -4550,8 +4577,8 @@ const BOARD_CONFIG = [
     "labelY": 228.6,
     "labelRotation": -31.0,
     "buildingType": "telecom",
-    "buildingX": 1162.8,
-    "buildingY": 250.0,
+    "buildingX": 1168.28,
+    "buildingY": 266.06,
     "buildingWidth": 47.3,
     "buildingRotation": 0,
     "depth": 229,
@@ -4631,8 +4658,8 @@ const BOARD_CONFIG = [
     "labelY": 265.4,
     "labelRotation": -31.8,
     "buildingType": "technology",
-    "buildingX": 1235.0,
-    "buildingY": 285.5,
+    "buildingX": 1240.48,
+    "buildingY": 301.56,
     "buildingWidth": 48.1,
     "buildingRotation": 0,
     "depth": 265,
@@ -4746,8 +4773,8 @@ const BOARD_CONFIG = [
     "labelY": 347.4,
     "labelRotation": -34.4,
     "buildingType": "technology",
-    "buildingX": 1395.1,
-    "buildingY": 364.5,
+    "buildingX": 1400.58,
+    "buildingY": 380.56,
     "buildingWidth": 51.1,
     "buildingRotation": 0,
     "depth": 347,
@@ -4871,8 +4898,8 @@ const BOARD_CONFIG = [
     "labelY": 458.7,
     "labelRotation": 26.6,
     "buildingType": "bank",
-    "buildingX": 1364.4,
-    "buildingY": 475.6,
+    "buildingX": 1360.84,
+    "buildingY": 492.19,
     "buildingWidth": 53.1,
     "buildingRotation": 0,
     "depth": 459,
@@ -4952,8 +4979,8 @@ const BOARD_CONFIG = [
     "labelY": 503.5,
     "labelRotation": 27.5,
     "buildingType": "bank",
-    "buildingX": 1295.5,
-    "buildingY": 521.0,
+    "buildingX": 1291.94,
+    "buildingY": 537.59,
     "buildingWidth": 54.2,
     "buildingRotation": 0,
     "depth": 504,
@@ -5033,8 +5060,8 @@ const BOARD_CONFIG = [
     "labelY": 548.4,
     "labelRotation": 29.2,
     "buildingType": "bank",
-    "buildingX": 1227.4,
-    "buildingY": 564.8,
+    "buildingX": 1223.84,
+    "buildingY": 581.39,
     "buildingWidth": 55.5,
     "buildingRotation": 0,
     "depth": 548,
@@ -5114,8 +5141,8 @@ const BOARD_CONFIG = [
     "labelY": 594.1,
     "labelRotation": 30.3,
     "buildingType": "mining",
-    "buildingX": 1157.3,
-    "buildingY": 609.1,
+    "buildingX": 1153.74,
+    "buildingY": 625.69,
     "buildingWidth": 58.0,
     "buildingRotation": 0,
     "depth": 594,
@@ -5195,8 +5222,8 @@ const BOARD_CONFIG = [
     "labelY": 641.6,
     "labelRotation": 31.4,
     "buildingType": "mining",
-    "buildingX": 1084.7,
-    "buildingY": 654.8,
+    "buildingX": 1081.14,
+    "buildingY": 671.39,
     "buildingWidth": 59.2,
     "buildingRotation": 0,
     "depth": 642,
@@ -5313,8 +5340,8 @@ const BOARD_CONFIG = [
     "labelY": 743.8,
     "labelRotation": 33.4,
     "buildingType": "mining",
-    "buildingX": 933.4,
-    "buildingY": 754.3,
+    "buildingX": 929.84,
+    "buildingY": 770.89,
     "buildingWidth": 59.5,
     "buildingRotation": 0,
     "depth": 744,
@@ -7646,7 +7673,7 @@ function renderPropertyCinematic() {
     </div>`;
   } else if (pc.phase === 'reward') {
     bodyHtml = `<div class="pc-reward-panel">
-      <div class="pc-construction-visual pc-reward-visual" style="width:62%; max-width:260px; max-height:520px; min-height:120px; flex:1 1 auto;">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }), 'large')}</div>
+      <div class="pc-construction-visual pc-reward-visual">${renderPropertyCinematicConstructionInner(Object.assign({}, pc, { stage: 'completed' }), 'large')}</div>
       <div class="pc-reward-title">ШИНЭ ХӨРӨНГӨ ТАНЫ ЭЗЭМШИЛД ОРЛОО</div>
       <div class="pc-reward-sub">${pc.tile.name} • Суурь орлого: ₮${fmt(pc.tile.rent)}</div>
       <div class="pc-wealth-grid">
@@ -7668,7 +7695,7 @@ function renderPropertyCinematic() {
         <div class="pc-company-name">${pc.tile.name}</div>
         <div class="pc-sector-name">${pc.tile.sectorName || ''}</div>
       </div>
-      <div class="pc-body ${phaseEnteringClass}">${bodyHtml}</div>
+      <div class="pc-body ${phaseEnteringClass}"><div class="pc-body-inner">${bodyHtml}</div></div>
       ${skipHtml}
     </div>
   </div>`;
